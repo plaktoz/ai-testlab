@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">kanban-api</a> &gt; <a href="index.source.html" class="el_package">com.kanban.service</a> &gt; <span class="el_source">CardService.java</span></div><h1>CardService.java</h1><pre class="source lang-java linenums">package com.kanban.service;
+
+import com.kanban.dto.request.CardCreateRequest;
+import com.kanban.dto.request.CardMoveRequest;
+import com.kanban.dto.request.CardUpdateRequest;
+import com.kanban.dto.response.CardResponse;
+import com.kanban.entity.BoardColumn;
+import com.kanban.entity.Card;
+import com.kanban.exception.ResourceNotFoundException;
+import com.kanban.repository.CardRepository;
+import com.kanban.repository.ColumnRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class CardService {
+
+    private final CardRepository cardRepository;
+    private final ColumnRepository columnRepository;
+
+<span class="fc" id="L25">    public CardService(CardRepository cardRepository, ColumnRepository columnRepository) {</span>
+<span class="fc" id="L26">        this.cardRepository = cardRepository;</span>
+<span class="fc" id="L27">        this.columnRepository = columnRepository;</span>
+<span class="fc" id="L28">    }</span>
+
+    @Transactional(readOnly = true)
+    public List&lt;CardResponse&gt; getCards(Long columnId) {
+        List&lt;Card&gt; cards;
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (columnId != null) {</span>
+<span class="fc" id="L34">            cards = cardRepository.findByColumnIdOrderByPositionAsc(columnId);</span>
+<span class="fc" id="L35">        } else {</span>
+<span class="fc" id="L36">            cards = cardRepository.findAllOrderedByColumnAndPosition();</span>
+        }
+<span class="fc" id="L38">        return cards.stream().map(this::toResponse).collect(Collectors.toList());</span>
+    }
+
+    public CardResponse createCard(CardCreateRequest request) {
+<span class="fc" id="L42">        BoardColumn column = findColumnById(request.columnId());</span>
+<span class="fc" id="L43">        int nextPosition = cardRepository.findMaxPositionInColumn(request.columnId()) + 1;</span>
+
+<span class="fc" id="L45">        Card card = new Card();</span>
+<span class="fc" id="L46">        card.setColumn(column);</span>
+<span class="fc" id="L47">        card.setTitle(request.title());</span>
+<span class="fc" id="L48">        card.setDescription(request.description());</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (request.priority() != null) {</span>
+<span class="fc" id="L50">            card.setPriority(Card.Priority.valueOf(request.priority()));</span>
+        }
+<span class="fc" id="L52">        card.setPosition(nextPosition);</span>
+<span class="fc" id="L53">        return toResponse(cardRepository.save(card));</span>
+    }
+
+    @Transactional(readOnly = true)
+    public CardResponse getCard(Long id) {
+<span class="fc" id="L58">        return toResponse(findCardById(id));</span>
+    }
+
+    public CardResponse replaceCard(Long id, CardUpdateRequest request) {
+<span class="fc bfc" id="L62" title="All 4 branches covered.">        if (request.title() == null || request.title().isBlank()) {</span>
+<span class="fc" id="L63">            throw new IllegalArgumentException(&quot;title is required for full update&quot;);</span>
+        }
+<span class="fc" id="L65">        Card card = findCardById(id);</span>
+<span class="fc" id="L66">        card.setTitle(request.title());</span>
+<span class="fc" id="L67">        card.setDescription(request.description());</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        card.setPriority(request.priority() != null ? Card.Priority.valueOf(request.priority()) : null);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (request.columnId() != null) {</span>
+<span class="fc" id="L70">            card.setColumn(findColumnById(request.columnId()));</span>
+        }
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (request.position() != null) {</span>
+<span class="fc" id="L73">            card.setPosition(request.position());</span>
+        }
+<span class="fc" id="L75">        return toResponse(cardRepository.save(card));</span>
+    }
+
+    public CardResponse partialUpdateCard(Long id, CardUpdateRequest request) {
+<span class="fc" id="L79">        Card card = findCardById(id);</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (request.title() != null) {</span>
+<span class="fc" id="L81">            card.setTitle(request.title());</span>
+        }
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if (request.description() != null) {</span>
+<span class="fc" id="L84">            card.setDescription(request.description());</span>
+        }
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (request.priority() != null) {</span>
+<span class="fc" id="L87">            card.setPriority(Card.Priority.valueOf(request.priority()));</span>
+        }
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (request.columnId() != null) {</span>
+<span class="fc" id="L90">            card.setColumn(findColumnById(request.columnId()));</span>
+        }
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (request.position() != null) {</span>
+<span class="fc" id="L93">            card.setPosition(request.position());</span>
+        }
+<span class="fc" id="L95">        return toResponse(cardRepository.save(card));</span>
+    }
+
+    public void deleteCard(Long id) {
+<span class="fc" id="L99">        Card card = findCardById(id);</span>
+<span class="fc" id="L100">        Long columnId = card.getColumn().getId();</span>
+<span class="fc" id="L101">        int deletedPosition = card.getPosition();</span>
+<span class="fc" id="L102">        cardRepository.delete(card);</span>
+<span class="fc" id="L103">        cardRepository.decrementPositionsAfterInColumn(columnId, deletedPosition);</span>
+<span class="fc" id="L104">    }</span>
+
+    public CardResponse moveCard(Long id, CardMoveRequest request) {
+<span class="fc" id="L107">        Card card = findCardById(id);</span>
+<span class="fc" id="L108">        Long sourceColumnId = card.getColumn().getId();</span>
+<span class="fc" id="L109">        int sourcePosition = card.getPosition();</span>
+<span class="fc" id="L110">        Long targetColumnId = request.columnId();</span>
+<span class="fc" id="L111">        int targetPosition = request.position();</span>
+
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (sourceColumnId.equals(targetColumnId)) {</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">            if (sourcePosition == targetPosition) {</span>
+<span class="fc" id="L115">                return toResponse(card);</span>
+            }
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            if (targetPosition &gt; sourcePosition) {</span>
+<span class="fc" id="L118">                cardRepository.shiftDownBetween(sourceColumnId, sourcePosition + 1, targetPosition);</span>
+<span class="fc" id="L119">            } else {</span>
+<span class="fc" id="L120">                cardRepository.shiftUpBetween(sourceColumnId, targetPosition, sourcePosition - 1);</span>
+            }
+<span class="fc" id="L122">            card.setPosition(targetPosition);</span>
+<span class="fc" id="L123">        } else {</span>
+<span class="fc" id="L124">            findColumnById(targetColumnId);</span>
+<span class="fc" id="L125">            cardRepository.decrementPositionsAfterInColumn(sourceColumnId, sourcePosition);</span>
+<span class="fc" id="L126">            cardRepository.incrementPositionsFromInColumn(targetColumnId, targetPosition);</span>
+<span class="fc" id="L127">            card.setColumn(findColumnById(targetColumnId));</span>
+<span class="fc" id="L128">            card.setPosition(targetPosition);</span>
+        }
+
+<span class="fc" id="L131">        return toResponse(cardRepository.save(card));</span>
+    }
+
+    private Card findCardById(Long id) {
+<span class="fc" id="L135">        return cardRepository.findById(id)</span>
+<span class="fc" id="L136">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Card not found: &quot; + id));</span>
+    }
+
+    private BoardColumn findColumnById(Long id) {
+<span class="fc" id="L140">        return columnRepository.findById(id)</span>
+<span class="fc" id="L141">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Column not found: &quot; + id));</span>
+    }
+
+    private CardResponse toResponse(Card card) {
+<span class="fc" id="L145">        return new CardResponse(</span>
+<span class="fc" id="L146">                card.getId(),</span>
+<span class="fc" id="L147">                card.getColumn().getId(),</span>
+<span class="fc" id="L148">                card.getTitle(),</span>
+<span class="fc" id="L149">                card.getDescription(),</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">                card.getPriority() != null ? card.getPriority().name() : null,</span>
+<span class="fc" id="L151">                card.getPosition(),</span>
+<span class="fc" id="L152">                card.getCreatedAt(),</span>
+<span class="fc" id="L153">                card.getUpdatedAt()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

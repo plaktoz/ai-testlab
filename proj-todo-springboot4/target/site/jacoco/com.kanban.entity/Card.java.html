@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Card.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">kanban-api</a> &gt; <a href="index.source.html" class="el_package">com.kanban.entity</a> &gt; <span class="el_source">Card.java</span></div><h1>Card.java</h1><pre class="source lang-java linenums">package com.kanban.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;cards&quot;)
+public class Card {
+
+<span class="fc" id="L10">    public enum Priority { LOW, MEDIUM, HIGH, CRITICAL }</span>
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;column_id&quot;, nullable = false)
+    private BoardColumn column;
+
+    @Column(nullable = false, length = 255)
+    private String title;
+
+    @Column(columnDefinition = &quot;TEXT&quot;)
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Priority priority;
+
+    @Column(nullable = false)
+    private Integer position;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+<span class="nc" id="L41">        createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L42">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L43">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="nc" id="L47">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L48">    }</span>
+
+<span class="fc" id="L50">    public Card() {}</span>
+
+<span class="fc" id="L52">    public Long getId() { return id; }</span>
+<span class="fc" id="L53">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="fc" id="L55">    public BoardColumn getColumn() { return column; }</span>
+<span class="fc" id="L56">    public void setColumn(BoardColumn column) { this.column = column; }</span>
+
+<span class="fc" id="L58">    public String getTitle() { return title; }</span>
+<span class="fc" id="L59">    public void setTitle(String title) { this.title = title; }</span>
+
+<span class="fc" id="L61">    public String getDescription() { return description; }</span>
+<span class="fc" id="L62">    public void setDescription(String description) { this.description = description; }</span>
+
+<span class="fc" id="L64">    public Priority getPriority() { return priority; }</span>
+<span class="fc" id="L65">    public void setPriority(Priority priority) { this.priority = priority; }</span>
+
+<span class="fc" id="L67">    public Integer getPosition() { return position; }</span>
+<span class="fc" id="L68">    public void setPosition(Integer position) { this.position = position; }</span>
+
+<span class="fc" id="L70">    public LocalDateTime getCreatedAt() { return createdAt; }</span>
+<span class="fc" id="L71">    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }</span>
+
+<span class="fc" id="L73">    public LocalDateTime getUpdatedAt() { return updatedAt; }</span>
+<span class="fc" id="L74">    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
