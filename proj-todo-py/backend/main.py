@@ -11,6 +11,7 @@ from models import Card, Column
 from schemas import (
     CardCreate,
     CardMoveRequest,
+    CardReorderRequest,
     CardResponse,
     CardUpdate,
     ColumnCreate,
@@ -191,8 +192,11 @@ def reorder_columns(payload: ColumnReorderRequest, db: Session = Depends(get_db)
 # ---------------------------------------------------------------------------
 
 @app.patch("/columns/{column_id}/cards/reorder", response_model=List[CardResponse], status_code=200)
-def reorder_cards_in_column(column_id: int, payload: "CardReorderRequest", db: Session = Depends(get_db)):
-    from schemas import CardReorderRequest as CRR
+def reorder_cards_in_column(
+    column_id: int,
+    payload: CardReorderRequest,
+    db: Session = Depends(get_db),
+):
     col = db.query(Column).filter(Column.id == column_id).first()
     if not col:
         raise HTTPException(status_code=404, detail=f"Column {column_id} not found.")
