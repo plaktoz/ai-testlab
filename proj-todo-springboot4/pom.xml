@@ -18,9 +18,9 @@
     <description>Kanban Task Board REST API — Spring Boot 4</description>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
         <springdoc.version>3.0.3</springdoc.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
     </properties>
 
     <dependencies>

@@ -47,7 +47,7 @@ public class CardService {
         card.setTitle(request.title());
         card.setDescription(request.description());
         if (request.priority() != null) {
-            card.setPriority(Card.Priority.valueOf(request.priority()));
+            card.setPriority(Card.Priority.valueOf(request.priority().toUpperCase()));
         }
         card.setPosition(nextPosition);
         return toResponse(cardRepository.save(card));
@@ -65,7 +65,7 @@ public class CardService {
         Card card = findCardById(id);
         card.setTitle(request.title());
         card.setDescription(request.description());
-        card.setPriority(request.priority() != null ? Card.Priority.valueOf(request.priority()) : null);
+        card.setPriority(request.priority() != null ? Card.Priority.valueOf(request.priority().toUpperCase()) : null);
         if (request.columnId() != null) {
             card.setColumn(findColumnById(request.columnId()));
         }
@@ -84,7 +84,7 @@ public class CardService {
             card.setDescription(request.description());
         }
         if (request.priority() != null) {
-            card.setPriority(Card.Priority.valueOf(request.priority()));
+            card.setPriority(Card.Priority.valueOf(request.priority().toUpperCase()));
         }
         if (request.columnId() != null) {
             card.setColumn(findColumnById(request.columnId()));

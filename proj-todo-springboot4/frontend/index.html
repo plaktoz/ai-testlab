@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kanban — Task Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div>
+    <div class="spinner"></div>
+  </div>
+  <span class="loading-text">Loading board…</span>
+</div>
+
+<div id="app">
+  <header id="header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="1" y="3" width="4" height="10" rx="1"/>
+          <rect x="6" y="3" width="4" height="7" rx="1"/>
+          <rect x="11" y="3" width="4" height="5" rx="1"/>
+        </svg>
+      </div>
+      <span class="header-title">Kanban</span>
+      <span class="header-subtitle">Task Board</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="showAddColumnForm()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+        </svg>
+        Add Column
+      </button>
+    </div>
+  </header>
+
+  <div id="board-scroll">
+    <div id="columns-container">
+      <!-- columns rendered here -->
+      <div id="add-column-form">
+        <h4>New Column</h4>
+        <div class="form-group">
+          <input class="form-input" id="new-col-name" placeholder="Column name" maxlength="255" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="new-col-color">Accent Color</label>
+          <div class="color-picker-row">
+            <div class="color-swatch">
+              <input type="color" id="new-col-color" value="#38bdf8" />
+            </div>
+            <span class="color-hint">Column header accent</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <button type="button" class="btn btn-primary btn-flex" onclick="submitAddColumn()">Create Column</button>
+          <button type="button" class="btn btn-ghost" onclick="hideAddColumnForm()">Cancel</button>
+        </div>
+      </div>
+
+      <button type="button" class="add-column-btn" id="add-column-btn" onclick="showAddColumnForm()">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+        </svg>
+        Add Column
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Edit Modal -->
+<div id="modal-overlay" onclick="handleModalOverlayClick(event)">
+  <div id="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Edit Task</span>
+      <button type="button" class="btn-icon" onclick="closeModal()" aria-label="Close modal">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="modal-task-title">Title</label>
+        <input class="form-input" id="modal-task-title" placeholder="Task title" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modal-task-desc">Description</label>
+        <textarea class="form-textarea" id="modal-task-desc" placeholder="Add a description…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modal-task-priority">Priority</label>
+        <select class="form-select" id="modal-task-priority" aria-label="Task priority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" id="modal-delete-btn" onclick="deleteCurrentTask()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="2,4 4,4 14,4"/><path d="M5 4V2h6v2"/><path d="M6 7v5m4-5v5"/><rect x="3" y="4" width="10" height="10" rx="1"/>
+        </svg>
+        Delete
+      </button>
+      <div class="modal-footer-right">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveModalTask()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rename Column Modal -->
+<div id="rename-modal-overlay" onclick="handleRenameOverlayClick(event)">
+  <div id="rename-modal">
+    <h3>Rename Column</h3>
+    <div class="form-group">
+      <label class="form-label">Column Name</label>
+      <input class="form-input" id="rename-col-name" placeholder="Column name" maxlength="255" />
+    </div>
+    <div class="form-group form-group-spaced">
+      <label class="form-label" for="rename-col-color">Accent Color</label>
+      <div class="color-picker-row">
+        <div class="color-swatch">
+          <input type="color" id="rename-col-color" value="#38bdf8" />
+        </div>
+        <span class="color-hint">Header border accent</span>
+      </div>
+    </div>
+    <div class="rename-form-row">
+      <button type="button" class="btn btn-primary btn-flex" onclick="submitRenameColumn()">Save</button>
+      <button type="button" class="btn btn-ghost" onclick="closeRenameModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
