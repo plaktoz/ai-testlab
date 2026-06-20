@@ -317,35 +317,26 @@ class TestReorderColumns:
 
 class TestReorderCardsInColumn:
 
-    def test_reorder_cards_in_column_returns_422_due_to_forward_ref(
+    def test_reorder_cards_in_column_returns_200_for_valid_payload(
         self, client, test_task, second_task, third_task
     ):
-        """
-        US-09: PATCH /columns/{id}/cards/reorder is reachable but the handler
-        uses a string forward-reference annotation ('CardReorderRequest') that
-        Pydantic cannot resolve at startup.  FastAPI therefore treats the body
-        parameter as a required query parameter, producing a 422 error.
-        This test documents that actual behaviour.
-        """
+        """US-09: PATCH /columns/{id}/cards/reorder accepts a valid payload."""
         col_id = test_task.column_id
         new_order = [third_task.id, second_task.id, test_task.id]
         resp = client.patch(
             f"/columns/{col_id}/cards/reorder",
             json={"card_ids": new_order},
         )
-        assert resp.status_code == 422
-        assert resp.json()["error"] == "VALIDATION_ERROR"
+        assert resp.status_code == 200
+        assert [card["id"] for card in resp.json()] == new_order
 
-    def test_reorder_cards_column_not_found_still_422(self, client):
-        """
-        US-09: Even for a non-existent column, the forward-ref bug causes 422
-        before the 404 check inside the handler is reached.
-        """
+    def test_reorder_cards_column_not_found_returns_404(self, client):
+        """US-09: A missing column should return 404 after request parsing succeeds."""
         resp = client.patch(
             "/columns/99999/cards/reorder",
             json={"card_ids": []},
         )
-        assert resp.status_code == 422
+        assert resp.status_code == 404
 
 
 # ===========================================================================
@@ -814,48 +805,17 @@ class TestDocsEndpoint:
         resp = client.get("/docs")
         assert resp.status_code == 200
 
-    def test_openapi_json_crashes_due_to_forward_ref_bug(self):
-        """
-        GET /openapi.json raises an unhandled server error in the current
-        implementation.
-
-        Implementation bug: the PATCH /columns/{column_id}/cards/reorder
-        handler uses a string annotation ('CardReorderRequest') for the body
-        parameter.  Pydantic 2.x cannot resolve the forward reference at
-        startup, so generating the OpenAPI schema raises PydanticUserError.
-        With raise_server_exceptions=True the exception propagates out of
-        TestClient; with raise_server_exceptions=False the status code is 500.
-
-        This test uses raise_server_exceptions=False to capture the actual
-        HTTP response, and asserts the observed 500 status code.
-        """
+    def test_openapi_json_is_accessible(self):
+        """GET /openapi.json returns a valid schema document."""
         from main import app
 
-        # Use a client that does NOT raise server exceptions so we get the
-        # HTTP 500 response rather than a Python exception.
-        non_raising_client = TestClient(app, raise_server_exceptions=False)
-        resp = non_raising_client.get("/openapi.json")
-        assert resp.status_code == 500, (
-            f"Expected 500 from /openapi.json due to forward-ref bug, "
-            f"got {resp.status_code}"
-        )
-
-    def test_openapi_spec_or_error_response(self):
-        """
-        /openapi.json returns 500 due to the forward-ref annotation bug.
-        This test documents the actual vs. expected behaviour.
-        """
-        from main import app
-
-        non_raising_client = TestClient(app, raise_server_exceptions=False)
-        resp = non_raising_client.get("/openapi.json")
-        # Current behaviour: 500 (forward-ref bug).
-        # Expected behaviour once bug is fixed: 200 with a valid spec.
-        assert resp.status_code in (200, 500)
-        if resp.status_code == 200:
-            spec = resp.json()
-            assert "paths" in spec
-            assert "info" in spec
+        client = TestClient(app)
+        resp = client.get("/openapi.json")
+        assert resp.status_code == 200
+        spec = resp.json()
+        assert "paths" in spec
+        assert "info" in spec
+        assert spec["info"]["title"] == "Kanban Task Board API"
 
 
 # ===========================================================================
