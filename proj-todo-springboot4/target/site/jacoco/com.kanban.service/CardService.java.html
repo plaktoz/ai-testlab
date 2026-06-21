@@ -32,7 +32,7 @@ public class CardService {
         List&lt;Card&gt; cards;
 <span class="fc bfc" id="L33" title="All 2 branches covered.">        if (columnId != null) {</span>
 <span class="fc" id="L34">            cards = cardRepository.findByColumnIdOrderByPositionAsc(columnId);</span>
-<span class="fc" id="L35">        } else {</span>
+        } else {
 <span class="fc" id="L36">            cards = cardRepository.findAllOrderedByColumnAndPosition();</span>
         }
 <span class="fc" id="L38">        return cards.stream().map(this::toResponse).collect(Collectors.toList());</span>
@@ -47,7 +47,7 @@ public class CardService {
 <span class="fc" id="L47">        card.setTitle(request.title());</span>
 <span class="fc" id="L48">        card.setDescription(request.description());</span>
 <span class="fc bfc" id="L49" title="All 2 branches covered.">        if (request.priority() != null) {</span>
-<span class="fc" id="L50">            card.setPriority(Card.Priority.valueOf(request.priority()));</span>
+<span class="fc" id="L50">            card.setPriority(Card.Priority.valueOf(request.priority().toUpperCase()));</span>
         }
 <span class="fc" id="L52">        card.setPosition(nextPosition);</span>
 <span class="fc" id="L53">        return toResponse(cardRepository.save(card));</span>
@@ -65,7 +65,7 @@ public class CardService {
 <span class="fc" id="L65">        Card card = findCardById(id);</span>
 <span class="fc" id="L66">        card.setTitle(request.title());</span>
 <span class="fc" id="L67">        card.setDescription(request.description());</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        card.setPriority(request.priority() != null ? Card.Priority.valueOf(request.priority()) : null);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        card.setPriority(request.priority() != null ? Card.Priority.valueOf(request.priority().toUpperCase()) : null);</span>
 <span class="fc bfc" id="L69" title="All 2 branches covered.">        if (request.columnId() != null) {</span>
 <span class="fc" id="L70">            card.setColumn(findColumnById(request.columnId()));</span>
         }
@@ -84,7 +84,7 @@ public class CardService {
 <span class="fc" id="L84">            card.setDescription(request.description());</span>
         }
 <span class="fc bfc" id="L86" title="All 2 branches covered.">        if (request.priority() != null) {</span>
-<span class="fc" id="L87">            card.setPriority(Card.Priority.valueOf(request.priority()));</span>
+<span class="fc" id="L87">            card.setPriority(Card.Priority.valueOf(request.priority().toUpperCase()));</span>
         }
 <span class="fc bfc" id="L89" title="All 2 branches covered.">        if (request.columnId() != null) {</span>
 <span class="fc" id="L90">            card.setColumn(findColumnById(request.columnId()));</span>
@@ -116,11 +116,11 @@ public class CardService {
             }
 <span class="fc bfc" id="L117" title="All 2 branches covered.">            if (targetPosition &gt; sourcePosition) {</span>
 <span class="fc" id="L118">                cardRepository.shiftDownBetween(sourceColumnId, sourcePosition + 1, targetPosition);</span>
-<span class="fc" id="L119">            } else {</span>
+            } else {
 <span class="fc" id="L120">                cardRepository.shiftUpBetween(sourceColumnId, targetPosition, sourcePosition - 1);</span>
             }
 <span class="fc" id="L122">            card.setPosition(targetPosition);</span>
-<span class="fc" id="L123">        } else {</span>
+        } else {
 <span class="fc" id="L124">            findColumnById(targetColumnId);</span>
 <span class="fc" id="L125">            cardRepository.decrementPositionsAfterInColumn(sourceColumnId, sourcePosition);</span>
 <span class="fc" id="L126">            cardRepository.incrementPositionsFromInColumn(targetColumnId, targetPosition);</span>
@@ -154,4 +154,4 @@ public class CardService {
         );
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

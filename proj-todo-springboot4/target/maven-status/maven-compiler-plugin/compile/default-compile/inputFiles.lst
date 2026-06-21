@@ -1,4 +1,5 @@
 /Users/tianhonglee/Desktop/projects/github/ai-testlab/proj-todo-springboot4/src/main/java/com/kanban/KanbanApplication.java
+/Users/tianhonglee/Desktop/projects/github/ai-testlab/proj-todo-springboot4/src/main/java/com/kanban/config/CorsConfig.java
 /Users/tianhonglee/Desktop/projects/github/ai-testlab/proj-todo-springboot4/src/main/java/com/kanban/controller/CardController.java
 /Users/tianhonglee/Desktop/projects/github/ai-testlab/proj-todo-springboot4/src/main/java/com/kanban/controller/ColumnController.java
 /Users/tianhonglee/Desktop/projects/github/ai-testlab/proj-todo-springboot4/src/main/java/com/kanban/dto/request/CardCreateRequest.java

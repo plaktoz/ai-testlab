@@ -92,7 +92,7 @@ public class ColumnService {
 <span class="fc bfc" id="L92" title="All 2 branches covered.">        if (submittedIds.size() != existingIds.size() ||</span>
 <span class="fc bfc" id="L93" title="All 2 branches covered.">                !Set.copyOf(submittedIds).equals(existingIds)) {</span>
 <span class="fc" id="L94">            throw new IllegalArgumentException(</span>
-<span class="fc" id="L95">                    &quot;column_ids must contain exactly all existing column IDs&quot;);</span>
+                    &quot;column_ids must contain exactly all existing column IDs&quot;);
         }
 
 <span class="fc" id="L98">        List&lt;BoardColumn&gt; reordered = new ArrayList&lt;&gt;();</span>
@@ -119,7 +119,7 @@ public class ColumnService {
 <span class="fc bfc" id="L119" title="All 2 branches covered.">        if (submittedIds.size() != existingIds.size() ||</span>
 <span class="pc bpc" id="L120" title="1 of 2 branches missed.">                !Set.copyOf(submittedIds).equals(existingIds)) {</span>
 <span class="fc" id="L121">            throw new IllegalArgumentException(</span>
-<span class="fc" id="L122">                    &quot;card_ids must contain exactly all card IDs in the column&quot;);</span>
+                    &quot;card_ids must contain exactly all card IDs in the column&quot;);
         }
 
 <span class="fc" id="L125">        List&lt;Card&gt; reordered = new ArrayList&lt;&gt;();</span>
@@ -144,4 +144,4 @@ public class ColumnService {
 <span class="fc" id="L144">        return new ColumnResponse(column.getId(), column.getName(), column.getColor(), column.getPosition());</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
