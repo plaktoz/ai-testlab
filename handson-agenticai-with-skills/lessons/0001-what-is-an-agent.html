@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — What is an Agent? | Agentic AI</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header class="lesson-header">
+    <div class="lesson-meta">
+      <a href="../reference/glossary.html">Glossary</a> ·
+      <a href="../RESOURCES.md">Resources</a> ·
+      Lesson 1 of 10
+    </div>
+    <h1>What is an Agent?</h1>
+    <p class="lesson-subtitle">Your first Claude API call in Python. From zero to talking to an AI in one notebook.</p>
+    <div class="lesson-stats">
+      <span>⏱ ~20 min</span>
+      <span>🎯 Simple</span>
+      <span>🧰 Jupyter Notebook</span>
+    </div>
+  </header>
+
+  <!-- ── Concept ── -->
+  <h2>The big idea</h2>
+
+  <p>
+    Most software does exactly what you tell it to do — your Java Spring Boot service reads a request,
+    runs your logic, returns a response. It never <em>decides</em> anything.
+  </p>
+  <p>
+    An <strong>AI agent</strong> is different. You give it a <em>goal</em>, and it figures out the
+    steps. It can call tools (like a web search or a database), check its own output, and loop until
+    the goal is done — without you scripting every step.
+  </p>
+
+  <p>The simplest possible agent has three parts:</p>
+  <ul style="margin: 0 0 1rem 1.5rem; font-family: var(--sans); font-size: 0.95rem; line-height: 2;">
+    <li><strong>A model</strong> — the brain (Claude, in our case)</li>
+    <li><strong>A loop</strong> — runs until the model says it's done</li>
+    <li><strong>Tools</strong> — external actions the model can trigger (we add these in Lesson 2)</li>
+  </ul>
+
+  <p>
+    In this lesson you'll skip the loop and tools — those come later.
+    Right now you'll just <em>talk to the model</em>. One call. One response.
+    That's enough to understand the foundation.
+  </p>
+
+  <div class="callout info">
+    <div class="callout-title">Key insight</div>
+    <p>An LLM answers a single question. An <em>agent</em> keeps going until a <em>goal</em> is met.
+    Today we build the LLM layer. Tomorrow we wrap it in the loop.</p>
+  </div>
+
+  <!-- ── Java Bridge ── -->
+  <div class="java-bridge">
+    <div class="java-bridge-header">Java Developer Bridge</div>
+    <p>
+      Think of the Claude API like calling a remote service — similar to how you'd call a REST endpoint
+      with <code>RestTemplate</code> or <code>WebClient</code> in Spring Boot.
+      The Python <code>anthropic</code> package is the SDK that wraps those HTTP calls for you,
+      just like the Feign client wraps REST calls in Java.
+    </p>
+    <p>
+      Anthropic also ships an official Java SDK (<code>com.anthropic:anthropic-java</code>)
+      which has the same structure. Once you understand the Python version, the Java version
+      will feel immediately familiar.
+    </p>
+  </div>
+
+  <!-- ── Step-by-step ── -->
+  <h2>Step-by-step</h2>
+
+  <ol class="steps">
+
+    <li class="step">
+      <strong>Get your API key</strong>
+      <p style="margin-top: 0.5rem;">
+        Go to <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a>,
+        sign in, and create an API key. Copy it somewhere safe —
+        you'll only see it once.
+      </p>
+      <div class="callout warn" style="margin-top: 0.75rem;">
+        <div class="callout-title">Security</div>
+        <p>Never commit your API key to Git. Store it as an environment variable, not in your notebook code.</p>
+      </div>
+    </li>
+
+    <li class="step">
+      <strong>Set your API key as an environment variable</strong>
+      <p style="margin-top: 0.5rem;">
+        Open your terminal and run:
+      </p>
+      <div class="cell-label">Terminal</div>
+      <pre><span class="cm"># macOS / Linux</span>
+<span class="kw">export</span> ANTHROPIC_API_KEY=<span class="st">"sk-ant-…your-key…"</span>
+
+<span class="cm"># Windows (Command Prompt)</span>
+<span class="kw">set</span> ANTHROPIC_API_KEY=sk-ant-…your-key…
+
+<span class="cm"># Or add to your shell profile (~/.zshrc or ~/.bashrc) so it persists</span></pre>
+      <p>
+        The <code>anthropic</code> Python SDK automatically reads this variable — you don't pass
+        the key in your code.
+      </p>
+    </li>
+
+    <li class="step">
+      <strong>Install the SDK and launch Jupyter</strong>
+      <div class="cell-label">Terminal</div>
+      <pre><span class="cm"># Install dependencies (once)</span>
+pip install anthropic jupyter
+
+<span class="cm"># Launch Jupyter in this folder</span>
+jupyter notebook</pre>
+      <p style="margin-top: 0.5rem;">
+        Jupyter will open in your browser. Click <strong>New → Python 3 (ipykernel)</strong>
+        to create a fresh notebook. Name it <code>lesson-01-hello-agent.ipynb</code>.
+      </p>
+    </li>
+
+    <li class="step">
+      <strong>Import the SDK</strong>
+      <p style="margin-top: 0.5rem;">
+        In the first cell of your notebook, type and run (<kbd>Shift+Enter</kbd>):
+      </p>
+      <div class="cell-label">Cell 1 — Code</div>
+      <pre><span class="kw">import</span> anthropic
+
+<span class="cm"># Create a client — it reads ANTHROPIC_API_KEY from the environment</span>
+client = anthropic.<span class="cl">Anthropic</span>()</pre>
+      <p>No output means success. If you see <code>ModuleNotFoundError</code>, run
+        <code>pip install anthropic</code> again in the terminal where Jupyter is running.
+      </p>
+    </li>
+
+    <li class="step">
+      <strong>Make your first API call</strong>
+      <p style="margin-top: 0.5rem;">
+        Add a new cell and run this:
+      </p>
+      <div class="cell-label">Cell 2 — Code</div>
+      <pre>response = client.messages.<span class="fn">create</span>(
+    model=<span class="st">"claude-haiku-4-5-20251001"</span>,  <span class="cm"># fast and cheap — great for learning</span>
+    max_tokens=<span class="nu">1024</span>,
+    messages=[
+        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"What is an AI agent? Explain in 2 sentences."</span>}
+    ]
+)
+
+<span class="fn">print</span>(response.content[<span class="nu">0</span>].text)</pre>
+
+      <div class="cell-label output">Expected Output (will vary)</div>
+      <pre style="background: #1a2a1a; color: #a6e3a1;">An AI agent is a system that perceives its environment and takes
+autonomous actions to achieve specific goals. Unlike simple programs
+that follow fixed rules, agents can adapt their behavior based on
+context and feedback to accomplish complex tasks.</pre>
+
+      <div class="callout tip" style="margin-top: 1rem;">
+        <div class="callout-title">What's happening</div>
+        <p>
+          <code>client.messages.create()</code> sends your message to Claude and waits for a reply.
+          <code>response.content[0].text</code> extracts the text from the first content block.
+          The response can have multiple blocks (we'll see that in Lesson 2 with tools).
+        </p>
+      </div>
+    </li>
+
+    <li class="step">
+      <strong>Inspect the full response object</strong>
+      <p style="margin-top: 0.5rem;">
+        Don't just trust the text. Look at what the API actually returns:
+      </p>
+      <div class="cell-label">Cell 3 — Code</div>
+      <pre><span class="cm"># Print the full response to understand the structure</span>
+<span class="fn">print</span>(<span class="st">"Stop reason:"</span>, response.stop_reason)
+<span class="fn">print</span>(<span class="st">"Model:"</span>,       response.model)
+<span class="fn">print</span>(<span class="st">"Input tokens:"</span>, response.usage.input_tokens)
+<span class="fn">print</span>(<span class="st">"Output tokens:"</span>,response.usage.output_tokens)</pre>
+
+      <div class="cell-label output">Expected Output</div>
+      <pre style="background: #1a2a1a; color: #a6e3a1;">Stop reason: end_turn
+Model: claude-haiku-4-5-20251001
+Input tokens: 22
+Output tokens: 47</pre>
+
+      <p style="margin-top: 0.5rem;">
+        <code>stop_reason: "end_turn"</code> means the model finished naturally.
+        You'll later see <code>"tool_use"</code> when the model wants to call a tool —
+        that's the signal to keep the loop going.
+      </p>
+    </li>
+
+    <li class="step">
+      <strong>Try a system prompt</strong>
+      <p style="margin-top: 0.5rem;">
+        A <strong>system prompt</strong> gives the agent its persona and instructions.
+        Think of it as the constructor of a Java object — it sets the starting state.
+      </p>
+      <div class="cell-label">Cell 4 — Code</div>
+      <pre>response = client.messages.<span class="fn">create</span>(
+    model=<span class="st">"claude-haiku-4-5-20251001"</span>,
+    max_tokens=<span class="nu">512</span>,
+    system=<span class="st">"You are a concise assistant who only answers in bullet points."</span>,
+    messages=[
+        {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"What are the 3 parts of an AI agent?"</span>}
+    ]
+)
+
+<span class="fn">print</span>(response.content[<span class="nu">0</span>].text)</pre>
+
+      <div class="callout info" style="margin-top: 0.75rem;">
+        <div class="callout-title">System prompt vs user message</div>
+        <p>
+          The <code>system</code> parameter sets the agent's role and rules — it is not part of the
+          conversation history. The <code>messages</code> list is the conversation.
+          Every message has a <code>role</code> (<code>"user"</code> or <code>"assistant"</code>).
+        </p>
+      </div>
+    </li>
+
+  </ol>
+
+  <!-- ── Model choice ── -->
+  <h2>Which model should I use?</h2>
+
+  <p>
+    Anthropic offers three tiers. During learning, always start with the cheapest:
+  </p>
+
+  <table style="width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 0.85rem; margin: 1rem 0;">
+    <thead>
+      <tr style="border-bottom: 2px solid var(--rule);">
+        <th style="text-align: left; padding: 0.5rem 0.75rem;">Model</th>
+        <th style="text-align: left; padding: 0.5rem 0.75rem;">ID</th>
+        <th style="text-align: left; padding: 0.5rem 0.75rem;">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid var(--rule);">
+        <td style="padding: 0.5rem 0.75rem;"><strong>Haiku 4.5</strong></td>
+        <td style="padding: 0.5rem 0.75rem;"><code>claude-haiku-4-5-20251001</code></td>
+        <td style="padding: 0.5rem 0.75rem; color: var(--green);">Learning, prototyping, fast/cheap tasks</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--rule);">
+        <td style="padding: 0.5rem 0.75rem;"><strong>Sonnet 4.6</strong></td>
+        <td style="padding: 0.5rem 0.75rem;"><code>claude-sonnet-4-6</code></td>
+        <td style="padding: 0.5rem 0.75rem;">Balanced quality/cost for real apps</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.5rem 0.75rem;"><strong>Opus 4.8</strong></td>
+        <td style="padding: 0.5rem 0.75rem;"><code>claude-opus-4-8</code></td>
+        <td style="padding: 0.5rem 0.75rem;">Complex reasoning, most capable tasks</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── Java Bridge deep dive ── -->
+  <div class="java-bridge">
+    <div class="java-bridge-header">Java Developer Bridge — Side-by-side</div>
+    <p>Here is the same call in Java using the official Anthropic Java SDK:</p>
+
+    <div class="cell-label" style="color: #a0522d;">Java (Anthropic SDK)</div>
+    <pre style="background: #2a1f00;"><span class="cm">// Maven: com.anthropic:anthropic-java:&lt;latest&gt;</span>
+<span class="kw">import</span> com.anthropic.client.AnthropicClient;
+<span class="kw">import</span> com.anthropic.client.okhttp.AnthropicOkHttpClient;
+<span class="kw">import</span> com.anthropic.models.messages.*;
+
+<span class="cl">AnthropicClient</span> client = <span class="cl">AnthropicOkHttpClient</span>.builder()
+    .apiKey(System.getenv(<span class="st">"ANTHROPIC_API_KEY"</span>))
+    .build();
+
+<span class="kw">var</span> response = client.messages().create(
+    <span class="cl">MessageCreateParams</span>.builder()
+        .model(<span class="cl">Model</span>.CLAUDE_HAIKU_4_5_20251001)
+        .maxTokens(<span class="nu">1024</span>)
+        .addUserMessage(<span class="st">"What is an AI agent? Explain in 2 sentences."</span>)
+        .build()
+);
+
+System.out.println(response.content().get(<span class="nu">0</span>).text().orElse(<span class="st">""</span>));</pre>
+
+    <p>The structure is identical — same concepts, same parameter names, just Java syntax.
+    The <code>stop_reason</code>, <code>usage</code>, and <code>model</code> fields
+    are all on the response object in both SDKs.</p>
+  </div>
+
+  <!-- ── Primary source ── -->
+  <div class="primary-source">
+    <div>
+      <strong>Primary Source: Anthropic API Quickstart</strong>
+      <p>
+        The official guide that covers installation, authentication, and first API calls.
+        Read this alongside this lesson. →
+        <a href="https://docs.anthropic.com/en/api/getting-started" target="_blank">
+          docs.anthropic.com/en/api/getting-started
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Quiz ── -->
+  <div class="quiz">
+    <div class="quiz-title">Check your understanding — 3 questions</div>
+
+    <!-- Q1 -->
+    <div class="quiz-question" data-correct="b">
+      <p>1. What is the key difference between an LLM and an AI agent?</p>
+      <ul class="quiz-options">
+        <li><button class="quiz-option" data-key="a">An LLM uses Python; an agent uses Java</button></li>
+        <li><button class="quiz-option" data-key="b">An agent loops until a goal is met; an LLM answers one question</button></li>
+        <li><button class="quiz-option" data-key="c">An agent is faster than an LLM at all tasks</button></li>
+        <li><button class="quiz-option" data-key="d">An LLM can use tools; an agent cannot</button></li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-question" data-correct="c">
+      <p>2. What does <code>stop_reason: "end_turn"</code> mean?</p>
+      <ul class="quiz-options">
+        <li><button class="quiz-option" data-key="a">The model hit the token limit and was cut off</button></li>
+        <li><button class="quiz-option" data-key="b">The model encountered an API error</button></li>
+        <li><button class="quiz-option" data-key="c">The model finished its response naturally</button></li>
+        <li><button class="quiz-option" data-key="d">The API call timed out</button></li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-question" data-correct="a">
+      <p>3. Where should you store your Anthropic API key?</p>
+      <ul class="quiz-options">
+        <li><button class="quiz-option" data-key="a">As an environment variable, never in source code</button></li>
+        <li><button class="quiz-option" data-key="b">In a constant at the top of your notebook</button></li>
+        <li><button class="quiz-option" data-key="c">In a JSON file committed to your Git repo</button></li>
+        <li><button class="quiz-option" data-key="d">In the system prompt parameter</button></li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+  </div>
+
+  <!-- ── Ask the teacher ── -->
+  <div class="ask-teacher">
+    <strong>Something unclear?</strong> Ask your teacher directly in the chat.<br>
+    <em>Type your question and Claude will explain, give another example, or rephrase.</em>
+  </div>
+
+  <!-- ── Nav ── -->
+  <nav class="lesson-nav">
+    <a href="../reference/glossary.html">
+      <span>Reference</span>
+      <span>Glossary →</span>
+    </a>
+    <a class="next" href="0002-tool-use.html">
+      <span>Next lesson</span>
+      <span>Lesson 2: Tool Use →</span>
+    </a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

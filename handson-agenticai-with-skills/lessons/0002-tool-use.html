@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Tool Use | Agentic AI</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header class="lesson-header">
+    <div class="lesson-meta">
+      <a href="../reference/glossary.html">Glossary</a> ·
+      <a href="../RESOURCES.md">Resources</a> ·
+      <a href="0001-what-is-an-agent.html">← Lesson 1</a> ·
+      Lesson 2 of 10
+    </div>
+    <h1>Tool Use</h1>
+    <p class="lesson-subtitle">Give your agent the ability to call Python functions. This is what makes it truly agentic.</p>
+    <div class="lesson-stats">
+      <span>⏱ ~25 min</span>
+      <span>🎯 Simple</span>
+      <span>🧰 Jupyter Notebook</span>
+    </div>
+  </header>
+
+  <!-- ── Concept ── -->
+  <h2>The big idea</h2>
+
+  <p>
+    In Lesson 1, Claude answered questions from its training data alone.
+    But a real agent needs to <em>act</em> — check today's date, call an API,
+    read a file, query a database. That's what <strong>tools</strong> are for.
+  </p>
+
+  <p>
+    You define a tool as a Python function + a JSON description of its parameters.
+    Claude reads the description, decides when to call the tool, and tells you
+    <em>what arguments to pass</em>. Your code calls the actual function and sends
+    the result back. Claude then continues reasoning with the new information.
+  </p>
+
+  <div class="callout info">
+    <div class="callout-title">The key mental model</div>
+    <p>
+      Claude never calls your function directly — <em>you</em> call it.
+      Claude says "please call <code>get_weather(city='Singapore')</code>",
+      and your agent loop executes that, returns the result, and Claude continues.
+      Claude is the brain; your code is the hands.
+    </p>
+  </div>
+
+  <h3>The Agent Loop with tools</h3>
+  <pre style="background: #1e1e2e; color: #cdd6f4; font-size: 0.82rem;">
+┌─────────────────────────────────────────────┐
+│  1. Send message (+ available tools)        │
+│  2. Claude responds                         │
+│     ├── stop_reason = "end_turn"  ──────────┼── Done. Print result.
+│     └── stop_reason = "tool_use" ──────────┐│
+│  3. Execute the requested tool(s)           ││
+│  4. Send tool result back to Claude    ◄────┘│
+│  5. Go to step 2                            │
+└─────────────────────────────────────────────┘</pre>
+
+  <div class="java-bridge">
+    <div class="java-bridge-header">Java Developer Bridge</div>
+    <p>
+      Tool use is like <strong>callback interfaces in Java</strong>. You define an interface
+      (the tool schema), Claude decides to call it, your code implements it, and the result
+      flows back. It is also similar to how Java CDI/dependency injection lets a framework
+      call your <code>@Bean</code> methods — you define the contract, the framework decides when to invoke.
+    </p>
+  </div>
+
+  <!-- ── Steps ── -->
+  <h2>Step-by-step</h2>
+
+  <p>Continue in the same notebook (<code>lesson-01-hello-agent.ipynb</code>) or create
+    <code>lesson-02-tool-use.ipynb</code>.</p>
+
+  <ol class="steps">
+
+    <li class="step">
+      <strong>Define a tool function</strong>
+      <p style="margin-top: 0.5rem;">Write a Python function you want the agent to be able to call:</p>
+      <div class="cell-label">Cell 1 — Code</div>
+      <pre><span class="kw">import</span> anthropic
+<span class="kw">import</span> datetime
+
+client = anthropic.<span class="cl">Anthropic</span>()
+
+<span class="cm"># The actual Python function</span>
+<span class="kw">def</span> <span class="fn">get_current_date</span>():
+    <span class="st">"""Return today's date as a string."""</span>
+    <span class="kw">return</span> datetime.date.today().<span class="fn">isoformat</span>()  <span class="cm"># e.g. "2026-06-21"</span>
+
+<span class="cm"># Tell Claude about the tool using a JSON schema</span>
+tools = [
+    {
+        <span class="st">"name"</span>: <span class="st">"get_current_date"</span>,
+        <span class="st">"description"</span>: <span class="st">"Returns today's date in ISO format (YYYY-MM-DD)."</span>,
+        <span class="st">"input_schema"</span>: {
+            <span class="st">"type"</span>: <span class="st">"object"</span>,
+            <span class="st">"properties"</span>: {},  <span class="cm"># no parameters needed</span>
+            <span class="st">"required"</span>: []
+        }
+    }
+]</pre>
+      <p style="margin-top: 0.5rem;">
+        The <code>input_schema</code> is a JSON Schema object. Claude reads it to know what
+        arguments to provide when calling the tool. For <code>get_current_date</code>,
+        no arguments are needed.
+      </p>
+    </li>
+
+    <li class="step">
+      <strong>Write the agent loop</strong>
+      <div class="cell-label">Cell 2 — Code</div>
+      <pre><span class="kw">def</span> <span class="fn">run_agent</span>(user_message):
+    messages = [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_message}]
+
+    <span class="kw">while</span> <span class="kw">True</span>:
+        response = client.messages.<span class="fn">create</span>(
+            model=<span class="st">"claude-haiku-4-5-20251001"</span>,
+            max_tokens=<span class="nu">1024</span>,
+            tools=tools,
+            messages=messages
+        )
+
+        <span class="cm"># Finished naturally — return the text</span>
+        <span class="kw">if</span> response.stop_reason == <span class="st">"end_turn"</span>:
+            <span class="kw">return</span> response.content[<span class="nu">0</span>].text
+
+        <span class="cm"># Claude wants to call a tool</span>
+        <span class="kw">if</span> response.stop_reason == <span class="st">"tool_use"</span>:
+            <span class="cm"># Add Claude's response to the message history</span>
+            messages.<span class="fn">append</span>({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: response.content})
+
+            <span class="cm"># Execute each tool Claude requested</span>
+            tool_results = []
+            <span class="kw">for</span> block <span class="kw">in</span> response.content:
+                <span class="kw">if</span> block.<span class="fn">type</span> == <span class="st">"tool_use"</span>:
+                    <span class="fn">print</span>(<span class="st">f"→ Calling tool: {block.name}({block.input})"</span>)
+
+                    <span class="cm"># Dispatch to the right function</span>
+                    <span class="kw">if</span> block.name == <span class="st">"get_current_date"</span>:
+                        result = <span class="fn">get_current_date</span>()
+
+                    tool_results.<span class="fn">append</span>({
+                        <span class="st">"type"</span>: <span class="st">"tool_result"</span>,
+                        <span class="st">"tool_use_id"</span>: block.id,
+                        <span class="st">"content"</span>: <span class="fn">str</span>(result)
+                    })
+
+            <span class="cm"># Send tool results back to Claude</span>
+            messages.<span class="fn">append</span>({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: tool_results})</pre>
+    </li>
+
+    <li class="step">
+      <strong>Run your agent</strong>
+      <div class="cell-label">Cell 3 — Code</div>
+      <pre>answer = <span class="fn">run_agent</span>(<span class="st">"What day of the week is today? Use the tool to get the date."</span>)
+<span class="fn">print</span>(answer)</pre>
+
+      <div class="cell-label output">Expected Output</div>
+      <pre style="background: #1a2a1a; color: #a6e3a1;">→ Calling tool: get_current_date({})
+Today is Saturday, June 21, 2026.</pre>
+
+      <p style="margin-top: 0.5rem;">
+        Notice the loop ran <strong>twice</strong>: once to get Claude to decide to use the tool,
+        and once after returning the result so Claude could write the final answer.
+      </p>
+    </li>
+
+    <li class="step">
+      <strong>Add a tool with parameters</strong>
+      <p style="margin-top: 0.5rem;">Now define a tool that takes an argument — a simple calculator:</p>
+      <div class="cell-label">Cell 4 — Code</div>
+      <pre><span class="kw">def</span> <span class="fn">calculate</span>(expression: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="st">"""Safely evaluate a simple arithmetic expression."""</span>
+    <span class="kw">try</span>:
+        <span class="cm"># eval() is safe here because we restrict it to numbers/operators</span>
+        allowed = <span class="fn">set</span>(<span class="st">"0123456789+-*/().,% "</span>)
+        <span class="kw">if not</span> <span class="fn">all</span>(c <span class="kw">in</span> allowed <span class="kw">for</span> c <span class="kw">in</span> expression):
+            <span class="kw">return</span> <span class="st">"Error: only arithmetic allowed"</span>
+        <span class="kw">return</span> <span class="fn">str</span>(<span class="fn">eval</span>(expression))
+    <span class="kw">except</span> <span class="cl">Exception</span> <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="st">f"Error: {e}"</span>
+
+calc_tool = {
+    <span class="st">"name"</span>: <span class="st">"calculate"</span>,
+    <span class="st">"description"</span>: <span class="st">"Evaluate a basic arithmetic expression and return the result."</span>,
+    <span class="st">"input_schema"</span>: {
+        <span class="st">"type"</span>: <span class="st">"object"</span>,
+        <span class="st">"properties"</span>: {
+            <span class="st">"expression"</span>: {
+                <span class="st">"type"</span>: <span class="st">"string"</span>,
+                <span class="st">"description"</span>: <span class="st">"The arithmetic expression to evaluate, e.g. '42 * 1.15'"</span>
+            }
+        },
+        <span class="st">"required"</span>: [<span class="st">"expression"</span>]
+    }
+}</pre>
+    </li>
+
+    <li class="step">
+      <strong>Wire multiple tools and test</strong>
+      <div class="cell-label">Cell 5 — Code</div>
+      <pre><span class="kw">def</span> <span class="fn">dispatch_tool</span>(name, inputs):
+    <span class="st">"""Map tool name → function call."""</span>
+    <span class="kw">if</span> name == <span class="st">"get_current_date"</span>: <span class="kw">return</span> <span class="fn">get_current_date</span>()
+    <span class="kw">if</span> name == <span class="st">"calculate"</span>:       <span class="kw">return</span> <span class="fn">calculate</span>(inputs[<span class="st">"expression"</span>])
+    <span class="kw">return</span> <span class="st">f"Unknown tool: {name}"</span>
+
+<span class="kw">def</span> <span class="fn">run_agent_v2</span>(user_message, all_tools):
+    messages = [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: user_message}]
+    <span class="kw">while</span> <span class="kw">True</span>:
+        response = client.messages.<span class="fn">create</span>(
+            model=<span class="st">"claude-haiku-4-5-20251001"</span>,
+            max_tokens=<span class="nu">1024</span>,
+            tools=all_tools,
+            messages=messages
+        )
+        <span class="kw">if</span> response.stop_reason == <span class="st">"end_turn"</span>:
+            <span class="kw">return</span> response.content[<span class="nu">0</span>].text
+        messages.<span class="fn">append</span>({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"content"</span>: response.content})
+        tool_results = []
+        <span class="kw">for</span> block <span class="kw">in</span> response.content:
+            <span class="kw">if</span> block.<span class="fn">type</span> == <span class="st">"tool_use"</span>:
+                result = <span class="fn">dispatch_tool</span>(block.name, block.input)
+                <span class="fn">print</span>(<span class="st">f"  Tool: {block.name}({block.input}) → {result}"</span>)
+                tool_results.<span class="fn">append</span>({<span class="st">"type"</span>: <span class="st">"tool_result"</span>,
+                                      <span class="st">"tool_use_id"</span>: block.id,
+                                      <span class="st">"content"</span>: <span class="fn">str</span>(result)})
+        messages.<span class="fn">append</span>({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: tool_results})
+
+<span class="cm"># Test it</span>
+<span class="fn">print</span>(<span class="fn">run_agent_v2</span>(
+    <span class="st">"What is 15% tip on a $48.50 dinner bill? Also tell me today's date."</span>,
+    [tools[<span class="nu">0</span>], calc_tool]
+))</pre>
+
+      <div class="cell-label output">Expected Output</div>
+      <pre style="background: #1a2a1a; color: #a6e3a1;">  Tool: calculate({'expression': '48.50 * 0.15'}) → 7.275
+  Tool: get_current_date({}) → 2026-06-21
+A 15% tip on a $48.50 dinner bill is $7.28.
+Today's date is June 21, 2026.</pre>
+    </li>
+
+  </ol>
+
+  <!-- ── Primary source ── -->
+  <div class="primary-source">
+    <div>
+      <strong>Primary Source: Tool Use Guide — Anthropic Docs</strong>
+      <p>
+        The definitive reference for tool schemas, parallel tool use, and tool_choice.
+        Read the "Define tools" and "Process tool calls" sections. →
+        <a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview" target="_blank">
+          docs.anthropic.com — Tool Use Overview
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Java Bridge ── -->
+  <div class="java-bridge">
+    <div class="java-bridge-header">Java Developer Bridge — Tool Dispatch Pattern</div>
+    <p>The dispatch pattern above (name → function call) is equivalent to a strategy pattern in Java:</p>
+    <div class="cell-label" style="color: #a0522d;">Java equivalent</div>
+    <pre style="background: #2a1f00;"><span class="cm">// Java tool dispatcher using a Map of strategies</span>
+<span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Function</span>&lt;<span class="cl">Map</span>&lt;<span class="cl">String</span>, <span class="cl">Object</span>&gt;, <span class="cl">String</span>&gt;&gt; tools = <span class="kw">new</span> <span class="cl">HashMap</span>&lt;&gt;();
+tools.put(<span class="st">"calculate"</span>, inputs -> calculate((<span class="cl">String</span>) inputs.get(<span class="st">"expression"</span>)));
+tools.put(<span class="st">"get_current_date"</span>, inputs -> getCurrentDate());
+
+<span class="cm">// Dispatch</span>
+<span class="cl">String</span> result = tools.get(toolName).apply(toolInputs);</pre>
+    <p>
+      The JSON <code>input_schema</code> maps to a Java record or DTO class.
+      In the Anthropic Java SDK, tool results are typed objects rather than raw strings.
+    </p>
+  </div>
+
+  <!-- ── Quiz ── -->
+  <div class="quiz">
+    <div class="quiz-title">Check your understanding — 3 questions</div>
+
+    <div class="quiz-question" data-correct="b">
+      <p>1. When Claude returns <code>stop_reason: "tool_use"</code>, what should your code do next?</p>
+      <ul class="quiz-options">
+        <li><button class="quiz-option" data-key="a">Print the response and stop the loop</button></li>
+        <li><button class="quiz-option" data-key="b">Execute the requested tool and send the result back to Claude</button></li>
+        <li><button class="quiz-option" data-key="c">Restart the agent with a new system prompt</button></li>
+        <li><button class="quiz-option" data-key="d">Call a different model to handle the tool</button></li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="quiz-question" data-correct="c">
+      <p>2. What is the purpose of <code>tool_use_id</code> in the tool result?</p>
+      <ul class="quiz-options">
+        <li><button class="quiz-option" data-key="a">It authenticates the tool call with Anthropic's servers</button></li>
+        <li><button class="quiz-option" data-key="b">It sets the priority of parallel tool calls</button></li>
+        <li><button class="quiz-option" data-key="c">It tells Claude which specific tool call this result belongs to</button></li>
+        <li><button class="quiz-option" data-key="d">It is the API key for the external service being called</button></li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="quiz-question" data-correct="d">
+      <p>3. Does Claude directly execute the Python function you define as a tool?</p>
+      <ul class="quiz-options">
+        <li><button class="quiz-option" data-key="a">Yes, via reflection</button></li>
+        <li><button class="quiz-option" data-key="b">Yes, but only for pure functions with no side effects</button></li>
+        <li><button class="quiz-option" data-key="c">Yes, if you enable it with a special flag</button></li>
+        <li><button class="quiz-option" data-key="d">No — Claude tells you what to call; your code executes it</button></li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>Something unclear?</strong> Ask your teacher directly in the chat.
+    <em>Try asking: "Can I have two tools with the same name?" or "What happens if my tool throws an exception?"</em>
+  </div>
+
+  <nav class="lesson-nav">
+    <a href="0001-what-is-an-agent.html">
+      <span>← Previous</span>
+      <span>Lesson 1: What is an Agent?</span>
+    </a>
+    <a class="next" href="0003-agent-loop.html">
+      <span>Next lesson</span>
+      <span>Lesson 3: The Agent Loop →</span>
+    </a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,411 @@
+/* ============================================================
+   Agentic AI Course — Shared Stylesheet
+   Tufte-inspired, print-friendly, clean
+   ============================================================ */
+
+:root {
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+  --ink: #1a1a1a;
+  --ink-light: #555;
+  --ink-muted: #888;
+  --paper: #faf9f7;
+  --paper-alt: #f3f1ee;
+  --rule: #d8d4cc;
+
+  --blue: #1a56db;
+  --blue-light: #e8f0fe;
+  --green: #0d7a4e;
+  --green-light: #e6f4ee;
+  --amber: #b45309;
+  --amber-light: #fef3c7;
+  --red: #b91c1c;
+  --red-light: #fee2e2;
+
+  --java-bg: #fff8e6;
+  --java-border: #f59e0b;
+  --java-text: #78350f;
+
+  --step-bg: #f0f4ff;
+  --step-border: #3b82f6;
+
+  --radius: 6px;
+  --max-width: 760px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 18px; }
+
+body {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--paper);
+  padding: 2rem 1rem 6rem;
+}
+
+/* ---- Layout ---- */
+.page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* ---- Header ---- */
+.lesson-header {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.lesson-meta {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.5rem;
+}
+
+.lesson-meta a { color: var(--blue); text-decoration: none; }
+.lesson-meta a:hover { text-decoration: underline; }
+
+h1 {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.lesson-subtitle {
+  font-family: var(--sans);
+  font-size: 1rem;
+  color: var(--ink-light);
+  margin-top: 0.25rem;
+}
+
+.lesson-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.lesson-stats span::before { margin-right: 0.25rem; }
+
+/* ---- Typography ---- */
+h2 {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 2.5rem 0 0.75rem;
+  color: var(--ink);
+}
+
+h3 {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin: 1.75rem 0 0.5rem;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+p { margin-bottom: 1rem; }
+
+a { color: var(--blue); }
+a:hover { text-decoration: underline; }
+
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+/* ---- Step blocks ---- */
+.steps { counter-reset: step-counter; list-style: none; margin: 1.5rem 0; }
+
+.step {
+  counter-increment: step-counter;
+  position: relative;
+  padding: 1.25rem 1.25rem 1.25rem 3.75rem;
+  margin-bottom: 1rem;
+  background: var(--step-bg);
+  border-left: 3px solid var(--step-border);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.step::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 1rem;
+  top: 1.25rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: var(--step-border);
+  color: white;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step p:last-child { margin-bottom: 0; }
+
+/* ---- Code blocks ---- */
+pre {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.875em;
+  background: var(--paper-alt);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Syntax colours (manual, no library needed) */
+.kw  { color: #cba6f7; }  /* keywords: import, def, class */
+.st  { color: #a6e3a1; }  /* strings */
+.cm  { color: #6c7086; font-style: italic; }  /* comments */
+.fn  { color: #89b4fa; }  /* function names */
+.nu  { color: #fab387; }  /* numbers */
+.cl  { color: #f9e2af; }  /* class names */
+.op  { color: #89dceb; }  /* operators/punctuation */
+
+/* cell labels for Jupyter */
+.cell-label {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  margin-bottom: 0.25rem;
+  margin-top: 1.25rem;
+}
+
+.cell-label.output { color: var(--green); }
+
+/* ---- Java Bridge ---- */
+.java-bridge {
+  background: var(--java-bg);
+  border: 1px solid var(--java-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.java-bridge-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  margin-bottom: 0.75rem;
+}
+
+.java-bridge-header::before {
+  content: '☕';
+  font-size: 1rem;
+}
+
+.java-bridge p { color: var(--java-text); margin-bottom: 0.5rem; }
+.java-bridge p:last-child { margin-bottom: 0; }
+.java-bridge pre { background: #2a1f00; }
+
+/* ---- Callout boxes ---- */
+.callout {
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+}
+
+.callout.info  { background: var(--blue-light); border-left: 3px solid var(--blue); }
+.callout.tip   { background: var(--green-light); border-left: 3px solid var(--green); }
+.callout.warn  { background: var(--amber-light); border-left: 3px solid var(--amber); }
+
+.callout-title {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.callout.info  .callout-title { color: var(--blue); }
+.callout.tip   .callout-title { color: var(--green); }
+.callout.warn  .callout-title { color: var(--amber); }
+
+.callout p:last-child { margin-bottom: 0; }
+
+/* ---- Quiz ---- */
+.quiz {
+  border: 2px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin: 2.5rem 0;
+  background: white;
+}
+
+.quiz-title {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+  margin-bottom: 1.25rem;
+}
+
+.quiz-question { margin-bottom: 1.5rem; }
+.quiz-question:last-of-type { margin-bottom: 0; }
+
+.quiz-question p {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.quiz-options { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+
+.quiz-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  transition: background 0.15s, border-color 0.15s;
+  background: white;
+  text-align: left;
+  width: 100%;
+}
+
+.quiz-option:hover { background: var(--paper-alt); border-color: var(--blue); }
+.quiz-option.correct { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.quiz-option.wrong   { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+.quiz-feedback {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  min-height: 1.2em;
+  font-style: italic;
+}
+
+/* ---- Nav footer ---- */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.lesson-nav a {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--ink);
+  max-width: 45%;
+}
+
+.lesson-nav a span:first-child {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  margin-bottom: 0.2rem;
+}
+
+.lesson-nav a:hover span:last-child { color: var(--blue); text-decoration: underline; }
+.lesson-nav .next { text-align: right; }
+
+/* ---- Source citation ---- */
+.primary-source {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--paper-alt);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin: 1.5rem 0;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.primary-source::before {
+  content: '📖';
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.primary-source strong { display: block; margin-bottom: 0.25rem; }
+.primary-source p { margin: 0; color: var(--ink-light); }
+
+/* ---- Ask the teacher ---- */
+.ask-teacher {
+  background: #f0f4ff;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-top: 2rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  text-align: center;
+}
+
+.ask-teacher strong { color: var(--blue); }
+
+/* ---- Print styles ---- */
+@media print {
+  body { background: white; padding: 0; font-size: 11pt; }
+  .quiz-option:hover { background: white; }
+  .lesson-nav { display: none; }
+  pre { white-space: pre-wrap; }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  .step { padding-left: 3rem; }
+}

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary — Agentic AI</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    .glossary-term {
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.75rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .glossary-term:last-child { border-bottom: none; }
+
+    .term-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+    .term-name {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .term-badge {
+      font-family: var(--sans);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.1em 0.5em;
+      border-radius: 3px;
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+    .term-badge.java { background: var(--java-bg); color: var(--amber); }
+
+    .term-def { margin-bottom: 0.5rem; }
+
+    .term-avoid {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+    }
+    .term-avoid strong { color: var(--red); font-style: normal; }
+
+    .term-java {
+      margin-top: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--java-bg);
+      border-left: 2px solid var(--java-border);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--java-text);
+    }
+    .term-java::before { content: '☕ Java: '; font-weight: 700; }
+
+    .section-divider {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-muted);
+      margin: 2.5rem 0 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--ink);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="lesson-header">
+    <div class="lesson-meta">
+      <a href="../lessons/0001-what-is-an-agent.html">← Lesson 1</a> ·
+      Reference
+    </div>
+    <h1>Glossary</h1>
+    <p class="lesson-subtitle">
+      Terms are added here only after they appear in a lesson.
+      Defined once, used consistently across all lessons.
+    </p>
+  </header>
+
+  <!-- ── Core Concepts ── -->
+  <div class="section-divider">Core Concepts</div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">Agent</span>
+      <span class="term-badge">Core</span>
+    </div>
+    <p class="term-def">
+      A system that perceives its environment, reasons about a goal, and takes autonomous
+      actions — including calling tools and looping — until that goal is met.
+      An agent wraps an LLM in a loop.
+    </p>
+    <div class="term-avoid">
+      <strong>Avoid:</strong> "AI assistant" (implies passivity), "chatbot" (implies single-turn)
+    </div>
+    <div class="term-java">The loop is like a <code>while (!done)</code> driven by a policy, not by you.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">Agent Loop</span>
+      <span class="term-badge">Core</span>
+    </div>
+    <p class="term-def">
+      The cycle of: (1) send message + tools to the model, (2) execute any tool calls the model
+      requests, (3) return results, (4) repeat — until <code>stop_reason == "end_turn"</code>.
+    </p>
+    <div class="term-java">Like a <code>while</code> loop with a strategy pattern deciding each iteration.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">LLM</span>
+      <span class="term-badge">Core</span>
+    </div>
+    <p class="term-def">
+      Large Language Model. A neural network trained on text that generates token-by-token
+      completions. Claude is an LLM. An LLM answers once; an agent loops.
+    </p>
+    <div class="term-avoid">
+      <strong>Avoid:</strong> "AI" (too broad), "GPT" (a specific competing model)
+    </div>
+  </div>
+
+  <!-- ── API & SDK ── -->
+  <div class="section-divider">API &amp; SDK</div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">Message</span>
+      <span class="term-badge">API</span>
+    </div>
+    <p class="term-def">
+      A single turn in the conversation. Has a <code>role</code> (<code>"user"</code> or
+      <code>"assistant"</code>) and a <code>content</code> (text string or list of content blocks).
+      The <code>messages</code> array is the full conversation history you maintain in your code.
+    </p>
+    <div class="term-java">Like a DTO (<code>MessageDTO</code>) passed to and from the API.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">System Prompt</span>
+      <span class="term-badge">API</span>
+    </div>
+    <p class="term-def">
+      Instructions passed in the <code>system</code> parameter of a message request.
+      Sets the agent's persona, rules, and context. Not part of the conversation history —
+      it is applied globally to every response.
+    </p>
+    <div class="term-java">Like a constructor that sets the initial state of your agent object.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">stop_reason</span>
+      <span class="term-badge">API</span>
+    </div>
+    <p class="term-def">
+      A field on every API response indicating why the model stopped generating.
+      <code>"end_turn"</code> means it finished naturally.
+      <code>"tool_use"</code> means it wants to call one or more tools.
+      <code>"max_tokens"</code> means the output was cut off.
+    </p>
+    <div class="term-java">Like a status code on a response object — drives the next branch in your loop.</div>
+  </div>
+
+  <!-- ── Tool Use ── -->
+  <div class="section-divider">Tool Use</div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">Tool</span>
+      <span class="term-badge">Tool Use</span>
+    </div>
+    <p class="term-def">
+      A Python function that the model can request to have called.
+      Defined as a JSON Schema description; your code executes the actual function.
+      The model never executes code — it only requests execution.
+    </p>
+    <div class="term-avoid">
+      <strong>Avoid:</strong> "plugin", "function call" (the latter is OpenAI terminology)
+    </div>
+    <div class="term-java">Like a <code>@FunctionInterface</code> registered with a dispatcher. The model is the caller; you are the executor.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">input_schema</span>
+      <span class="term-badge">Tool Use</span>
+    </div>
+    <p class="term-def">
+      A JSON Schema object describing the parameters a tool accepts.
+      Claude reads this to know what arguments to provide when calling the tool.
+      Follows the JSON Schema draft-07 specification.
+    </p>
+    <div class="term-java">Like a method signature or a Java <code>record</code> describing the input DTO.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">tool_use_id</span>
+      <span class="term-badge">Tool Use</span>
+    </div>
+    <p class="term-def">
+      A unique identifier on each tool call block in the assistant's response.
+      Must be echoed back in the <code>tool_result</code> so Claude knows
+      which result belongs to which tool call (important when multiple tools are called in parallel).
+    </p>
+    <div class="term-java">Like a correlation ID in a microservices request/response pair.</div>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">Tool Result</span>
+      <span class="term-badge">Tool Use</span>
+    </div>
+    <p class="term-def">
+      A content block of type <code>"tool_result"</code> sent back to the model after executing a tool.
+      Contains the <code>tool_use_id</code> and the string result of the function call.
+    </p>
+  </div>
+
+  <!-- ── Models ── -->
+  <div class="section-divider">Models (current as of 2026)</div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">claude-haiku-4-5-20251001</span>
+      <span class="term-badge">Model</span>
+    </div>
+    <p class="term-def">
+      Anthropic's fastest, most cost-effective model. Ideal for learning, prototyping,
+      high-volume tasks, and anything where speed matters more than maximum reasoning depth.
+      Use this for all lessons unless noted otherwise.
+    </p>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">claude-sonnet-4-6</span>
+      <span class="term-badge">Model</span>
+    </div>
+    <p class="term-def">
+      Balanced performance and cost. The go-to model for production applications
+      where quality matters but Opus-level reasoning is not needed.
+    </p>
+  </div>
+
+  <div class="glossary-term">
+    <div class="term-header">
+      <span class="term-name">claude-opus-4-8</span>
+      <span class="term-badge">Model</span>
+    </div>
+    <p class="term-def">
+      Most capable and most expensive. Use for complex reasoning, evaluation, or tasks where
+      correctness matters more than cost.
+    </p>
+  </div>
+
+  <nav class="lesson-nav">
+    <a href="../lessons/0001-what-is-an-agent.html">
+      <span>← Lesson</span>
+      <span>Lesson 1: What is an Agent?</span>
+    </a>
+    <a class="next" href="../lessons/0002-tool-use.html">
+      <span>→ Lesson</span>
+      <span>Lesson 2: Tool Use</span>
+    </a>
+  </nav>
+
+</div>
+</body>
+</html>
