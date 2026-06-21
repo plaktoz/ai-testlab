@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 7 — Evaluating Agent Frameworks</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    .lens-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      margin: 1.5rem 0;
+    }
+
+    .lens-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .lens-table td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .lens-table tr:last-child td { border-bottom: none; }
+
+    .lens-num {
+      display: inline-block;
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: var(--code-bg);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .red-flag {
+      font-size: 0.8rem;
+      color: #8b1a1a;
+    }
+
+    .eval-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      overflow: hidden;
+    }
+
+    .eval-card-header {
+      background: var(--surface);
+      padding: 0.75rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .eval-card-header h3 {
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin: 0;
+      color: var(--text);
+    }
+
+    .eval-card-header .framework-meta {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .eval-row {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 0 1rem;
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-ui);
+      font-size: 0.84rem;
+      align-items: start;
+    }
+
+    .eval-row:last-child { border-bottom: none; }
+
+    .eval-label {
+      font-weight: bold;
+      color: var(--accent);
+      padding-top: 0.05rem;
+    }
+
+    .eval-verdict {
+      line-height: 1.5;
+    }
+
+    .verdict-good { color: #1a5a1a; }
+    .verdict-weak { color: #8b1a1a; }
+    .verdict-mixed { color: #5a4a00; }
+
+    .verdict-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: bold;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      margin-right: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tag-good  { background: #e8f5e9; color: #1a5a1a; }
+    .tag-weak  { background: #fce8e8; color: #8b1a1a; }
+    .tag-mixed { background: #fff8e0; color: #5a4a00; }
+  </style>
+</head>
+<body>
+<div class="lesson-wrap">
+
+  <header class="lesson-header">
+    <div class="lesson-number">Lesson 07 · Agentic AI</div>
+    <h1>Evaluating Agent Frameworks</h1>
+    <div class="lesson-subtitle">A six-lens method for reading any new framework, paper, or codebase against your mental model</div>
+  </header>
+
+  <p>
+    The agentic AI space produces new frameworks every few months — AutoGen, LangGraph, CrewAI,
+    Semantic Kernel, and more. Each arrives with marketing claims about autonomy, multi-agent
+    capability, and production-readiness. Without a structured lens, you have no basis for
+    evaluating those claims beyond surface impressions.
+  </p>
+
+  <p>
+    The prior six lessons are that lens. This lesson turns them into a repeatable evaluation method.
+  </p>
+
+  <h2>The Six-Lens Framework</h2>
+
+  <p>
+    Each lens maps to one lesson. Apply them in order — each one narrows the question
+    before the next one goes deeper.
+  </p>
+
+  <table class="lens-table">
+    <thead>
+      <tr>
+        <th>Lens</th>
+        <th>Core question</th>
+        <th>Red flag</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="lens-num">L1 · Workflow vs Agent</span></td>
+        <td>Does the framework's "agent" give control to the LLM, or does the developer still define the flow? Is the distinction clearly drawn?</td>
+        <td class="red-flag">Calls everything "agents" regardless of who controls flow. Blurs the distinction in marketing.</td>
+      </tr>
+      <tr>
+        <td><span class="lens-num">L2 · Patterns</span></td>
+        <td>Which of the five workflow patterns does it natively support? Which require awkward workarounds? Can you implement evaluator-optimizer without hacking the internals?</td>
+        <td class="red-flag">Only one topology. No first-class evaluator loop. Forces all tasks into one pattern shape.</td>
+      </tr>
+      <tr>
+        <td><span class="lens-num">L3 · ReAct loop</span></td>
+        <td>How does the harness inject observations? Is the loop structure inspectable in traces? Are there built-in step limits and loop detection?</td>
+        <td class="red-flag">No step limit. No loop detection. Opaque traces that can't be reconstructed after the fact.</td>
+      </tr>
+      <tr>
+        <td><span class="lens-num">L4 · Memory</span></td>
+        <td>What memory systems are available? In-context only, or external stores? What happens when context fills — is there rolling summarisation, or a hard crash?</td>
+        <td class="red-flag">No mechanism for context exhaustion. External memory bolted on as an afterthought with no clear retrieval strategy.</td>
+      </tr>
+      <tr>
+        <td><span class="lens-num">L5 · Failure modes</span></td>
+        <td>What harness-level mitigations are built in? Is there prompt injection hardening? Are tools scoped per agent or shared globally?</td>
+        <td class="red-flag">No tool scoping. No prompt injection guidance in the docs. Assumes model self-protection.</td>
+      </tr>
+      <tr>
+        <td><span class="lens-num">L6 · Multi-agent trust</span></td>
+        <td>How are worker scopes defined — at system prompt construction, or by runtime assertion? What topologies are natively supported vs. requiring custom code?</td>
+        <td class="red-flag">Peer-network as the default topology with no structured alternatives. Runtime trust claims accepted without question.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Using the lens:</strong> you don't need all six answers before forming an opinion.
+    If L1 reveals that the framework mislabels workflows as agents, that shapes how much you
+    trust the L2–L6 claims. Start with L1 and go as deep as the decision warrants.
+  </div>
+
+  <h2>Worked Example: AutoGen</h2>
+
+  <p>
+    AutoGen (Wu et al., 2023) is a Microsoft Research multi-agent conversation framework.
+    It was cited in Lesson 6's source box as a concrete peer-network implementation.
+    Here is the six-lens read.
+  </p>
+
+  <div class="eval-card">
+    <div class="eval-card-header">
+      <h3>AutoGen</h3>
+      <div class="framework-meta">Wu et al., 2023 · Microsoft Research ·
+        <a href="https://arxiv.org/abs/2308.08155" target="_blank">arxiv.org/abs/2308.08155</a>
+      </div>
+    </div>
+
+    <div class="eval-row">
+      <div class="eval-label">L1 · Workflow vs Agent</div>
+      <div class="eval-verdict">
+        <span class="verdict-tag tag-mixed">Mixed</span>
+        AutoGen distinguishes <code>AssistantAgent</code> (LLM-driven) from <code>UserProxyAgent</code>
+        (code-executor, human-in-the-loop). The distinction maps reasonably to agent vs. workflow node.
+        However, <code>UserProxyAgent</code> is often used in roles where a human never actually
+        participates — the name implies human oversight that may not exist at runtime.
+      </div>
+    </div>
+
+    <div class="eval-row">
+      <div class="eval-label">L2 · Patterns</div>
+      <div class="eval-verdict">
+        <span class="verdict-tag tag-weak">Weak</span>
+        The primary topology is peer-to-peer conversation. Sequential pipelines and fan-out/fan-in
+        are supported but require custom orchestration code on top of the conversation primitives.
+        The evaluator-optimizer pattern has no native representation — you would need to implement
+        the loop and rubric yourself.
+      </div>
+    </div>
+
+    <div class="eval-row">
+      <div class="eval-label">L3 · ReAct loop</div>
+      <div class="eval-verdict">
+        <span class="verdict-tag tag-good">Strong</span>
+        AutoGen does include <code>max_consecutive_auto_reply</code> — a built-in step limit per
+        agent. This directly mitigates action loops. Conversation history serves as the trace and
+        is inspectable. Observations (code execution results) are injected into the conversation
+        as <code>UserProxyAgent</code> turns.
+      </div>
+    </div>
+
+    <div class="eval-row">
+      <div class="eval-label">L4 · Memory</div>
+      <div class="eval-verdict">
+        <span class="verdict-tag tag-weak">Weak</span>
+        Memory is the conversation history — in-context only by default. No built-in rolling
+        summarisation for long conversations. External memory (vector stores, etc.) is not
+        integrated into the core framework; it requires custom retrieval logic. Context exhaustion
+        is a real risk in long multi-agent conversations.
+      </div>
+    </div>
+
+    <div class="eval-row">
+      <div class="eval-label">L5 · Failure modes</div>
+      <div class="eval-verdict">
+        <span class="verdict-tag tag-weak">Weak</span>
+        No built-in prompt injection hardening in the core framework. Tools (functions) are
+        shared at the agent level — no fine-grained tool scoping per workflow step. Minimal
+        footprint is a design responsibility that falls entirely on the implementer.
+      </div>
+    </div>
+
+    <div class="eval-row">
+      <div class="eval-label">L6 · Multi-agent trust</div>
+      <div class="eval-verdict">
+        <span class="verdict-tag tag-weak">Weak</span>
+        Peer-network is the default and primary topology. Agent system prompts can be
+        customised (which is the correct way to set scope), but the framework does not
+        enforce or encourage per-agent trust boundaries. A worker agent has no native mechanism
+        to reject instructions from a peer based on scope.
+      </div>
+    </div>
+  </div>
+
+  <p>
+    The evaluation yields a clear picture: AutoGen's strength is rapid prototyping of
+    multi-agent <em>conversations</em>. Its weaknesses are in production hardening — memory
+    management, prompt injection, trust boundaries, and topology flexibility. Knowing this,
+    you can adopt it for research experiments while building the mitigations yourself, or
+    choose a different framework for a production deployment where those properties matter.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-label">The key skill</div>
+    An evaluation does not tell you whether a framework is good or bad. It tells you
+    <em>which properties it trades away for which gains</em>. AutoGen trades production
+    hardening for conversation flexibility. That is a reasonable trade for its intended
+    context (research, rapid prototyping). The lens makes the trade explicit.
+  </div>
+
+  <h2>Evaluating Papers</h2>
+
+  <p>
+    The same six lenses apply when reading a research paper. The framing shifts slightly:
+    papers describe systems; frameworks ship systems. For a paper, ask:
+  </p>
+
+  <ul>
+    <li><strong>Which claims match which lens?</strong> Map each contribution claim to L1–L6.</li>
+    <li><strong>Which lenses are absent?</strong> A paper that never addresses failure modes
+      (L3, L5) has either not tested at scale or left it to future work.</li>
+    <li><strong>What is the evaluation methodology?</strong> An evaluator-optimizer paper
+      (L2) that uses a single proxy metric for its rubric is itself vulnerable to
+      specification gaming (L5).</li>
+  </ul>
+
+  <!-- Quiz 1 -->
+  <div class="quiz">
+    <h3>Retrieval check — which lens first</h3>
+    <p class="quiz-question">
+      A new framework markets itself as "fully autonomous multi-agent orchestration."
+      Which question should you ask first to evaluate that claim?
+    </p>
+    <ul class="quiz-options" id="q1-options">
+      <li onclick="answer(this, true,  'q1')">Whether the LLM or developer controls the flow</li>
+      <li onclick="answer(this, false, 'q1')">How many workflow patterns the framework supports</li>
+      <li onclick="answer(this, false, 'q1')">What memory systems the framework exposes agents</li>
+      <li onclick="answer(this, false, 'q1')">Whether the framework detects prompt injection runtime</li>
+    </ul>
+    <div class="quiz-feedback" id="q1-feedback"></div>
+  </div>
+
+  <!-- Quiz 2 (interleaved: L3 action loops + L5 failure modes) -->
+  <div class="quiz">
+    <h3>Retrieval check — harness gap</h3>
+    <p class="quiz-question">
+      A framework's execution harness has no step limit and no repeat-action detection.
+      A coding agent gets stuck on a failing test. What will happen?
+    </p>
+    <ul class="quiz-options" id="q2-options">
+      <li onclick="answer(this, true,  'q2')">Agent loops indefinitely whenever it encounters a blocking error</li>
+      <li onclick="answer(this, false, 'q2')">Agent loses track of context as the window fills up</li>
+      <li onclick="answer(this, false, 'q2')">Agent outputs optimized for a proxy rather than real goal</li>
+      <li onclick="answer(this, false, 'q2')">Agent trusts injected instructions arriving through tool results</li>
+    </ul>
+    <div class="quiz-feedback" id="q2-feedback"></div>
+  </div>
+
+  <!-- Quiz 3 (interleaved: L6 trust hierarchy) -->
+  <div class="quiz">
+    <h3>Retrieval check — trust boundary design</h3>
+    <p class="quiz-question">
+      A framework routes all orchestrator messages to workers as user-turn messages,
+      with no system prompt constructed per worker. What principle does this violate?
+    </p>
+    <ul class="quiz-options" id="q3-options">
+      <li onclick="answer(this, false, 'q3')">Workers cannot independently validate orchestrator claims at runtime</li>
+      <li onclick="answer(this, true,  'q3')">Worker scope must be defined in the system prompt</li>
+      <li onclick="answer(this, false, 'q3')">Orchestrators should never pass user messages directly to workers</li>
+      <li onclick="answer(this, false, 'q3')">Workers should escalate all ambiguous orchestrator instructions to humans</li>
+    </ul>
+    <div class="quiz-feedback" id="q3-feedback"></div>
+  </div>
+
+  <!-- Primary source -->
+  <div class="source-box">
+    <div class="source-label">Primary source for this lesson</div>
+    <strong>Wu et al. — "AutoGen: Enabling Next-Generation LLM Applications via Multi-Agent Conversation"</strong> (2023)<br>
+    <a href="https://arxiv.org/abs/2308.08155" target="_blank">arxiv.org/abs/2308.08155</a><br>
+    <span style="color:#666; font-size:0.85em; margin-top:0.3rem; display:block;">
+      Read this paper applying the six lenses above as you go. Notice which properties AutoGen
+      claims, which it doesn't address, and which it explicitly defers to the implementer.
+      The gap between the paper's claims and the lens analysis is the real lesson.
+    </span>
+    <br>
+    <strong>Lilian Weng — "LLM-powered Autonomous Agents"</strong> (2023)<br>
+    <a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank">lilianweng.github.io/posts/2023-06-23-agent/</a><br>
+    <span style="color:#666; font-size:0.85em; margin-top:0.3rem; display:block;">
+      A comprehensive survey of agentic AI components through mid-2023. Covers planning,
+      memory, and tool use across many papers. Reading it after completing all seven lessons
+      lets you place each component in the mental model you've already built.
+    </span>
+  </div>
+
+  <nav class="lesson-nav">
+    <a href="0006-multi-agent-design.html">← Prev: Multi-Agent Design</a>
+    <span style="color: var(--muted); font-family: var(--font-ui); font-size: 0.85rem;">Series complete</span>
+  </nav>
+
+  <div class="ask-agent">
+    <strong>Something unclear?</strong> Ask your Claude Code agent. It can apply the six-lens
+    framework to any framework or paper you name — walk through each lens out loud, show
+    where the gaps are, or help you map a new system onto your mental model. That's the
+    skill this lesson is building. Use it.
+  </div>
+
+</div>
+
+<script>
+  const explanations = {
+    q1: {
+      correct: "Correct. The workflow-vs-agent distinction (L1) is the first lens for a reason: it tests the most fundamental claim. 'Autonomous' implies the LLM controls its own flow — if the developer still defines the steps, the framework is a workflow engine with an agent veneer. You don't need to evaluate memory, trust, or failure modes if the foundational claim doesn't hold.",
+      incorrect: "Not quite. The right first question is L1: does the LLM actually control the flow, or does the developer? 'Autonomous' is a claim about who has control. If that claim is false — if the developer still defines the steps — then the L2–L6 properties of the 'agent' framework are being applied to a workflow engine, and every subsequent evaluation is misframed."
+    },
+    q2: {
+      correct: "Correct. Without a step limit or repeat-action detection in the harness, an agent that gets stuck will repeat the same action indefinitely. This is the action-loop failure mode from Lesson 3 and Lesson 5. Context exhaustion (option B) is also a real risk in a long trace, but it's a separate failure with a separate mitigation — and it would not happen immediately on a blocking error. The immediate, direct consequence of no loop detection is: infinite loop.",
+      incorrect: "Not quite. The direct consequence of no step limit and no loop detection is that an agent stuck on a failing test will keep retrying the same action indefinitely — the action-loop failure mode. Context exhaustion (B) is also a concern in long traces, but it's gradual, not immediate, and has a different mitigation. Specification gaming (C) and prompt injection (D) are unrelated to step limits."
+    },
+    q3: {
+      correct: "Correct. Worker scope is established at construction time through the system prompt — that's the only channel through which trust levels and authorized actions can be set before the conversation begins. A framework that routes orchestrator messages as user-turn content gives workers no way to know what they're authorized to do. Runtime messages can claim anything; only the system prompt is constructed by the deployer and carries the deployer's intent.",
+      incorrect: "Not quite. The violated principle is that worker scope must be defined in the system prompt at construction time. When orchestrator messages arrive as user-turn content, there is no pre-established scope — the worker has no way to know what it's authorized to do except by trusting whatever the orchestrator claims at runtime. And runtime claims can't be verified, especially if the orchestrator has been compromised by prompt injection."
+    }
+  };
+
+  function answer(el, isCorrect, qId) {
+    const options = document.querySelectorAll(`#${qId}-options li`);
+    options.forEach(o => o.style.pointerEvents = 'none');
+    el.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    const fb = document.getElementById(`${qId}-feedback`);
+    fb.textContent = isCorrect ? explanations[qId].correct : explanations[qId].incorrect;
+    fb.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    fb.style.display = 'block';
+  }
+</script>
+</body>
+</html>

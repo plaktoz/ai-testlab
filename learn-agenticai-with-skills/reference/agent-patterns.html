@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference — Agent Patterns</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    @media print {
+      body { padding: 1rem; font-size: 14px; }
+      .lesson-wrap { max-width: none; }
+      .no-print { display: none; }
+    }
+
+    .ref-section {
+      margin: 2rem 0;
+    }
+
+    .ref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .ref-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      background: var(--surface);
+    }
+
+    .ref-card h4 {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin: 0 0 0.4rem 0;
+    }
+
+    .ref-card .when {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+
+    .ref-card ul {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      padding-left: 1rem;
+      margin: 0;
+    }
+
+    .ref-card li { margin-bottom: 0.2rem; }
+
+    .decision-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+
+    .decision-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .decision-table td {
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .decision-table tr:last-child td { border-bottom: none; }
+    .decision-table tr:nth-child(even) td { background: var(--code-bg); }
+
+    .tag {
+      display: inline-block;
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .tag-workflow { background: #e8f0fe; color: #1a56d4; }
+    .tag-agent    { background: #fff3e0; color: #c05000; }
+
+    .react-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 0.5rem 1rem;
+      margin: 0.75rem 0;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+    }
+    .react-label { font-weight: bold; color: var(--accent); }
+    .react-desc  { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="lesson-wrap">
+
+  <header class="lesson-header">
+    <div class="lesson-number">Reference · Agentic AI</div>
+    <h1>Agent Patterns — Quick Reference</h1>
+    <div class="lesson-subtitle">The foundational taxonomy: workflows, agents, workflow patterns, and the ReAct loop</div>
+  </header>
+
+  <!-- Section 1: Core Distinction -->
+  <div class="ref-section">
+    <h2>The Core Distinction <span class="no-print" style="font-weight:normal; font-size:0.85rem; color:var(--muted)">→ <a href="../lessons/0001-workflows-vs-agents.html">Lesson 1</a></span></h2>
+
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Workflow</th>
+          <th>Agent</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Control flow</strong></td>
+          <td>Developer-defined at design time</td>
+          <td>LLM decides at runtime</td>
+        </tr>
+        <tr>
+          <td><strong>LLM role</strong></td>
+          <td>Text transformer at fixed nodes</td>
+          <td>Decision-maker at every step</td>
+        </tr>
+        <tr>
+          <td><strong>Predictability</strong></td>
+          <td>High — same input, same path</td>
+          <td>Lower — path depends on reasoning</td>
+        </tr>
+        <tr>
+          <td><strong>Debuggability</strong></td>
+          <td>Clear failure localisation</td>
+          <td>Requires trace reconstruction</td>
+        </tr>
+        <tr>
+          <td><strong>Cost / latency</strong></td>
+          <td>Deterministic, bounded</td>
+          <td>Variable, unbounded loops</td>
+        </tr>
+        <tr>
+          <td><strong>Use when</strong></td>
+          <td>Task steps are known in advance</td>
+          <td>Steps can't be pre-defined</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout" style="margin-top:0">
+      <strong>Test:</strong> If you can flowchart the steps, it's a workflow.
+      If the LLM must figure out the steps itself, it's an agent.
+    </div>
+  </div>
+
+  <!-- Section 2: Workflow Patterns -->
+  <div class="ref-section">
+    <h2>The Five Workflow Patterns <span class="no-print" style="font-weight:normal; font-size:0.85rem; color:var(--muted)">→ <a href="../lessons/0002-workflow-patterns.html">Lesson 2</a></span></h2>
+
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>1 · Prompt Chaining</h4>
+        <div class="when">When: fixed sequence of dependent steps</div>
+        <ul>
+          <li>Each output feeds the next input</li>
+          <li>Add gates to abort on bad intermediate output</li>
+          <li>Trade-off: sequential latency vs. localised failures</li>
+        </ul>
+      </div>
+
+      <div class="ref-card">
+        <h4>2 · Routing</h4>
+        <div class="when">When: distinct input categories need specialised handling</div>
+        <ul>
+          <li>Classifier (LLM or ML) directs to the right path</li>
+          <li>Each route is optimised for its category</li>
+          <li>Trade-off: specialisation vs. classifier error risk</li>
+        </ul>
+      </div>
+
+      <div class="ref-card">
+        <h4>3 · Parallelisation</h4>
+        <div class="when">When: tasks are independent or you need higher confidence</div>
+        <ul>
+          <li><strong>Sectioning</strong> — split task, run chunks simultaneously</li>
+          <li><strong>Voting</strong> — run same task N times, aggregate</li>
+          <li>Trade-off: latency/confidence vs. cost × N</li>
+        </ul>
+      </div>
+
+      <div class="ref-card">
+        <h4>4 · Orchestrator-Workers</h4>
+        <div class="when">When: task structure is unknown until you start</div>
+        <ul>
+          <li>Orchestrator LLM dynamically dispatches subtasks</li>
+          <li>Worker LLMs execute single specialised subtasks</li>
+          <li>Trade-off: flexibility vs. bounded cost/latency</li>
+        </ul>
+      </div>
+
+      <div class="ref-card" style="grid-column: 1 / -1">
+        <h4>5 · Evaluator-Optimizer</h4>
+        <div class="when">When: output quality can be assessed by a separate LLM, and iteration improves quality</div>
+        <ul>
+          <li>Generator produces output; Evaluator scores against rubric</li>
+          <li>Loop until quality threshold met or max iterations reached</li>
+          <li>Trade-off: highest quality vs. highest cost and latency</li>
+          <li><strong>Critical:</strong> the exit condition must be explicit — no implicit "good enough"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: ReAct -->
+  <div class="ref-section">
+    <h2>The ReAct Loop <span class="no-print" style="font-weight:normal; font-size:0.85rem; color:var(--muted)">→ <a href="../lessons/0003-react-loop.html">Lesson 3</a></span></h2>
+
+    <p style="font-size:0.9rem">
+      The micro-level structure inside every agent step.
+      Source: <a href="https://arxiv.org/abs/2210.03629" target="_blank">Yao et al., 2022</a>
+    </p>
+
+    <div class="react-row">
+      <div class="react-label">Thought</div>
+      <div class="react-desc">Model's internal reasoning about the current state and what to do next. Generated by the model. Not an action.</div>
+    </div>
+    <div class="react-row">
+      <div class="react-label">Action</div>
+      <div class="react-desc">A tool call or the decision to finish. Generated by the model. Executed by the environment.</div>
+    </div>
+    <div class="react-row">
+      <div class="react-label">Observation</div>
+      <div class="react-desc">The result returned by the environment after the action. Injected into the context by the harness — not generated by the model.</div>
+    </div>
+
+    <div class="figure" style="margin-top:1.5rem">Task → [Thought → Action → Observation] × N → finish(answer)</div>
+    <div class="figure-caption">The loop runs until finish() is called. The full trace accumulates in the context window.</div>
+
+    <h3>ReAct Failure Modes</h3>
+    <table class="decision-table">
+      <thead>
+        <tr><th>Failure</th><th>Cause</th><th>Mitigation</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Context exhaustion</strong></td>
+          <td>Trace fills the context; early observations truncated</td>
+          <td>Rolling summarisation of old trace segments</td>
+        </tr>
+        <tr>
+          <td><strong>Action loops</strong></td>
+          <td>Model repeats the same action when stuck</td>
+          <td>Loop detection in the execution harness</td>
+        </tr>
+        <tr>
+          <td><strong>Reasoning drift</strong></td>
+          <td>Recent context dominates; model drifts from original task</td>
+          <td>Step limits; task re-injection every N steps</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout" style="margin-top:1rem">
+      <strong>Key asymmetry:</strong> the model cannot protect itself from any of these failures.
+      All mitigations live in the execution harness — your code.
+    </div>
+  </div>
+
+  <div class="no-print" style="margin-top:3rem; border-top:1px solid var(--border); padding-top:1.5rem; font-family:var(--font-ui); font-size:0.85rem; color:var(--muted)">
+    Source: <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">Anthropic, "Building Effective Agents" (2024)</a>
+    · <a href="https://arxiv.org/abs/2210.03629" target="_blank">Yao et al., ReAct (2022)</a>
+    · <a href="https://arxiv.org/abs/2309.02427" target="_blank">Sumers et al., CoALA (2023)</a>
+  </div>
+
+</div>
+</body>
+</html>

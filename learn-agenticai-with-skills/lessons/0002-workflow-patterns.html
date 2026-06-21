@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Workflow Patterns</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    .pattern-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem 1.5rem 1rem;
+      margin: 2rem 0;
+      background: var(--surface);
+    }
+    .pattern-card h3 {
+      margin-top: 0;
+      font-size: 1rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .pattern-card .when { color: var(--muted); font-style: italic; font-size: 0.9rem; margin-bottom: 1rem; }
+    .tradeoff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .tradeoff-item {
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+    }
+    .tradeoff-item.pro { background: #e8f5e9; color: #2e7d32; }
+    .tradeoff-item.con { background: #fff3e0; color: #e65100; }
+  </style>
+</head>
+<body>
+<div class="lesson-wrap">
+
+  <header class="lesson-header">
+    <div class="lesson-number">Lesson 02 · Agentic AI</div>
+    <h1>Workflow Patterns</h1>
+    <div class="lesson-subtitle">The five canonical ways to compose multiple LLM calls into a system</div>
+  </header>
+
+  <p>
+    In <a href="0001-workflows-vs-agents.html">Lesson 1</a> you drew the line between workflows and agents.
+    Now we populate the workflow side of that line. Workflows are where most production systems live —
+    and the five patterns below cover the vast majority of what you'll encounter and design.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-label">Core premise</div>
+    All five patterns below are <strong>workflows</strong>: the developer defines the control flow.
+    The LLM does text transformation inside nodes — it never chooses the next step.
+    <br><br>
+    Source: <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">Anthropic, "Building Effective Agents" (2024)</a>
+  </div>
+
+  <!-- Pattern 1: Prompt Chaining -->
+  <div class="pattern-card">
+    <h3>1 · Prompt Chaining</h3>
+    <div class="when">When: the task decomposes cleanly into a fixed sequence of dependent steps</div>
+    <p>
+      Each LLM call's output becomes the next call's input. You add quality gates between steps —
+      a programmatic check that aborts the chain if an intermediate result is wrong before wasting
+      compute on downstream steps.
+      <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+    </p>
+    <div class="figure">Input ──► LLM₁ ──►[gate]──► LLM₂ ──►[gate]──► LLM₃ ──► Output
+                              ✗ abort          ✗ abort</div>
+    <div class="figure-caption">Each step transforms the output of the previous one. Gates catch failures early.</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item pro">+ Failures are localised — you know exactly which step broke</div>
+      <div class="tradeoff-item pro">+ Simpler to test and reason about than a monolithic prompt</div>
+      <div class="tradeoff-item con">− Latency is additive — steps run sequentially</div>
+      <div class="tradeoff-item con">− Errors propagate: a bad step 1 poisons every step downstream</div>
+    </div>
+  </div>
+
+  <!-- Pattern 2: Routing -->
+  <div class="pattern-card">
+    <h3>2 · Routing</h3>
+    <div class="when">When: inputs fall into distinct categories requiring different specialised handling</div>
+    <p>
+      A classifier (LLM or traditional ML) examines the input and directs it to the appropriate
+      specialised chain or prompt. Each route is optimised for its category rather than trying to
+      handle everything with a single generalised prompt.
+      <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+    </p>
+    <div class="figure">         ┌──► Route A (e.g. billing query)
+         │
+Input ──► Classifier ──► Route B (e.g. tech support)
+         │
+         └──► Route C (e.g. cancellation)</div>
+    <div class="figure-caption">One classifier, many specialised downstream paths.</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item pro">+ Specialised prompts outperform generalised ones per category</div>
+      <div class="tradeoff-item pro">+ Easy to add new routes without touching existing ones</div>
+      <div class="tradeoff-item con">− Classifier errors send inputs down the wrong path</div>
+      <div class="tradeoff-item con">− Ambiguous inputs may span multiple categories cleanly</div>
+    </div>
+  </div>
+
+  <!-- Pattern 3: Parallelisation -->
+  <div class="pattern-card">
+    <h3>3 · Parallelisation</h3>
+    <div class="when">When: tasks are independent, or you need higher confidence via multiple perspectives</div>
+    <p>
+      Two sub-patterns share the same structure but serve different goals:
+    </p>
+    <p>
+      <strong>Sectioning</strong> — split a task into independent chunks and run them simultaneously.
+      A long document gets processed in parallel sections; a complex task gets concurrent specialised workers.
+      Reduces wall-clock latency when parts don't depend on each other.
+    </p>
+    <p>
+      <strong>Voting</strong> — run the same task multiple times independently, then aggregate.
+      Used when a single LLM response is unreliable: majority vote increases confidence.
+      <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+    </p>
+    <div class="figure">Sectioning                          Voting
+
+Input                               Input
+  │                                   │
+  ├──► LLM (chunk A) ──┐              ├──► LLM run 1 ──┐
+  ├──► LLM (chunk B) ──┤ aggregate    ├──► LLM run 2 ──┤ majority
+  └──► LLM (chunk C) ──┘              └──► LLM run 3 ──┘
+                  │                                 │
+                Output                           Output</div>
+    <div class="figure-caption">Left: reduces latency by splitting. Right: increases confidence by repeating.</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item pro">+ Sectioning cuts latency proportionally to parallelism</div>
+      <div class="tradeoff-item pro">+ Voting surfaces high-confidence answers and catches hallucinations</div>
+      <div class="tradeoff-item con">− Requires that tasks are genuinely independent (sectioning)</div>
+      <div class="tradeoff-item con">− Voting multiplies cost by N runs</div>
+    </div>
+  </div>
+
+  <!-- Pattern 4: Orchestrator-Workers -->
+  <div class="pattern-card">
+    <h3>4 · Orchestrator-Workers</h3>
+    <div class="when">When: the full task can't be decomposed in advance — the plan must be constructed dynamically</div>
+    <p>
+      An orchestrator LLM analyses the task and dynamically dispatches subtasks to worker LLMs.
+      Workers complete their subtasks and report back; the orchestrator synthesises results and
+      may spawn more workers. This looks like parallelisation, but with a critical difference:
+      <em>the orchestrator decides at runtime what work to create.</em>
+      <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+    </p>
+    <div class="figure">         ┌──────────────────────────────┐
+         │         Orchestrator         │
+         │  (decides what work to do)   │
+         └──────────┬───────────────────┘
+                    │ dispatches
+         ┌──────────┼──────────┐
+         ▼          ▼          ▼
+      Worker A   Worker B   Worker C
+         │          │          │
+         └──────────┴──────────┘
+                    │ results
+                    ▼
+                Orchestrator synthesises</div>
+    <div class="figure-caption">The orchestrator is a developer-defined router — control flow is still pre-coded, but the routing decisions use LLM reasoning.</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item pro">+ Handles open-ended tasks where steps aren't knowable upfront</div>
+      <div class="tradeoff-item pro">+ Worker specialisation is clean — each worker does one thing</div>
+      <div class="tradeoff-item con">− Cost and latency are harder to bound than fixed chains</div>
+      <div class="tradeoff-item con">− Orchestrator reasoning errors cascade to all workers</div>
+    </div>
+  </div>
+
+  <!-- Pattern 5: Evaluator-Optimizer -->
+  <div class="pattern-card">
+    <h3>5 · Evaluator-Optimizer</h3>
+    <div class="when">When: output quality can be assessed by a separate LLM, and iteration improves quality</div>
+    <p>
+      One LLM generates a response; a second LLM evaluates it against a rubric and produces
+      feedback. If the feedback identifies deficiencies, the output is revised and re-evaluated.
+      This loops until quality criteria are met or a maximum iteration count is reached.
+      <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+    </p>
+    <div class="figure">           ┌─────── feedback ◄────────────────┐
+           │                                  │
+           ▼                                  │
+Input ──► Generator ──► output ──► Evaluator ─┤
+                                              │
+                                              └── "pass" ──► Output</div>
+    <div class="figure-caption">The loop runs until the evaluator is satisfied. The exit condition must be explicit to prevent infinite loops.</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-item pro">+ Iterative refinement consistently outperforms single-shot generation</div>
+      <div class="tradeoff-item pro">+ Evaluation criteria are explicit and testable</div>
+      <div class="tradeoff-item con">− Cost and latency scale with iteration count</div>
+      <div class="tradeoff-item con">− Evaluator and generator can reach a local optimum that still fails</div>
+    </div>
+  </div>
+
+  <h2>Choosing a Pattern</h2>
+
+  <p>
+    In practice, these patterns compose. A routing step at the front can split inputs between a
+    prompt chain and an evaluator-optimizer loop. An orchestrator-workers step can use sectioning
+    parallelisation internally. The question is always: <em>what is the most constrained thing I
+    need the control flow to do?</em>
+  </p>
+
+  <div class="figure">Task requires fixed sequence of dependent steps?    → Prompt Chaining
+Task inputs fall into known, distinct categories?   → Routing
+Task splits into independent, parallelisable parts? → Parallelisation (Sectioning)
+Need higher confidence from a single task?          → Parallelisation (Voting)
+Task structure is unknown until you start?          → Orchestrator-Workers
+Output quality can be assessed and iterated on?     → Evaluator-Optimizer</div>
+  <div class="figure-caption">These are starting points, not rigid rules. Most systems combine more than one.</div>
+
+  <div class="callout">
+    <div class="callout-label">Boundary reminder</div>
+    None of the five patterns above crosses into agent territory. An orchestrator-workers
+    system still has developer-defined control flow — the orchestrator is a node in a graph
+    you designed, not an LLM that has autonomously decided to spawn workers.
+    The agent boundary is crossed when the LLM <em>dynamically decides its own next action
+    without the developer pre-coding that decision point.</em>
+  </div>
+
+  <!-- Quiz 1 -->
+  <div class="quiz">
+    <h3>Retrieval check — pattern recognition</h3>
+    <p class="quiz-question">
+      A code documentation tool first extracts all function signatures from a file (step 1),
+      then generates a docstring for each signature (step 2), then writes a module-level
+      summary using the docstrings as input (step 3). Each step requires the previous one.
+      Which pattern is this?
+    </p>
+    <ul class="quiz-options" id="q1-options">
+      <li onclick="answer(this, false, 'q1')">Routing — classifier directs to specialised handling</li>
+      <li onclick="answer(this, true,  'q1')">Prompt chaining — sequential dependent steps</li>
+      <li onclick="answer(this, false, 'q1')">Parallelisation — independent tasks run concurrently</li>
+      <li onclick="answer(this, false, 'q1')">Evaluator-optimizer — generate then critique in a loop</li>
+    </ul>
+    <div class="quiz-feedback" id="q1-feedback"></div>
+  </div>
+
+  <!-- Quiz 2 -->
+  <div class="quiz">
+    <h3>Retrieval check — pattern recognition</h3>
+    <p class="quiz-question">
+      A research assistant receives a broad question, splits it into four independent
+      sub-questions, dispatches all four to separate LLM calls at the same time, then
+      synthesises the answers into a final response. Which pattern is this?
+    </p>
+    <ul class="quiz-options" id="q2-options">
+      <li onclick="answer(this, false, 'q2')">Prompt chaining — sequential dependent steps</li>
+      <li onclick="answer(this, false, 'q2')">Orchestrator-workers — dynamic task allocation</li>
+      <li onclick="answer(this, true,  'q2')">Parallelisation — independent tasks run concurrently</li>
+      <li onclick="answer(this, false, 'q2')">Evaluator-optimizer — generate then critique in a loop</li>
+    </ul>
+    <div class="quiz-feedback" id="q2-feedback"></div>
+  </div>
+
+  <!-- Quiz 3 -->
+  <div class="quiz">
+    <h3>Retrieval check — pattern recognition</h3>
+    <p class="quiz-question">
+      A writing assistant generates a draft essay, then a second LLM scores it against a
+      clarity rubric and returns critique. If the score is below threshold, the draft is
+      revised and re-scored. This repeats until the rubric is satisfied. Which pattern is this?
+    </p>
+    <ul class="quiz-options" id="q3-options">
+      <li onclick="answer(this, false, 'q3')">Prompt chaining — sequential dependent steps</li>
+      <li onclick="answer(this, false, 'q3')">Routing — classifier directs to specialised handling</li>
+      <li onclick="answer(this, false, 'q3')">Orchestrator-workers — dynamic task allocation</li>
+      <li onclick="answer(this, true,  'q3')">Evaluator-optimizer — generate then critique in a loop</li>
+    </ul>
+    <div class="quiz-feedback" id="q3-feedback"></div>
+  </div>
+
+  <!-- Primary source -->
+  <div class="source-box">
+    <div class="source-label">Primary source for this lesson</div>
+    <strong>Anthropic — "Building Effective Agents"</strong> (Dec 2024)<br>
+    <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">
+      anthropic.com/research/building-effective-agents
+    </a><br>
+    <span style="color:#666; font-size:0.85em; margin-top:0.3rem; display:block;">
+      Read the "Workflow patterns" section. Each pattern in this lesson maps directly to a section
+      there. The diagrams in the source are worth studying alongside the ASCII ones here.
+    </span>
+  </div>
+
+  <nav class="lesson-nav">
+    <a href="0001-workflows-vs-agents.html">← Prev: Workflows vs Agents</a>
+    <a href="0003-react-loop.html">Next: The ReAct Loop →</a>
+  </nav>
+
+  <div class="ask-agent">
+    <strong>Something unclear?</strong> Ask your Claude Code agent. Describe what confused you
+    and it can clarify, give a concrete example, compare patterns, or go deeper. It is your
+    teacher — use it freely.
+  </div>
+
+</div>
+
+<script>
+  const explanations = {
+    q1: {
+      correct: "Correct. Steps 1→2→3 each require the previous step's output. The sequence is fixed and developer-defined. That's the signature of prompt chaining — with each step acting as an implicit quality gate (a bad extraction in step 1 would corrupt both step 2 and step 3).",
+      incorrect: "Not quite. The key property here is that steps must run sequentially, each depending on the prior output. That dependency chain — not the number of steps — is what defines prompt chaining."
+    },
+    q2: {
+      correct: "Correct. The four sub-questions are independent (neither depends on the other's result), so they can run simultaneously. This is the sectioning variant of parallelisation — splitting a task to reduce latency, then synthesising the parallel results.",
+      incorrect: "Not quite. The defining property here is that all four LLM calls run at the same time and independently. That's parallelisation (specifically sectioning). Orchestrator-workers would have an orchestrator LLM dynamically deciding which workers to spawn — not a predetermined split."
+    },
+    q3: {
+      correct: "Correct. A generator produces output, an evaluator scores it against a rubric, and the loop continues until the quality bar is met. The explicit exit condition (rubric satisfied) and the feedback loop are the hallmarks of evaluator-optimizer.",
+      incorrect: "Not quite. The defining property is the feedback loop: generate → evaluate → revise, repeating until quality criteria are met. That pattern — with an explicit evaluator scoring against a rubric — is evaluator-optimizer, not a one-pass chain."
+    }
+  };
+
+  function answer(el, isCorrect, qId) {
+    const options = document.querySelectorAll(`#${qId}-options li`);
+    options.forEach(o => o.style.pointerEvents = 'none');
+    el.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    const fb = document.getElementById(`${qId}-feedback`);
+    fb.textContent = isCorrect ? explanations[qId].correct : explanations[qId].incorrect;
+    fb.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    fb.style.display = 'block';
+  }
+</script>
+</body>
+</html>
