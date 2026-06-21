@@ -9,4 +9,5 @@ venv/
 target/*
 .mvn*
 mvnw*
+.vscode/
 .pytest_cache/
