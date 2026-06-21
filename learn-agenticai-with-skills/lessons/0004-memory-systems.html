@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4 — Memory Systems</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <style>
+    .mem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.75rem 0;
+    }
+    .mem-card {
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 1.1rem 1.2rem;
+      background: var(--surface);
+    }
+    .mem-card h3 {
+      margin-top: 0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--accent);
+    }
+    .mem-card p { font-size: 0.9rem; margin-bottom: 0.6rem; }
+    .mem-card ul { font-size: 0.85rem; margin: 0; padding-left: 1.2rem; }
+    .mem-card li { margin-bottom: 0.25rem; }
+
+    .prop-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .prop {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 3px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .prop-green  { background: #e8f5e9; color: #2e7d32; }
+    .prop-amber  { background: #fff3e0; color: #e65100; }
+    .prop-red    { background: #ffebee; color: #c62828; }
+    .prop-blue   { background: #e3f2fd; color: #1565c0; }
+
+    .tradeoff-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-ui);
+      font-size: 0.83rem;
+      margin: 1.5rem 0;
+    }
+    .tradeoff-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      padding: 0.4rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .tradeoff-table td {
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .tradeoff-table tr:last-child td { border-bottom: none; }
+    .tradeoff-table tr:nth-child(even) td { background: var(--code-bg); }
+    .tradeoff-table td:first-child { font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="lesson-wrap">
+
+  <header class="lesson-header">
+    <div class="lesson-number">Lesson 04 · Agentic AI</div>
+    <h1>Memory Systems</h1>
+    <div class="lesson-subtitle">Where agents store and retrieve what they know — and why the tradeoffs are architectural</div>
+  </header>
+
+  <p>
+    In <a href="0003-react-loop.html">Lesson 3</a> you saw that the ReAct loop accumulates its
+    entire trace in the context window. That's fine for short runs. But real agents need to
+    remember things across sessions, across users, and at scales that dwarf any context window.
+    <em>Memory system design is how you handle that.</em>
+  </p>
+
+  <p>
+    The most rigorous framework for reasoning about agent memory comes from the CoALA survey
+    (Cognitive Architectures for Language Agents). It identifies four types of memory, each
+    with distinct properties and tradeoffs.
+    <a href="https://arxiv.org/abs/2309.02427" target="_blank">[Sumers et al., 2023]</a>
+  </p>
+
+  <h2>The Central Tension</h2>
+
+  <p>
+    The context window is the <em>only</em> space where reasoning happens. The model cannot
+    reason about anything outside it. This creates an irreducible tension:
+  </p>
+
+  <div class="figure">More in-context       → richer reasoning, but token cost grows and context fills
+Retrieve externally   → scalable storage, but retrieval errors corrupt the reasoning
+In weights            → zero retrieval cost at inference, but expensive to update
+Episodic logs         → agents that learn from experience, but require retrieval infrastructure</div>
+  <div class="figure-caption">Every memory design decision navigates this tension. There is no dominant strategy.</div>
+
+  <div class="callout key">
+    <div class="callout-label">The core insight</div>
+    The context window is the agent's entire working memory. Every other memory type
+    is external to it — and must be retrieved into it before the model can reason about it.
+    Retrieval is never free: it consumes tokens, takes time, and can be wrong.
+  </div>
+
+  <h2>The Four Memory Types</h2>
+
+  <div class="mem-grid">
+
+    <div class="mem-card">
+      <h3>In-Context (Working Memory)</h3>
+      <p>The active context window. Everything the model can currently attend to.</p>
+      <ul>
+        <li>System prompt, conversation history, tool results, retrieved docs</li>
+        <li>The entire ReAct trace accumulates here</li>
+        <li>Cleared at session end — nothing persists automatically</li>
+        <li>Hard ceiling: context window size</li>
+      </ul>
+      <div class="prop-row">
+        <span class="prop prop-green">zero retrieval error</span>
+        <span class="prop prop-green">instant access</span>
+        <span class="prop prop-red">finite</span>
+        <span class="prop prop-red">ephemeral</span>
+      </div>
+    </div>
+
+    <div class="mem-card">
+      <h3>External (Persistent) Memory</h3>
+      <p>Stored outside the model; retrieved into context on demand.</p>
+      <ul>
+        <li><strong>Fuzzy retrieval:</strong> vector similarity search (semantic matching)</li>
+        <li><strong>Exact retrieval:</strong> SQL, keyword, hash lookups</li>
+        <li>Persists across sessions; scales to millions of documents</li>
+        <li>Retrieval can return wrong or incomplete chunks</li>
+      </ul>
+      <div class="prop-row">
+        <span class="prop prop-green">persistent</span>
+        <span class="prop prop-green">scalable</span>
+        <span class="prop prop-amber">retrieval error risk</span>
+        <span class="prop prop-amber">latency cost</span>
+      </div>
+    </div>
+
+    <div class="mem-card">
+      <h3>Episodic Memory</h3>
+      <p>Records of past agent runs — what the agent did, with what results.</p>
+      <ul>
+        <li>Enables few-shot prompting from real, verified task runs</li>
+        <li>Supports debugging: replay the exact trace that produced a failure</li>
+        <li>Enables improvement over time (agent learns from its own history)</li>
+        <li>Implementation: store trace embeddings; retrieve by similarity to current task</li>
+      </ul>
+      <div class="prop-row">
+        <span class="prop prop-blue">experiential</span>
+        <span class="prop prop-green">persistent</span>
+        <span class="prop prop-amber">retrieval required</span>
+        <span class="prop prop-amber">storage overhead</span>
+      </div>
+    </div>
+
+    <div class="mem-card">
+      <h3>Semantic Memory</h3>
+      <p>Factual world knowledge. Exists in two locations:</p>
+      <ul>
+        <li><strong>In-weights:</strong> baked in during training/fine-tuning. Zero retrieval cost; stale after cutoff; expensive to update.</li>
+        <li><strong>Externalized (RAG):</strong> stored in a knowledge base, retrieved at runtime. Updateable; subject to retrieval errors and latency.</li>
+      </ul>
+      <div class="prop-row">
+        <span class="prop prop-green">in-weights: fast</span>
+        <span class="prop prop-red">in-weights: stale</span>
+        <span class="prop prop-green">RAG: updateable</span>
+        <span class="prop prop-amber">RAG: retrieval errors</span>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>The Fine-Tuning vs RAG Decision</h2>
+
+  <p>
+    For semantic memory, the most common design question is whether to bake knowledge into
+    the model (fine-tuning) or retrieve it at inference time (RAG). This is not a binary
+    choice — many production systems do both — but the tradeoffs are distinct:
+  </p>
+
+  <table class="tradeoff-table">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Fine-tuning (in-weights)</th>
+        <th>RAG (externalized)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Inference cost</td>
+        <td>Zero — knowledge is in the model</td>
+        <td>Retrieval step + embedding cost</td>
+      </tr>
+      <tr>
+        <td>Update cost</td>
+        <td>High — requires retraining or fine-tuning</td>
+        <td>Low — update the knowledge base</td>
+      </tr>
+      <tr>
+        <td>Update latency</td>
+        <td>Days to weeks (training pipeline)</td>
+        <td>Near-real-time</td>
+      </tr>
+      <tr>
+        <td>Accuracy risk</td>
+        <td>Catastrophic forgetting; knowledge blending</td>
+        <td>Retrieval error; wrong chunks retrieved</td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td>Stable, high-frequency knowledge (writing style, domain syntax)</td>
+        <td>Dynamic, large, or user-specific knowledge</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-label">Rule of thumb</div>
+    Fine-tune for <em>how to reason</em> (style, format, domain syntax). Use RAG for
+    <em>what to know</em> (facts, documents, user data). The distinction maps roughly onto
+    procedural vs semantic memory.
+    <br><br>
+    Source: <a href="https://arxiv.org/abs/2309.02427" target="_blank">Sumers et al., "CoALA" (2023)</a>
+  </div>
+
+  <h2>Memory in the ReAct Loop</h2>
+
+  <p>
+    Every step of the <a href="0003-react-loop.html">ReAct loop</a> interacts with these
+    memory types. A realistic single step looks like this:
+  </p>
+
+  <div class="figure">Before the loop starts:
+  External memory ──► retrieval ──► loaded into context (in-context)
+  Episodic memory ──► relevant past run ──► loaded as few-shot example (in-context)
+
+During the loop:
+  Thought / Action / Observation ──────────────────► appended to in-context
+  Tool call (read_file, query_db) ──► result ──────► Observation added to in-context
+
+After the loop ends:
+  Entire trace ──► stored to episodic memory (for future runs)
+  New facts extracted ──► stored to external memory (knowledge base update)</div>
+  <div class="figure-caption">
+    In-context memory is the integration point. Everything retrieved from other memory types
+    flows into the context window before the model can reason about it.
+  </div>
+
+  <h2>What Goes Where: Design Heuristics</h2>
+
+  <p>
+    When designing a new agent, these questions determine the memory architecture:
+  </p>
+
+  <ul>
+    <li>
+      <strong>Does it fit in context?</strong> If yes, and you need the model to reason
+      over all of it simultaneously, load it in-context. Retrieval introduces error;
+      in-context doesn't.
+    </li>
+    <li>
+      <strong>Is it user-specific or entity-specific?</strong> Use external memory —
+      it can't be fine-tuned per user.
+    </li>
+    <li>
+      <strong>Does it change frequently?</strong> External memory (RAG) over fine-tuning.
+      Stale weights are a silent correctness failure.
+    </li>
+    <li>
+      <strong>Do you need the agent to improve from experience?</strong> Episodic memory —
+      store successful traces; retrieve them as few-shot examples for similar future tasks.
+    </li>
+    <li>
+      <strong>Is it stable, high-frequency background knowledge?</strong> In-weights via
+      fine-tuning — zero inference-time cost, never retrieved incorrectly.
+    </li>
+  </ul>
+
+  <!-- Quiz 1 -->
+  <div class="quiz">
+    <h3>Retrieval check — memory type identification</h3>
+    <p class="quiz-question">
+      A coding agent is given a 40-page internal API reference at the start of every session.
+      It is included verbatim in the system prompt and available throughout the run. Which
+      memory type is this?
+    </p>
+    <ul class="quiz-options" id="q1-options">
+      <li onclick="answer(this, true,  'q1')">In-context — loaded directly into the active prompt</li>
+      <li onclick="answer(this, false, 'q1')">External — fetched from a vector store on demand</li>
+      <li onclick="answer(this, false, 'q1')">Episodic — replayed from a record of past sessions</li>
+      <li onclick="answer(this, false, 'q1')">Semantic — encoded into the model at training time</li>
+    </ul>
+    <div class="quiz-feedback" id="q1-feedback"></div>
+  </div>
+
+  <!-- Quiz 2 -->
+  <div class="quiz">
+    <h3>Retrieval check — tradeoff reasoning</h3>
+    <p class="quiz-question">
+      A support agent must look up a customer's 8 recent orders (500 tokens total) before
+      responding. The data fits the context window. What is the strongest argument for loading
+      it directly into context rather than retrieving it on demand?
+    </p>
+    <ul class="quiz-options" id="q2-options">
+      <li onclick="answer(this, true,  'q2')">It eliminates the risk of retrieving incorrect chunks</li>
+      <li onclick="answer(this, false, 'q2')">It reduces the round-trip latency for each response</li>
+      <li onclick="answer(this, false, 'q2')">It avoids the cost of maintaining a vector database</li>
+      <li onclick="answer(this, false, 'q2')">It ensures the model can see every order record</li>
+    </ul>
+    <div class="quiz-feedback" id="q2-feedback"></div>
+  </div>
+
+  <!-- Quiz 3 — interleaved with Lesson 3 -->
+  <div class="quiz">
+    <h3>Retrieval check — connecting memory to the ReAct loop</h3>
+    <p class="quiz-question">
+      An evaluator-optimizer workflow runs 8 iterations. Each evaluator critique is appended
+      to the context before the next generator pass. In iteration 8, the generator contradicts
+      a constraint the evaluator established in iteration 2. What is the most likely cause?
+    </p>
+    <ul class="quiz-options" id="q3-options">
+      <li onclick="answer(this, true,  'q3')">Prior evaluations were truncated when the context window filled</li>
+      <li onclick="answer(this, false, 'q3')">The evaluator received a different system prompt each round</li>
+      <li onclick="answer(this, false, 'q3')">Evaluation logs were not persisted to external storage systems</li>
+      <li onclick="answer(this, false, 'q3')">The generator model was not updated between iteration rounds</li>
+    </ul>
+    <div class="quiz-feedback" id="q3-feedback"></div>
+  </div>
+
+  <!-- Primary source -->
+  <div class="source-box">
+    <div class="source-label">Primary source for this lesson</div>
+    <strong>Sumers, Yao, Narasimhan, Griffiths — "Cognitive Architectures for Language Agents (CoALA)"</strong> (2023)<br>
+    <a href="https://arxiv.org/abs/2309.02427" target="_blank">arxiv.org/abs/2309.02427</a><br>
+    <span style="color:#666; font-size:0.85em; margin-top:0.3rem; display:block;">
+      Read Section 3 (Memory) and Section 4 (Action Space). The paper introduces a unified
+      framework: memory types × action space × decision cycle. Section 3 is directly mapped
+      to this lesson. Dense — worth reading slowly. Table 1 is a useful summary.
+    </span>
+  </div>
+
+  <nav class="lesson-nav">
+    <a href="0003-react-loop.html">← Prev: The ReAct Loop</a>
+    <a href="0005-failure-modes.html">Next: Failure Modes →</a>
+  </nav>
+
+  <div class="ask-agent">
+    <strong>Something unclear?</strong> Ask your Claude Code agent. It can give concrete
+    examples of any memory pattern, walk through a RAG vs fine-tuning decision for a
+    specific scenario, or explain the CoALA framework in more depth.
+  </div>
+
+</div>
+
+<script>
+  const explanations = {
+    q1: {
+      correct: "Correct. The reference is included verbatim in the system prompt — it's already in the context window from the start of the session. The model can attend to any part of it without a retrieval step. That's in-context (working) memory.",
+      incorrect: "Not quite. The key detail is that it's 'included verbatim in the system prompt.' It's not fetched from a database, it's not stored in model weights, and it doesn't come from a past session record. It's already in the context window — that's in-context memory."
+    },
+    q2: {
+      correct: "Correct. This is the deepest advantage of in-context over external retrieval when the data fits: there is no retrieval step, so there is no retrieval error. The model is guaranteed to see exactly the right data. Latency and cost are real benefits too, but they're secondary to correctness — a retrieval system could return stale or mismatched order records.",
+      incorrect: "Not quite. Latency, cost, and full coverage are all real benefits — but they're not the strongest argument. The deepest advantage is correctness: in-context memory has zero retrieval error risk. A vector store could return the wrong customer's orders, or miss recent ones. When the data fits, in-context eliminates that entire failure mode."
+    },
+    q3: {
+      correct: "Correct. This is exactly the context exhaustion failure from Lesson 3, viewed through the memory lens: each appended critique consumes in-context memory tokens. After 8 iterations, the early critiques (and their constraints) have likely been truncated out of the context window. The generator can't see iteration 2's constraint because it's no longer in memory.",
+      incorrect: "Not quite. The symptom — iteration 8 contradicting a constraint from iteration 2 — is a memory failure, not a configuration or infrastructure failure. Each critique appended to the context consumes tokens. By iteration 8, the context window has likely truncated earlier evaluations. The generator contradicts iteration 2 because it can no longer see iteration 2."
+    }
+  };
+
+  function answer(el, isCorrect, qId) {
+    const options = document.querySelectorAll(`#${qId}-options li`);
+    options.forEach(o => o.style.pointerEvents = 'none');
+    el.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    const fb = document.getElementById(`${qId}-feedback`);
+    fb.textContent = isCorrect ? explanations[qId].correct : explanations[qId].incorrect;
+    fb.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    fb.style.display = 'block';
+  }
+</script>
+</body>
+</html>

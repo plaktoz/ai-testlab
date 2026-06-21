@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — Workflows vs Agents</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+<div class="lesson-wrap">
+
+  <header class="lesson-header">
+    <div class="lesson-number">Lesson 01 · Agentic AI</div>
+    <h1>Workflows vs Agents</h1>
+    <div class="lesson-subtitle">The foundational distinction that governs every architecture decision</div>
+  </header>
+
+  <p>
+    Before committing to any agent architecture, you need to answer one question cleanly:
+    <em>is this a workflow or an agent?</em> The answer determines your reliability guarantees,
+    latency profile, cost model, and debugging story. Most systems that call themselves "agents"
+    are actually workflows — and that's usually the right call.
+  </p>
+
+  <h2>The Core Distinction</h2>
+
+  <p>
+    The difference is about <strong>who controls the control flow</strong>:
+  </p>
+
+  <div class="figure">┌─────────────────────────────────────────────────────────┐
+│  WORKFLOW                                               │
+│                                                         │
+│  Step A ──► Step B ──► Step C ──► Output                │
+│                                                         │
+│  Control flow: defined by the developer                 │
+│  LLM role: text transformation at each step            │
+│  Predictability: high (same input → same path)          │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  AGENT                                                  │
+│                                                         │
+│  Input ──► LLM ──► decides next action                  │
+│              ▲           │                              │
+│              │           ▼                              │
+│           observe   tool / subagent / stop              │
+│              │           │                              │
+│              └───────────┘                              │
+│                                                         │
+│  Control flow: determined by the LLM at runtime         │
+│  LLM role: decision-maker                               │
+│  Predictability: lower (path depends on reasoning)      │
+└─────────────────────────────────────────────────────────┘</div>
+  <div class="figure-caption">Workflows hard-code control flow. Agents delegate control flow to the LLM.</div>
+
+  <div class="callout key">
+    <div class="callout-label">Key definition</div>
+    An <strong>agent</strong> is a system where an LLM dynamically determines its own next action — including
+    whether to use a tool, call a subagent, or stop. A <strong>workflow</strong> is a system where the
+    developer pre-defines the sequence of LLM calls and logic.
+    <br><br>
+    Source: <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">
+    Anthropic, "Building Effective Agents" (2024)</a>
+  </div>
+
+  <h2>Why This Matters More Than You Think</h2>
+
+  <p>
+    If you already work with LLMs, you've likely built both without drawing the distinction.
+    The architectural difference has sharp implications:
+  </p>
+
+  <ul>
+    <li>
+      <strong>Reliability.</strong> In a workflow, you can test every path exhaustively.
+      In an agent, the LLM can take novel paths you never anticipated. This isn't inherently
+      bad — it's why agents can generalize — but it makes verification much harder.
+    </li>
+    <li>
+      <strong>Error propagation.</strong> In a workflow, you know exactly where a failure
+      occurred. In an agent, errors compound across steps, and earlier reasoning mistakes
+      can corrupt every downstream action.
+      <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+    </li>
+    <li>
+      <strong>Cost and latency.</strong> Agents loop; the number of LLM calls is unknown
+      at design time. Workflows have deterministic cost profiles.
+    </li>
+    <li>
+      <strong>Debuggability.</strong> A workflow failure produces a clear trace.
+      An agent failure often requires reconstructing why the LLM reasoned itself
+      into a bad state.
+    </li>
+  </ul>
+
+  <h2>The Augmented LLM: What Both Are Built From</h2>
+
+  <p>
+    Both patterns compose from the same building block: an <strong>augmented LLM</strong> —
+    a model enhanced with retrieval, tools, and memory. The difference is only in how
+    you wire multiple calls together.
+  </p>
+
+  <div class="figure">Augmented LLM
+═══════════════
+  Context window
+  ┌──────────────────────────────┐
+  │  System prompt               │
+  │  Conversation history        │
+  │  Retrieved documents (RAG)   │
+  │  Tool results                │
+  └──────────────────────────────┘
+        │
+        ▼
+  Model generates:
+    • text response, OR
+    • tool call(s), OR
+    • both
+        │
+        ▼
+  External capabilities
+  ┌──────────────────────────────┐
+  │  Tools    (execute actions)  │
+  │  Retrieval (query memory)    │
+  │  Storage  (persist state)    │
+  └──────────────────────────────┘</div>
+  <div class="figure-caption">The augmented LLM — the atom from which all agent and workflow architectures are built.</div>
+
+  <p>
+    A key insight: the context window <em>is</em> the LLM's working memory. Everything the
+    model knows about the current task must fit in it, either directly or via retrieval.
+    This constraint shapes almost every architectural decision in agentic systems.
+  </p>
+
+  <h2>When to Use Each</h2>
+
+  <p>
+    Anthropic's guidance: <em>"Start with simple prompts and add complexity only when simpler
+    solutions fall short."</em>
+    <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">[Anthropic, 2024]</a>
+  </p>
+
+  <p>Use a <strong>workflow</strong> when:</p>
+  <ul>
+    <li>The task is well-defined and the steps are known in advance</li>
+    <li>Reliability and predictability are critical</li>
+    <li>You need deterministic cost/latency</li>
+    <li>You can exhaustively test the paths</li>
+  </ul>
+
+  <p>Use an <strong>agent</strong> when:</p>
+  <ul>
+    <li>The task requires dynamic decision-making that can't be anticipated</li>
+    <li>The number or type of steps varies significantly across inputs</li>
+    <li>Generalizing to novel situations matters more than strict predictability</li>
+    <li>The cost of human-in-the-loop for each decision is too high</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-label">Practical heuristic</div>
+    If you can flowchart the steps, it's a workflow. If you can't — if the LLM needs to
+    figure out the steps itself — it's an agent.
+  </div>
+
+  <h2>A Note on the Spectrum</h2>
+
+  <p>
+    In practice, most production systems are <strong>hybrid</strong>: a workflow that
+    delegates one or more steps to an agent. For example, a document processing pipeline
+    (workflow) that calls an agent to handle ambiguous edge cases. Knowing the distinction
+    lets you be intentional about where you place the agentic boundary — and therefore
+    where your reliability surface lives.
+  </p>
+
+  <!-- Quiz -->
+  <div class="quiz">
+    <h3>Retrieval check</h3>
+    <p class="quiz-question">
+      A customer support system routes incoming tickets to one of three specialized LLM
+      chains based on a classifier. Each chain follows a fixed sequence of steps to
+      resolve the ticket. What is this?
+    </p>
+    <ul class="quiz-options" id="q1-options">
+      <li onclick="answer(this, false, 'q1')">An agent — it uses multiple LLM calls</li>
+      <li onclick="answer(this, true,  'q1')">A workflow — control flow is developer-defined</li>
+      <li onclick="answer(this, false, 'q1')">An agent — it makes decisions about routing</li>
+      <li onclick="answer(this, false, 'q1')">Neither — it requires human-in-the-loop</li>
+    </ul>
+    <div class="quiz-feedback" id="q1-feedback"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Retrieval check</h3>
+    <p class="quiz-question">
+      What property of the LLM context window most directly constrains agentic system design?
+    </p>
+    <ul class="quiz-options" id="q2-options">
+      <li onclick="answer(this, false, 'q2')">Token cost — agents generate more tokens</li>
+      <li onclick="answer(this, false, 'q2')">Latency — each tool call adds round-trip time</li>
+      <li onclick="answer(this, true,  'q2')">Size — it is the LLM's working memory, so everything must fit in it</li>
+      <li onclick="answer(this, false, 'q2')">Immutability — you cannot append to context mid-run</li>
+    </ul>
+    <div class="quiz-feedback" id="q2-feedback"></div>
+  </div>
+
+  <!-- Primary source -->
+  <div class="source-box">
+    <div class="source-label">Primary source for this lesson</div>
+    <strong>Anthropic — "Building Effective Agents"</strong> (Dec 2024)<br>
+    <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">
+      anthropic.com/research/building-effective-agents
+    </a><br>
+    <span style="color:#666; font-size:0.85em; margin-top:0.3rem; display:block;">
+      Read sections: "What are agents?" and "When (and when not) to use agents."
+      These two sections are the canonical source for the distinctions in this lesson.
+    </span>
+  </div>
+
+  <nav class="lesson-nav">
+    <span></span>
+    <a href="0002-workflow-patterns.html">Next: Workflow Patterns →</a>
+  </nav>
+
+  <div class="ask-agent">
+    <strong>Something unclear?</strong> Ask your Claude Code agent. Describe what confused you
+    and it can clarify, give a concrete example, or go deeper on any concept in this lesson.
+    It is your teacher — use it.
+  </div>
+
+</div>
+
+<script>
+  const explanations = {
+    q1: {
+      correct: "Right. The classifier determines routing, but that's a developer-defined rule — not the LLM choosing its own next step. Each chain follows a fixed sequence. This is a workflow with a routing step.",
+      incorrect: "Not quite. The routing decision is made by a classifier following rules set by the developer, and each chain follows a fixed sequence. The LLM never decides its own next action — that's the workflow test."
+    },
+    q2: {
+      correct: "Correct. The context window is the model's entire working memory. Everything the model can reason about — history, retrieved docs, tool results, intermediate state — must fit within it. This forces tradeoffs in every multi-step system.",
+      incorrect: "Not quite. While token cost and latency are real constraints, the deeper architectural constraint is that the context window is the model's only working memory. This is what forces decisions about what to retrieve, what to summarize, and how to structure state."
+    }
+  };
+
+  function answer(el, isCorrect, qId) {
+    const options = document.querySelectorAll(`#${qId}-options li`);
+    options.forEach(o => o.style.pointerEvents = 'none');
+    el.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    const fb = document.getElementById(`${qId}-feedback`);
+    fb.textContent = isCorrect ? explanations[qId].correct : explanations[qId].incorrect;
+    fb.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    fb.style.display = 'block';
+  }
+</script>
+</body>
+</html>
