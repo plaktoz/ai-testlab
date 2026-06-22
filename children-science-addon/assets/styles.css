@@ -1,0 +1,192 @@
+/* Ecosystem Learning Course Stylesheet */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.lesson-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.lesson-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.lesson-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.lesson-header .subtitle {
+  font-size: 1.1rem;
+  opacity: 0.95;
+}
+
+.lesson-content {
+  padding: 3rem 2rem;
+  font-size: 1.05rem;
+}
+
+h2 {
+  color: #667eea;
+  margin: 2rem 0 1rem;
+  font-size: 1.8rem;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 0.5rem;
+}
+
+h3 {
+  color: #764ba2;
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.3rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.callout {
+  background: #f0f4ff;
+  border-left: 4px solid #667eea;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 6px;
+}
+
+.callout.tip {
+  background: #f0fff4;
+  border-left-color: #48bb78;
+}
+
+.callout.tip strong {
+  color: #22543d;
+}
+
+.quiz-question {
+  background: #fef5e7;
+  border: 2px solid #f39c12;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  border-radius: 8px;
+}
+
+.quiz-question h4 {
+  color: #e67e22;
+  margin-bottom: 1rem;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quiz-option {
+  padding: 1rem;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quiz-option:hover {
+  border-color: #f39c12;
+  background: #fffbf0;
+}
+
+.quiz-option input[type="radio"] {
+  margin-right: 0.75rem;
+}
+
+.reference-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.reference-link:hover {
+  border-bottom-color: #667eea;
+}
+
+.diagram {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.diagram img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.lesson-footer {
+  background: #f5f7fa;
+  padding: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.question-prompt {
+  background: #e8f4f8;
+  border-left: 4px solid #0ea5e9;
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin: 1.5rem 0;
+}
+
+.question-prompt strong {
+  color: #0c7a9a;
+}
+
+a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .lesson-container {
+    border-radius: 0;
+  }
+  
+  .lesson-header {
+    padding: 2rem 1.5rem;
+  }
+  
+  .lesson-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .lesson-content {
+    padding: 2rem 1.5rem;
+  }
+}
