@@ -1,10 +1,6 @@
-/* Ecosystem Learning Course Stylesheet */
+/* Ecosystem Learning Course — Shared Stylesheet */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -15,15 +11,47 @@ body {
   padding: 2rem;
 }
 
+/* ─── Container ─── */
 .lesson-container {
   max-width: 800px;
   margin: 0 auto;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
+/* ─── Top Navigation ─── */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 2rem;
+  background: #f8f9ff;
+  border-bottom: 2px solid #e0e8ff;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.progress-chip {
+  background: #667eea;
+  color: white;
+  padding: 0.25rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.92rem;
+}
+
+.nav-links a { color: #667eea; font-weight: 500; }
+
+/* ─── Header ─── */
 .lesson-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -31,45 +59,30 @@ body {
   text-align: center;
 }
 
-.lesson-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-}
+.lesson-header h1 { font-size: 2.3rem; margin-bottom: 0.5rem; font-weight: 700; }
+.lesson-header .subtitle { font-size: 1.1rem; opacity: 0.95; }
 
-.lesson-header .subtitle {
-  font-size: 1.1rem;
-  opacity: 0.95;
-}
-
-.lesson-content {
-  padding: 3rem 2rem;
-  font-size: 1.05rem;
-}
+/* ─── Content ─── */
+.lesson-content { padding: 3rem 2rem; font-size: 1.05rem; }
 
 h2 {
   color: #667eea;
   margin: 2rem 0 1rem;
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   border-bottom: 3px solid #667eea;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
 }
 
-h3 {
-  color: #764ba2;
-  margin: 1.5rem 0 0.75rem;
-  font-size: 1.3rem;
-}
+h3 { color: #764ba2; margin: 1.5rem 0 0.75rem; font-size: 1.25rem; }
+p { margin-bottom: 1rem; line-height: 1.8; }
 
-p {
-  margin-bottom: 1rem;
-  line-height: 1.8;
-}
+ul, ol { margin: 0.5rem 0 1.25rem 2rem; line-height: 1.9; }
 
+/* ─── Callouts ─── */
 .callout {
   background: #f0f4ff;
   border-left: 4px solid #667eea;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   margin: 1.5rem 0;
   border-radius: 6px;
 }
@@ -78,12 +91,34 @@ p {
   background: #f0fff4;
   border-left-color: #48bb78;
 }
+.callout.tip strong { color: #22543d; }
 
-.callout.tip strong {
-  color: #22543d;
+/* ─── Lesson Goal Box ─── */
+.lesson-goal {
+  background: #ebf8ff;
+  border-left: 4px solid #3182ce;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  font-size: 0.97rem;
 }
+.lesson-goal strong { color: #2b6cb0; }
 
-.quiz-question {
+/* ─── Dark Fact Box (for hooks) ─── */
+.fact-box {
+  background: #1a1a2e;
+  color: #e8e8ff;
+  padding: 1.5rem 1.75rem;
+  margin: 1.5rem 0;
+  border-radius: 10px;
+  line-height: 1.85;
+  font-size: 1rem;
+  border-left: 4px solid #667eea;
+}
+.fact-box strong { color: #a78bfa; }
+
+/* ─── Interactive Quiz ─── */
+.quiz-block {
   background: #fef5e7;
   border: 2px solid #f39c12;
   padding: 1.5rem;
@@ -91,47 +126,99 @@ p {
   border-radius: 8px;
 }
 
-.quiz-question h4 {
-  color: #e67e22;
+.quiz-block .quiz-q {
+  color: #c05c00;
+  font-weight: 700;
+  font-size: 1.05rem;
   margin-bottom: 1rem;
 }
 
-.quiz-options {
+.quiz-btns {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
-.quiz-option {
-  padding: 1rem;
+.quiz-btn {
+  padding: 0.85rem 1.1rem;
   background: white;
   border: 2px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 0.97rem;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1.5;
 }
 
-.quiz-option:hover {
-  border-color: #f39c12;
-  background: #fffbf0;
+.quiz-btn:hover:not(:disabled) { border-color: #f39c12; background: #fffbf0; }
+.quiz-btn.correct  { background: #f0fff4; border-color: #48bb78; color: #22543d; font-weight: 600; }
+.quiz-btn.incorrect { background: #fff5f5; border-color: #fc8181; color: #742a2a; }
+.quiz-btn:disabled { cursor: default; opacity: 0.88; }
+
+.quiz-explanation {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  background: #e6fffa;
+  border-left: 4px solid #38b2ac;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
 
-.quiz-option input[type="radio"] {
-  margin-right: 0.75rem;
+/* ─── Trophic Pyramid ─── */
+.trophic-pyramid { margin: 2rem auto; max-width: 520px; text-align: center; }
+.trophic-pyramid p { margin-bottom: 0.5rem; font-size: 0.82rem; color: #666; }
+
+.tl {
+  margin: 0 auto 4px;
+  padding: 0.6rem 1.25rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.87rem;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tl-label { font-size: 0.78rem; opacity: 0.85; font-weight: 400; }
+.tl-1 { background: #276749; width: 100%; }
+.tl-2 { background: #38a169; width: 80%; }
+.tl-3 { background: #68d391; width: 60%; color: #1a3a2a; }
+.tl-4 { background: #9ae6b4; width: 40%; color: #1a3a2a; }
+.tl-5 { background: #c6f6d5; width: 22%; color: #1a3a2a; font-size: 0.8rem; }
+
+/* ─── Cycle / Flow Diagrams ─── */
+.cycle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  background: #f9fafb;
+  border-radius: 8px;
 }
 
-.reference-link {
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 500;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.3s;
+.cnode {
+  background: #667eea;
+  color: white;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.88rem;
 }
+.cnode.green  { background: #38a169; }
+.cnode.orange { background: #dd6b20; }
+.cnode.teal   { background: #319795; }
+.cnode.red    { background: #c53030; }
+.cnode.gray   { background: #718096; }
+.carrow { color: #667eea; font-size: 1.3rem; font-weight: bold; line-height: 1; }
 
-.reference-link:hover {
-  border-bottom-color: #667eea;
-}
-
+/* ─── Generic Diagram box ─── */
 .diagram {
   text-align: center;
   margin: 2rem 0;
@@ -140,53 +227,50 @@ p {
   border-radius: 8px;
 }
 
-.diagram img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
+/* ─── Links ─── */
+.reference-link {
+  color: #667eea;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s;
 }
+.reference-link:hover { border-bottom-color: #667eea; }
 
+a { color: #667eea; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ─── Footer ─── */
 .lesson-footer {
   background: #f5f7fa;
   padding: 2rem;
   border-top: 1px solid #e0e0e0;
 }
 
-.question-prompt {
-  background: #e8f4f8;
-  border-left: 4px solid #0ea5e9;
-  padding: 1.5rem;
-  border-radius: 6px;
+/* ─── Glossary ─── */
+.glossary-term {
   margin: 1.5rem 0;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+.glossary-term:last-child { border-bottom: none; }
+.term-name { font-weight: 700; font-size: 1.1rem; color: #667eea; }
+.term-definition { margin-top: 0.5rem; line-height: 1.8; }
+.term-example {
+  background: #f9fafb;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border-left: 3px solid #764ba2;
+  border-radius: 4px;
+  font-style: italic;
+  font-size: 0.95rem;
 }
 
-.question-prompt strong {
-  color: #0c7a9a;
-}
-
-a {
-  color: #667eea;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
+/* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .lesson-container {
-    border-radius: 0;
-  }
-  
-  .lesson-header {
-    padding: 2rem 1.5rem;
-  }
-  
-  .lesson-header h1 {
-    font-size: 1.8rem;
-  }
-  
-  .lesson-content {
-    padding: 2rem 1.5rem;
-  }
+  body { padding: 0; }
+  .lesson-container { border-radius: 0; }
+  .lesson-header { padding: 2rem 1.5rem; }
+  .lesson-header h1 { font-size: 1.8rem; }
+  .lesson-content { padding: 2rem 1.5rem; }
+  .lesson-nav { padding: 0.75rem 1rem; }
 }
