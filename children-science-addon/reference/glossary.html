@@ -6,125 +6,465 @@
   <title>Ecosystem Glossary</title>
   <link rel="stylesheet" href="../assets/styles.css">
   <style>
-    .glossary-term {
-      margin: 1.5rem 0;
-      padding-bottom: 1.5rem;
+    .glossary-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 1.25rem 0 1.75rem;
       border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 1.5rem;
     }
-    .glossary-term:last-child {
-      border-bottom: none;
-    }
-    .term-name {
-      font-weight: 700;
-      font-size: 1.1rem;
+    .glossary-nav a {
+      padding: 0.2rem 0.6rem;
+      background: #f0f4ff;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
       color: #667eea;
     }
+    .glossary-nav a:hover { background: #667eea; color: white; text-decoration: none; }
+
+    .letter-group { margin-bottom: 2rem; }
+    .letter-header {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #764ba2;
+      border-bottom: 3px solid #764ba2;
+      padding-bottom: 0.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .glossary-term {
+      margin: 1.25rem 0;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid #eee;
+    }
+    .glossary-term:last-child { border-bottom: none; }
+    .term-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #333;
+    }
+    .term-lesson {
+      display: inline-block;
+      font-size: 0.72rem;
+      background: #f0f4ff;
+      color: #667eea;
+      padding: 0.1rem 0.45rem;
+      border-radius: 10px;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
     .term-definition {
-      margin-top: 0.5rem;
-      line-height: 1.8;
+      margin-top: 0.45rem;
+      line-height: 1.75;
+      color: #333;
     }
     .term-example {
       background: #f9fafb;
-      margin-top: 0.5rem;
-      padding: 0.75rem;
+      margin-top: 0.45rem;
+      padding: 0.65rem 0.85rem;
       border-left: 3px solid #764ba2;
       border-radius: 4px;
       font-style: italic;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      color: #555;
     }
   </style>
 </head>
 <body>
   <div class="lesson-container">
-    
-    <div class="lesson-header">
-      <h1>📚 Ecosystem Glossary</h1>
-      <p class="subtitle">Your Quick Reference Guide</p>
-    </div>
+
+    <nav class="lesson-nav">
+      <span class="progress-chip">Reference</span>
+      <div class="nav-links">
+        <a href="../index.html">← Course Home</a>
+      </div>
+    </nav>
+
+    <header class="lesson-header">
+      <h1>Ecosystem Glossary</h1>
+      <p class="subtitle">All terms from Lessons 01–10, alphabetically sorted. Each entry notes which lesson introduced it.</p>
+    </header>
 
     <div class="lesson-content">
 
-      <p>Use this glossary to look up ecosystem terms. All lessons will use these exact definitions.</p>
+      <!-- Quick-jump alphabet nav -->
+      <nav class="glossary-nav">
+        <a href="#A">A</a><a href="#B">B</a><a href="#C">C</a><a href="#D">D</a>
+        <a href="#E">E</a><a href="#F">F</a><a href="#H">H</a><a href="#K">K</a>
+        <a href="#M">M</a><a href="#N">N</a><a href="#O">O</a><a href="#P">P</a>
+        <a href="#R">R</a><a href="#S">S</a><a href="#T">T</a><a href="#W">W</a>
+      </nav>
 
-      <div class="glossary-term">
-        <div class="term-name">Carnivore</div>
-        <div class="term-definition">An animal that eats meat (other animals).</div>
-        <div class="term-example">Example: Wolf, hawk, shark</div>
+      <!-- A -->
+      <div class="letter-group" id="A">
+        <div class="letter-header">A</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Abiotic <span class="term-lesson">L01</span></div>
+          <div class="term-definition">Non-living components of an ecosystem: temperature, sunlight, water, pH, soil minerals, oxygen. Abiotic factors set the physical stage on which biology operates. Change them and the biology changes in response.</div>
+          <div class="term-example">Example: A lake's temperature and dissolved oxygen concentration are abiotic factors that determine which fish species can survive there.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Autotroph <span class="term-lesson">L02</span></div>
+          <div class="term-definition">An organism that produces its own organic molecules from inorganic inputs — either via photosynthesis (using light) or chemosynthesis (using chemical energy). All food webs start with autotrophs. They are the only entry point for energy into an ecosystem.</div>
+          <div class="term-example">Example: Grasses, trees, phytoplankton, and hydrothermal vent bacteria are all autotrophs.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Consumer</div>
-        <div class="term-definition">Any living thing that eats other organisms to get energy. Includes herbivores, carnivores, and omnivores.</div>
-        <div class="term-example">Example: Deer, lion, butterfly, you!</div>
+      <!-- B -->
+      <div class="letter-group" id="B">
+        <div class="letter-header">B</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Benthic <span class="term-lesson">L06, L09</span></div>
+          <div class="term-definition">Relating to the bottom of a body of water — the sediment and organisms living in or on it. In lakes and oceans, the benthic zone receives nutrient-rich organic matter sinking from above.</div>
+          <div class="term-example">Example: Benthic bacteria decompose dead material that sinks from surface waters, releasing nutrients back into the water column.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Biodiversity <span class="term-lesson">L03, L10</span></div>
+          <div class="term-definition">The variety of life in a given area — measured at the genetic, species, and ecosystem level. Biodiversity is not just a count of species; functional diversity (the variety of ecological roles filled) is often more important than raw species number for ecosystem resilience.</div>
+          <div class="term-example">Example: A grassland with 40 species of plants filling 15 different functional roles is more biodiverse (in the ecologically meaningful sense) than a rainforest patch with 40 species that all perform the same function.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Biotic <span class="term-lesson">L01</span></div>
+          <div class="term-definition">Living components of an ecosystem: all organisms including plants, animals, fungi, bacteria, and other microbes. Biotic interactions (predation, competition, mutualism, parasitism) form the web of relationships that determine community structure.</div>
+          <div class="term-example">Example: Wolves, elk, willows, and soil bacteria are all biotic components of the Yellowstone ecosystem.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Decomposer</div>
-        <div class="term-definition">An organism that breaks down dead plants and animals, returning nutrients to the soil.</div>
-        <div class="term-example">Example: Fungus, bacteria, earthworm</div>
+      <!-- C -->
+      <div class="letter-group" id="C">
+        <div class="letter-header">C</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Carbon Cycle <span class="term-lesson">L04</span></div>
+          <div class="term-definition">The continuous movement of carbon atoms through the atmosphere, living organisms, soil, and water. Key processes: photosynthesis (CO₂ → organic carbon), respiration (organic carbon → CO₂), decomposition (dead organic carbon → CO₂), and long-term storage (fossil fuels, soil organic matter).</div>
+          <div class="term-example">Example: A leaf uses photosynthesis to pull CO₂ from the air. A caterpillar eats the leaf. The caterpillar respires, releasing CO₂ back to the air. The caterpillar dies; a fungus decomposes it, releasing the remaining carbon as CO₂ and into the soil. Same carbon atoms, different forms.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Carnivore <span class="term-lesson">L02</span></div>
+          <div class="term-definition">An organism that eats other animals. Occupies at least the secondary consumer level in a food web.</div>
+          <div class="term-example">Example: Wolf, shark, dragonfly larva, mantis shrimp.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Carrying Capacity (K) <span class="term-lesson">L01, L10</span></div>
+          <div class="term-definition">The maximum population size a given environment can sustainably support, limited by available food, water, space, and other resources. When a population exceeds K, negative feedback (starvation, disease, predation) brings it back down. When it falls below K, resources are abundant and the population grows.</div>
+          <div class="term-example">Example: A meadow can support ~50 rabbits before food runs out. Carrying capacity K = 50. Above 50, rabbits starve; below 50, they breed freely until they hit 50 again.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Chemosynthesis <span class="term-lesson">L09</span></div>
+          <div class="term-definition">Primary production using chemical energy (rather than sunlight) to convert inorganic molecules into organic matter. The key equation at hydrothermal vents: CO₂ + 4H₂S + O₂ → CH₂O + 4S + 3H₂O. Chemosynthetic bacteria use hydrogen sulphide as their energy source instead of photons.</div>
+          <div class="term-example">Example: Bacteria in the trophosome of Riftia pachyptila tube worms at hydrothermal vents perform chemosynthesis, converting vent-emitted H₂S into organic matter that feeds the worm. No sunlight reaches 2,500 metres depth; none is needed.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Consumer <span class="term-lesson">L02</span></div>
+          <div class="term-definition">Any organism that gets energy by eating other organisms. Primary consumers eat producers; secondary consumers eat primary consumers; and so on. Contrast with autotrophs, who produce their own energy.</div>
+          <div class="term-example">Example: A zooplankton (primary consumer) eats phytoplankton (producer). A small fish (secondary consumer) eats the zooplankton. A tuna (tertiary consumer) eats the fish.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Ecosystem</div>
-        <div class="term-definition">A community of living things (animals, plants, insects) plus the non-living things around them (soil, water, air, sunlight), all connected together by the flow of energy and materials.</div>
-        <div class="term-example">Example: Forest, pond, ocean, coral reef</div>
+      <!-- D -->
+      <div class="letter-group" id="D">
+        <div class="letter-header">D</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Decomposer <span class="term-lesson">L04</span></div>
+          <div class="term-definition">Organisms that break down dead organic matter into inorganic molecules, returning nutrients to the soil and water. Primary decomposers are bacteria and fungi. Without decomposers, nutrients would lock permanently in dead organic matter and ecosystems would collapse.</div>
+          <div class="term-example">Example: A fallen log is colonised by fungi (ligninase breaks the cellulose matrix) and bacteria, reducing it to CO₂, H₂O, and mineral nutrients in ~10–15 years.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Denitrification <span class="term-lesson">L05</span></div>
+          <div class="term-definition">The conversion of nitrate (NO₃⁻) back to nitrogen gas (N₂) by bacteria such as Pseudomonas in anaerobic (oxygen-poor) conditions. Denitrification is the exit from the nitrogen cycle — it returns biologically accessible nitrogen to the inert atmospheric pool.</div>
+          <div class="term-example">Example: Waterlogged soils and lake sediments are hotspots for denitrification. Wetlands remove nitrogen pollution from agricultural runoff via denitrification.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Detritivore <span class="term-lesson">L04</span></div>
+          <div class="term-definition">An animal that feeds on detritus (dead organic fragments) and assists decomposers by physically fragmenting material, increasing surface area for microbial attack. Distinct from true decomposers, which chemically break down organic molecules.</div>
+          <div class="term-example">Example: Earthworms, woodlice, millipedes, and dung beetles are detritivores. They shred material and create microhabitats for bacteria and fungi to finish decomposition.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Detritus <span class="term-lesson">L04</span></div>
+          <div class="term-definition">Decomposing dead organic matter — dead leaves, fallen wood, faeces, shed skin, shed exoskeletons, dead plankton. Detritus forms the base of the detrital food web and is one of the most important energy pathways in most ecosystems.</div>
+          <div class="term-example">Example: Over 60% of energy in a temperate forest flows through the detrital pathway (dead organic matter → decomposers), not the grazing pathway (living plant → herbivore).</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Energy Flow</div>
-        <div class="term-definition">The movement of energy from the sun through plants and animals in an ecosystem. Energy flows in one direction: sun → producer → consumer → decomposer.</div>
-        <div class="term-example">Example: Sun energy → grass → rabbit → fox</div>
+      <!-- E -->
+      <div class="letter-group" id="E">
+        <div class="letter-header">E</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Ecosystem <span class="term-lesson">L01</span></div>
+          <div class="term-definition">A community of living organisms (biotic components) interacting with each other and with their physical environment (abiotic components) as a system. An ecosystem has inputs (energy, matter), outputs (heat, matter), internal stocks, and feedback loops that regulate its behaviour.</div>
+          <div class="term-example">Example: A pond is an ecosystem: inputs include sunlight, rain, and nutrients; outputs include evaporated water and nutrients carried out by wildlife; stocks include the organisms, water, and sediment; feedback includes algal growth reducing light penetration, which limits further algal growth.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Eutrophication <span class="term-lesson">L06</span></div>
+          <div class="term-definition">The process by which excess nutrients (especially nitrogen and phosphorus from fertiliser runoff) enter a water body, triggering explosive algal blooms. When algae die, bacteria decompose them and consume dissolved oxygen, producing a "dead zone" where fish and other aerobic organisms cannot survive.</div>
+          <div class="term-example">Example: The Gulf of Mexico dead zone (>20,000 km²) forms annually from Mississippi River nutrient runoff from Midwest agriculture. The 1980 Lake Erie eutrophication crisis was partially reversed through phosphorus detergent bans.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Extinction Debt <span class="term-lesson">L10</span></div>
+          <div class="term-definition">Future extinctions that are demographically committed by past habitat changes, even if those habitats are never further disturbed. Species in habitat fragments too small to maintain viable populations will eventually go locally extinct due to demographic and environmental stochasticity (random events), even with no additional human action.</div>
+          <div class="term-example">Example: A study of UK woodland birds found ~25% of populations were committed to future extinction by past habitat fragmentation — the "debt" will be collected by biology over coming decades regardless of current policy.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Food Chain</div>
-        <div class="term-definition">A sequence showing how energy passes from one organism to the next, starting with a producer and moving through consumers.</div>
-        <div class="term-example">Example: Plant → Grasshopper → Bird → Hawk</div>
+      <!-- F -->
+      <div class="letter-group" id="F">
+        <div class="letter-header">F</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Feedback Loop <span class="term-lesson">L01</span></div>
+          <div class="term-definition">A circular chain of cause-and-effect in which a system's output influences its own input. <strong>Negative feedback</strong> (stabilising): output reduces the original change. <strong>Positive feedback</strong> (destabilising / amplifying): output reinforces the original change.</div>
+          <div class="term-example">Negative: predator population rises → more prey eaten → prey population falls → less food for predators → predator population falls. The predator–prey cycle is a self-regulating negative feedback. Positive: glaciers melt (less white ice) → more solar energy absorbed by dark ocean → more warming → more glaciers melt. Positive feedback accelerates change.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Food Chain <span class="term-lesson">L03</span></div>
+          <div class="term-definition">A single linear sequence of who-eats-whom from producer to top predator. Useful as a teaching simplification but rarely describes reality accurately — most organisms eat multiple things and are eaten by multiple things, forming food webs rather than chains.</div>
+          <div class="term-example">Example: Phytoplankton → copepod → herring → cod → orca. Each arrow means "is eaten by."</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Food Web <span class="term-lesson">L03</span></div>
+          <div class="term-definition">The complete network of feeding relationships in an ecosystem — all food chains overlapping and interconnected. More ecologically realistic than a food chain. The structure of a food web determines the ecosystem's resistance to species loss: highly connected webs with redundant pathways are more robust.</div>
+          <div class="term-example">Example: In the Serengeti, a lion eats zebra, wildebeest, buffalo, warthog, and occasionally giraffe. Removing any one prey species changes the lion's behaviour but doesn't eliminate it. This redundancy is a food web property, invisible in a single food chain.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Food Web</div>
-        <div class="term-definition">A more complex version of a food chain that shows multiple interconnected food chains in an ecosystem.</div>
-        <div class="term-example">Example: Plants eaten by multiple animals; one animal eating multiple types of food</div>
+      <!-- H -->
+      <div class="letter-group" id="H">
+        <div class="letter-header">H</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Herbivore <span class="term-lesson">L02</span></div>
+          <div class="term-definition">An organism that eats only plants (primary producer). Primary consumers in a food web. Subject to the 10% energy rule: only ~10% of the plant's stored chemical energy is transferred to the herbivore's body.</div>
+          <div class="term-example">Example: Rabbit, caterpillar, manatee, krill.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Heterotroph <span class="term-lesson">L02</span></div>
+          <div class="term-definition">An organism that cannot produce its own energy and must consume other organisms to obtain it. All animals, fungi, and most bacteria are heterotrophs. Contrast with autotrophs.</div>
+          <div class="term-example">Example: You are a heterotroph. Every calorie you have ever consumed came from an autotroph (or from an organism that ate an autotroph).</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Humus <span class="term-lesson">L04</span></div>
+          <div class="term-definition">The stable, dark organic matter fraction of soil, produced by the partial decomposition of plant and animal material. Humus improves soil structure, water retention, and nutrient availability. It is biologically built — mechanical cultivation destroys it, and it takes decades to centuries to form naturally.</div>
+          <div class="term-example">Example: A teaspoon of humus-rich soil contains more bacteria (10⁸–10⁹) and fungal threads than there are humans on Earth. Tropical soils exposed to rain after forest clearing lose their humus within years.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Habitat</div>
-        <div class="term-definition">The specific place where an organism lives (its home and surroundings).</div>
-        <div class="term-example">Example: Beaver's habitat is a river; squirrel's habitat is a forest</div>
+      <!-- K -->
+      <div class="letter-group" id="K">
+        <div class="letter-header">K</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Keystone Species <span class="term-lesson">L03</span></div>
+          <div class="term-definition">A species whose ecological impact is disproportionately large relative to its biomass. Removing a keystone species causes cascading changes throughout the food web — a trophic cascade. The term was coined by ecologist Robert Paine (1969) based on sea star removal experiments.</div>
+          <div class="term-example">Example: Sea otters eat sea urchins. Remove otters → urchin population explodes → urchins overgraze kelp → kelp forests collapse → hundreds of dependent species lose habitat. The otter is the keystone; the kelp forest is the arch it holds up.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Herbivore</div>
-        <div class="term-definition">An animal that eats only plants.</div>
-        <div class="term-example">Example: Rabbit, deer, elephant, caterpillar</div>
+      <!-- M -->
+      <div class="letter-group" id="M">
+        <div class="letter-header">M</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Marine Snow <span class="term-lesson">L09</span></div>
+          <div class="term-definition">A continuous shower of organic particles sinking from the upper ocean to the deep sea — dead phytoplankton, faeces, shed mucus, and other organic debris. Marine snow is the primary mechanism by which the deep ocean is fed and is the main conduit for the biological carbon pump (transferring carbon from surface waters to deep sediments).</div>
+          <div class="term-example">Example: In the North Atlantic, marine snow exports 2–5 g C/m²/day to the deep ocean. Deep-sea organisms that have never experienced sunlight depend entirely on this rain of organic matter from above.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Omnivore</div>
-        <div class="term-definition">An animal that eats both plants and meat.</div>
-        <div class="term-example">Example: Bear, raccoon, human, chicken</div>
+      <!-- N -->
+      <div class="letter-group" id="N">
+        <div class="letter-header">N</div>
+
+        <div class="glossary-term">
+          <div class="term-name">New Tank Syndrome <span class="term-lesson">L07</span></div>
+          <div class="term-definition">The pattern in a newly set-up aquarium where ammonia from fish waste accumulates to toxic levels before the bacterial community that processes it has established. A direct consequence of the nitrogen cycle running without its biological filter. Causes mass fish death in tanks typically 2–6 weeks old.</div>
+          <div class="term-example">Example: A 60L tank is set up with fish on day 1. By week 2, ammonia peaks. By week 3, nitrite peaks. A new hobbyist who doesn't test water is likely to lose all fish between weeks 2–4. An experienced keeper fishless-cycles the tank for 4–6 weeks before adding fish.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Nitrification <span class="term-lesson">L05, L07</span></div>
+          <div class="term-definition">The two-step bacterial conversion of ammonia to nitrate: Step 1: NH₄⁺ (ammonium) → NO₂⁻ (nitrite), performed by Nitrosomonas (and Nitrosospira). Step 2: NO₂⁻ (nitrite) → NO₃⁻ (nitrate), performed by Nitrobacter (and Nitrospira). Both steps require oxygen (aerobic process). Nitrification detoxifies ammonia in soils, water bodies, and aquarium filters.</div>
+          <div class="term-example">Example: In a healthy aquarium biological filter, nitrification reduces toxic NH₃ (0.5 ppm lethal for many fish) to relatively harmless NO₃⁻ within 4–6 weeks of bacterial colonisation.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Nitrogenase <span class="term-lesson">L05</span></div>
+          <div class="term-definition">The enzyme complex that catalyses biological nitrogen fixation — converting inert N₂ gas into ammonia (NH₃). Nitrogenase is extremely sensitive to oxygen (which destroys it) and requires 16 ATP per N₂ molecule fixed. It is found only in certain prokaryotes (bacteria and archaea), never in plants or animals directly.</div>
+          <div class="term-example">Example: Rhizobium bacteria in root nodules of legumes protect their nitrogenase from oxygen using leghemoglobin (which gives the nodules a pink colour). The plant provides sugar; the bacteria provide fixed nitrogen.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Nitrogen Cycle <span class="term-lesson">L05</span></div>
+          <div class="term-definition">The biogeochemical cycle tracking nitrogen's transformation through the atmosphere, soil, water, and living organisms. Key processes: fixation (N₂ → NH₃, by bacteria), nitrification (NH₃ → NO₂⁻ → NO₃⁻), assimilation (NO₃⁻ absorbed by plants), ammonification (organic N → NH₄⁺ by decomposers), denitrification (NO₃⁻ → N₂).</div>
+          <div class="term-example">Example: The nitrogen in the protein in your muscle was: atmospheric N₂ → fixed by Rhizobium in soybean root nodules → nitrate → absorbed by soy plant → plant protein → eaten by chicken → chicken protein → eaten by you → muscle protein.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Nitrogen Fixation <span class="term-lesson">L05</span></div>
+          <div class="term-definition">The conversion of atmospheric N₂ (unusable by most life) into ammonia (NH₃, biologically available). Only performed by nitrogen-fixing bacteria and archaea with the nitrogenase enzyme. The rate-limiting step that controls how much new nitrogen enters most ecosystems.</div>
+          <div class="term-example">Example: Biological fixation: ~120 million tonnes N/year (Rhizobium, Azotobacter, cyanobacteria). Industrial fixation (Haber-Bosch): ~150 million tonnes N/year. Human industrial fixation now exceeds natural biological fixation — a profound alteration of the global nitrogen cycle.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Organism</div>
-        <div class="term-definition">Any living thing—a plant, animal, insect, fungus, or bacterium.</div>
-        <div class="term-example">Example: Tree, dog, bee, mushroom</div>
+      <!-- O -->
+      <div class="letter-group" id="O">
+        <div class="letter-header">O</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Omnivore <span class="term-lesson">L02</span></div>
+          <div class="term-definition">An organism that eats both plants and animals, occupying multiple trophic levels simultaneously. Omnivores tend to be more ecologically flexible and resilient to food source loss than strict specialists.</div>
+          <div class="term-example">Example: Brown bear, raccoon, domestic pig, crow, and humans are omnivores.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Photosynthesis</div>
-        <div class="term-definition">The process by which plants use sunlight, water, and air to make their own food (energy).</div>
-        <div class="term-example">Example: A tree's leaves capture sunlight to grow</div>
+      <!-- P -->
+      <div class="letter-group" id="P">
+        <div class="letter-header">P</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Pelagic <span class="term-lesson">L06, L09</span></div>
+          <div class="term-definition">Relating to the open water column of a lake or ocean, away from the bottom (benthic) and shore (littoral) zones. Pelagic organisms include phytoplankton, zooplankton, and open-water fish.</div>
+          <div class="term-example">Example: Herring, tuna, and jellyfish are pelagic organisms. They spend their lives in the open water column, not associated with the bottom.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Photosynthesis <span class="term-lesson">L02</span></div>
+          <div class="term-definition">The process by which autotrophs (primarily plants, algae, and cyanobacteria) convert light energy, water, and CO₂ into glucose and oxygen: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂. The stored chemical energy in glucose is the fuel for virtually all life on Earth. Photosynthesis is also the main pathway by which atmospheric CO₂ enters the biosphere.</div>
+          <div class="term-example">Example: Marine phytoplankton perform ~50% of all photosynthesis on Earth — roughly equal to all terrestrial plants combined — despite being microscopic and invisible to the naked eye.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Photic Zone <span class="term-lesson">L06, L09</span></div>
+          <div class="term-definition">The layer of water that receives enough sunlight for photosynthesis to occur — typically the top 200m in clear ocean water, less in turbid lakes. Below the photic zone (the aphotic zone), photosynthesis is impossible; organisms must depend on sinking organic matter or chemosynthesis.</div>
+          <div class="term-example">Example: In eutrophied lakes, algal blooms reduce transparency so severely that the photic zone can shrink from 5 metres to &lt;0.5 metres, preventing rooted aquatic plants from receiving sufficient light.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Primary Productivity <span class="term-lesson">L02, L06</span></div>
+          <div class="term-definition">The rate at which autotrophs convert energy into organic matter (biomass), measured in grams of carbon fixed per square metre per year (g C/m²/yr) or equivalent. <em>Gross primary productivity</em> (GPP) is total photosynthesis; <em>net primary productivity</em> (NPP) is GPP minus the autotroph's own respiration costs. NPP is what is available to consumers.</div>
+          <div class="term-example">Example: Open ocean NPP ≈ 125 g C/m²/yr. Coral reef NPP ≈ 2,500 g C/m²/yr (20× higher). Tropical rainforest NPP ≈ 2,200 g C/m²/yr. The vast area of the open ocean means it contributes ~50% of global NPP despite its low per-area rate.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Producer <span class="term-lesson">L02</span></div>
+          <div class="term-definition">Synonym for autotroph in food-web context — an organism that produces organic matter from inorganic inputs. Producers form the base of every food chain. All energy in a food web originally passed through a producer.</div>
+          <div class="term-example">Example: Grass, oak tree, kelp, phytoplankton, hydrothermal vent bacteria.</div>
+        </div>
       </div>
 
-      <div class="glossary-term">
-        <div class="term-name">Producer</div>
-        <div class="term-definition">An organism (usually a plant) that creates energy from the sun using photosynthesis. Producers form the base of a food chain.</div>
-        <div class="term-example">Example: Grass, tree, seaweed, algae</div>
+      <!-- R -->
+      <div class="letter-group" id="R">
+        <div class="letter-header">R</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Regime Shift <span class="term-lesson">L10</span></div>
+          <div class="term-definition">A rapid, often irreversible reorganisation of an ecosystem from one stable state to a fundamentally different one, triggered when the system crosses a tipping point. The new state may be self-reinforcing, making return to the original state difficult even if the original stressor is removed.</div>
+          <div class="term-example">Example: Clear, macrophyte-dominated lake → turbid, algae-dominated lake is a classic regime shift. The lake can receive nutrient input for years with little visible change, then flip suddenly and remain turbid for decades even after nutrient reduction.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Resilience <span class="term-lesson">L10</span></div>
+          <div class="term-definition">The capacity of an ecosystem to recover its original state and function after a disturbance. A resilient ecosystem absorbs shocks and returns to its pre-disturbance condition relatively quickly. High biodiversity, functional redundancy, and diverse feedback pathways increase resilience. Contrast with resistance.</div>
+          <div class="term-example">Example: A coral reef with high fish diversity recovers from a bleaching event in 10–15 years (high resilience). The same reef, overfished, with 50% fewer species, may not recover in a human lifetime (low resilience) after an equivalent bleaching event.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Resistance <span class="term-lesson">L10</span></div>
+          <div class="term-definition">The capacity of an ecosystem to avoid being disturbed or altered in the first place. A high-resistance ecosystem absorbs stress without showing much change. Contrast with resilience. The two often trade off: artificially increasing resistance (e.g., fire suppression) can reduce resilience (accumulated fuel makes eventual fire catastrophic).</div>
+          <div class="term-example">Example: An old-growth forest may be highly resistant to a drought event (thick bark, deep roots, diverse species composition), but if the drought is severe enough to kill a large fraction of trees, recovery takes centuries — low resilience despite high resistance.</div>
+        </div>
       </div>
 
-    </div>
+      <!-- S -->
+      <div class="letter-group" id="S">
+        <div class="letter-header">S</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Species Redundancy <span class="term-lesson">L03, L10</span></div>
+          <div class="term-definition">The existence of multiple species that perform the same ecological function (functional redundancy). Redundancy is the ecological equivalent of backup systems — if one species fails, others continue performing the function. It is the primary mechanism by which biodiversity provides resilience.</div>
+          <div class="term-example">Example: In a grassland, 8 species of nitrogen-fixing plants may all perform the same function normally. During drought, 7 of them die. The one surviving drought-tolerant nitrogen-fixer maintains the soil fertility that the whole ecosystem depends on. Without redundancy, that function would collapse.</div>
+        </div>
+      </div>
+
+      <!-- T -->
+      <div class="letter-group" id="T">
+        <div class="letter-header">T</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Ten Per Cent Rule (Trophic Efficiency) <span class="term-lesson">L02</span></div>
+          <div class="term-definition">The empirical observation that only approximately 10% of the energy stored at one trophic level is transferred to the next. The other ~90% is lost as heat during metabolism, used for the organism's own life processes, or excreted and decomposed. This is why food chains are short and top predators are always rare.</div>
+          <div class="term-example">Example: 10,000 kg of grass → supports ~1,000 kg of grasshoppers → supports ~100 kg of frogs → supports ~10 kg of snakes → supports ~1 kg of hawk. A hawk needs an entire food chain below it to exist. The 10% rule explains why.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Thermocline <span class="term-lesson">L06</span></div>
+          <div class="term-definition">A sharp temperature gradient in a lake or ocean that separates warm surface water (epilimnion) from cold deep water (hypolimnion). The thermocline acts as a physical barrier to mixing. In summer, nutrients trapped below the thermocline cannot reach the photic zone — a phenomenon called thermal stratification that limits primary productivity in many lakes.</div>
+          <div class="term-example">Example: Lake Baikal's thermocline forms at 20–50m depth in summer. Below it, temperatures drop to ~3.5°C; above it, 15–20°C. Nutrients from decomposition accumulate in the cold hypolimnion, inaccessible to surface algae.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Tipping Point <span class="term-lesson">L10</span></div>
+          <div class="term-definition">A threshold in a system's state space beyond which a small additional change triggers a rapid, self-reinforcing transition to a qualitatively different state. Tipping points are non-linear: the system can appear stable up to the threshold, then change suddenly and irreversibly. Related term: regime shift.</div>
+          <div class="term-example">Example: The Amazon deforestation tipping point is estimated at ~20–25% forest loss. At this level, reduced transpiration means less rainfall → less forest → less transpiration → a self-reinforcing collapse toward savanna, even if all further cutting stops. The Amazon is currently at ~17%.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Trophic Cascade <span class="term-lesson">L01, L03</span></div>
+          <div class="term-definition">A chain of indirect effects propagating through a food web when a predator or key species is added to or removed from an ecosystem. Top-down cascades start with a predator change; bottom-up cascades start with a change in primary productivity. Trophic cascades reveal the hidden connections between species that appear unrelated.</div>
+          <div class="term-example">Example: Reintroducing wolves to Yellowstone (1995) → elk moved away from rivers → riverside vegetation recovered → soil stabilised → rivers re-meandered → beaver dams rebuilt → fish diversity increased. The wolf changed the physical geography of rivers without ever touching a plant or fish.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Trophic Level <span class="term-lesson">L02</span></div>
+          <div class="term-definition">The feeding position of an organism in a food web, numbered from the base: Level 1 = producers, Level 2 = primary consumers (herbivores), Level 3 = secondary consumers, Level 4 = tertiary consumers, Level 5 = apex predators. Energy decreases ~90% between each level, which is why trophic pyramids are pyramidal — fewer organisms at higher levels.</div>
+          <div class="term-example">Example: Phytoplankton (L1) → krill (L2) → herring (L3) → tuna (L4) → orca (L5). Each step multiplies food requirements: one orca needs the productivity of millions of phytoplankton cells to exist.</div>
+        </div>
+
+        <div class="glossary-term">
+          <div class="term-name">Trophosome <span class="term-lesson">L09</span></div>
+          <div class="term-definition">A specialised organ in vestimentiferan tube worms (including Riftia pachyptila) that houses endosymbiotic chemosynthetic bacteria. The trophosome makes up ~15% of the worm's body weight and contains up to 10⁹ bacteria per gram of tissue. The worm provides the bacteria with H₂S, O₂, and CO₂ from the vent; the bacteria provide the worm with organic carbon via chemosynthesis. The worm has no mouth or digestive system.</div>
+          <div class="term-example">Example: Riftia pachyptila grows to 2.4 metres long with no gut — the largest animal without a digestive system. It is entirely fed by the chemosynthetic bacteria in its trophosome, making it a living bioreactor.</div>
+        </div>
+      </div>
+
+      <!-- W -->
+      <div class="letter-group" id="W">
+        <div class="letter-header">W</div>
+
+        <div class="glossary-term">
+          <div class="term-name">Whale Fall <span class="term-lesson">L09</span></div>
+          <div class="term-definition">The carcass of a whale that has sunk to the ocean floor. A whale fall creates a temporary ecosystem that passes through four distinct successional stages: mobile scavenger stage (sharks, hagfish strip soft tissue, months), enrichment opportunist stage (polychaete worms, crustaceans colonise remaining organic matter, months–years), sulphophilic stage (chemoautotrophic bacteria use H₂S from bone lipid decomposition, supporting vent-like communities, decades), reef stage (mineral substrate colonised by suspension feeders, decades–centuries). A large blue whale carcass can sustain a deep-sea community for 50–100 years.</div>
+          <div class="term-example">Example: The stepping stone hypothesis (Craig Smith, University of Hawai'i) proposes that historically, whale falls were spaced ~5 km apart in the North Pacific — close enough for vent/seep species to disperse between them, maintaining connectivity across the deep ocean.</div>
+        </div>
+      </div>
+
+    </div><!-- /lesson-content -->
+
+    <footer class="lesson-footer">
+      <p><a href="../index.html">← Back to Course Home</a></p>
+    </footer>
 
   </div>
 </body>
