@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 08 – Build a Terrarium</title>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body>
+  <div class="lesson-container">
+
+    <nav class="lesson-nav">
+      <span class="progress-chip">Lesson 8 of 10</span>
+      <div class="nav-links">
+        <a href="0007-the-aquarium-nitrogen-cycle.html">← Prev</a>
+        <a href="../index.html">Home</a>
+        <a href="0009-ocean-ecosystems.html">Next →</a>
+      </div>
+    </nav>
+
+    <header class="lesson-header">
+      <h1>Build a Terrarium</h1>
+      <p class="subtitle">Lesson 08 · ~30 minutes · Hands-on</p>
+    </header>
+
+    <div class="lesson-content">
+
+      <div class="fact-box">
+        <strong>In 1960, David Latimer planted a single spiderwort cutting in a glass bottle,
+        watered it once, sealed it shut — and didn't open it again for 53 years.</strong>
+        <br><br>
+        When he finally did open it in 2013, the plant was still alive. Perfectly healthy. The bottle
+        contained a complete, closed ecosystem: the plant photosynthesised, produced oxygen, and created
+        organic matter. Bacteria decomposed dead leaves, releasing CO₂ back to the plant. Water evaporated
+        up the walls, condensed, dripped back to the soil. All four cycles — water, carbon, nitrogen,
+        energy — ran continuously in a sealed glass bottle for over five decades.
+        <br><br>
+        This lesson is about building something like that. And understanding, from first principles,
+        exactly why each layer you add is there.
+      </div>
+
+      <div class="lesson-goal">
+        <strong>By the end of this lesson you will be able to:</strong> explain what cycles operate inside
+        a closed terrarium, justify each physical layer of a terrarium build, identify which plants and
+        conditions suit a closed vs open terrarium, and design a functional terrarium using knowledge from
+        Lessons 01–07.
+      </div>
+
+      <h2>The Terrarium as an Ecosystem</h2>
+
+      <p>A terrarium is not decoration. It's an engineered ecosystem. Let's map it against Lesson 01's
+      framework before building anything:</p>
+
+      <ul>
+        <li><strong>Inputs:</strong> Light (photosynthesis energy), CO₂ (from air, before sealing),
+        initial water, mineral nutrients in the soil</li>
+        <li><strong>Outputs from a closed terrarium:</strong> None — that's the point. If truly sealed,
+        matter cycles internally indefinitely. Only energy enters (as light) and leaves (as heat).</li>
+        <li><strong>Internal cycling:</strong>
+          <ul>
+            <li><em>Water cycle:</em> plant transpiration + surface evaporation → water vapour → condensation
+            on glass walls → drips back to substrate</li>
+            <li><em>Carbon cycle:</em> plant photosynthesis (CO₂ → organic carbon) → decomposition
+            → CO₂ returned</li>
+            <li><em>Nitrogen cycle:</em> bacteria in soil decompose dead plant matter → NH₄⁺ → nitrification
+            → NO₃⁻ → plant assimilation → organic nitrogen in tissue → death → back to bacteria</li>
+            <li><em>Energy flow:</em> light → plant (via photosynthesis) → decomposers (when plant dies)
+            → heat (lost). Unlike matter, energy doesn't cycle — it flows in and out as heat.</li>
+          </ul>
+        </li>
+        <li><strong>Feedback:</strong> If CO₂ rises (too much decomposition), plants photosynthesise
+        faster, using it up. If CO₂ falls (too much plant growth), photosynthesis slows. This is the
+        same negative feedback loop that operates in every forest on Earth.</li>
+      </ul>
+
+      <div class="quiz-block" data-correct="b">
+        <p class="quiz-q">Q: A closed terrarium is placed in complete darkness for 2 weeks. The plants die. Then the dead leaves are left to decompose for a month. What happens to the CO₂ level inside the terrarium during the decomposition month?</p>
+        <div class="quiz-btns">
+          <button class="quiz-btn" data-value="a">CO₂ stays constant — plants already converted all organic carbon to CO₂ when they died</button>
+          <button class="quiz-btn" data-value="b">CO₂ rises — decomposers break down the dead organic matter by aerobic respiration, releasing CO₂ from the stored carbon</button>
+          <button class="quiz-btn" data-value="c">CO₂ falls — the dead plants absorb CO₂ from the air as part of decomposition</button>
+          <button class="quiz-btn" data-value="d">Nothing changes — decomposition only affects nitrogen, not carbon</button>
+        </div>
+        <div class="quiz-explanation">
+          <p>Decomposers (bacteria and fungi) break down organic carbon in dead tissue via aerobic
+          respiration: C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + energy. The carbon that was locked in the plant
+          leaves is released as CO₂ back to the enclosed air. In a functioning (light-receiving) terrarium,
+          that CO₂ would immediately be used by living plants. In the dark, plants are dead, so CO₂ just
+          accumulates. Without a photosynthesiser to reuse it, the carbon cycle is open at the plant end
+          but closed at the decomposer end — an imbalance that would eventually exhaust the O₂ supply too.</p>
+        </div>
+      </div>
+
+      <h2>Closed vs Open Terrarium</h2>
+
+      <p>Before building, you need to choose which type suits your goals and plant selection.</p>
+
+      <div class="diagram">
+        <strong>Closed vs Open Terrarium — Key Differences</strong><br><br>
+        <table style="width:100%; border-collapse:collapse;">
+          <tr style="background:#f0f4ff;">
+            <th style="text-align:left;padding:0.5rem;border:1px solid #ccc;">Property</th>
+            <th style="text-align:left;padding:0.5rem;border:1px solid #ccc;">Closed</th>
+            <th style="text-align:left;padding:0.5rem;border:1px solid #ccc;">Open</th>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Humidity</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">80–100% (tropical)</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Ambient (30–60%)</td>
+          </tr>
+          <tr style="background:#fafafa;">
+            <td style="padding:0.5rem;border:1px solid #ccc;">Best plants</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Mosses, ferns, peperomia, fittonias, nerve plants</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Cacti, succulents, echeveria, haworthia, aloe</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Watering</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Once, then never (or rarely)</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Every 1–2 weeks</td>
+          </tr>
+          <tr style="background:#fafafa;">
+            <td style="padding:0.5rem;border:1px solid #ccc;">Maintenance</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Very low once established</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Regular but simple</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Ecosystem function</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">All cycles truly closed</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Partially open (water input, heat loss)</td>
+          </tr>
+          <tr style="background:#fafafa;">
+            <td style="padding:0.5rem;border:1px solid #ccc;">Failure mode</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Too much water (rot), direct sun (overheating)</td>
+            <td style="padding:0.5rem;border:1px solid #ccc;">Underwatering, dry soil compaction</td>
+          </tr>
+        </table>
+      </div>
+
+      <p><strong>Recommendation for this lesson:</strong> Build a closed terrarium with tropical plants —
+      the biology is richer, the cycling is more visible, and you can demonstrate the water cycle simply
+      by watching condensation on the glass walls.</p>
+
+      <div class="quiz-block" data-correct="d">
+        <p class="quiz-q">Q: You want to build a self-sustaining closed terrarium. Which plant combination would work best?</p>
+        <div class="quiz-btns">
+          <button class="quiz-btn" data-value="a">Cacti and succulents — they're tough and survive with very little water</button>
+          <button class="quiz-btn" data-value="b">Sunflowers and tomatoes — they grow well indoors</button>
+          <button class="quiz-btn" data-value="c">Oak tree seedlings and foxgloves — native plants are best</button>
+          <button class="quiz-btn" data-value="d">Moss, ferns, and fittonias — they thrive in high humidity and indirect light, matching closed terrarium conditions</button>
+        </div>
+        <div class="quiz-explanation">
+          <p>A closed terrarium maintains near-100% humidity internally. Cacti and succulents evolved
+          for arid conditions — constant high humidity causes root rot within weeks. Sunflowers and
+          tomatoes need direct sun and become too large. Oak seedlings grow fast and would crack the
+          glass. Mosses, ferns, and tropical low-light plants (fittonias, peperomia) evolved for
+          humid forest floors — exactly the conditions a sealed terrarium provides. Match the plant's
+          native habitat to the conditions you're creating.</p>
+        </div>
+      </div>
+
+      <h2>Build: Closed Tropical Terrarium</h2>
+
+      <p>This is an engineering design problem. Every layer has a function justifiable from first principles.</p>
+
+      <div class="diagram">
+        <strong>Materials List — Closed Tropical Terrarium</strong><br><br>
+        · Glass container with airtight lid (fish tank, large jar, or purpose-built terrarium)<br>
+          &nbsp;&nbsp;— volume: at least 10L for stability; 20–40L ideal<br>
+        · Drainage layer: small pebbles or aquarium gravel (2–3 cm)<br>
+        · Separation layer: fine mesh or horticultural grit (prevents soil from mixing into drainage)<br>
+        · Activated charcoal: thin layer on top of drainage (1 cm)<br>
+        · Substrate: tropical terrarium soil or mix of coco coir + perlite + organic compost (5–8 cm)<br>
+        · Plants: 1–3 species suited to high humidity and low-medium indirect light<br>
+          &nbsp;&nbsp;(moss, fittonia, mini-peperomia, baby ferns, selaginella)<br>
+        · Decorative elements (optional): small stones, driftwood, miniature figurines<br>
+        · Spray bottle of dechlorinated water<br>
+        · Long tweezers or bamboo skewer for planting
+      </div>
+
+      <h3>Layer 1: Drainage (Pebbles, 2–3 cm)</h3>
+      <p><strong>Why it's there:</strong> Plant roots need oxygen. Waterlogged roots suffocate and rot.
+      The drainage layer sits below the soil and receives excess water that percolates through. Gravity
+      keeps this water below the soil, preventing the root zone from becoming anaerobic. Without it,
+      a closed terrarium's water cycle would oversaturate the substrate and kill the plants via root rot
+      within weeks.</p>
+      <p>This is the same principle as the hyporheic zone (the gravel layer beneath riverbeds) — a
+      hidden reservoir that maintains aerobic conditions and supports huge microbial communities.</p>
+
+      <h3>Layer 2: Activated Charcoal (1 cm)</h3>
+      <p><strong>Why it's there:</strong> A closed ecosystem accumulates metabolic waste products —
+      tannins, organic acids, gases from anaerobic decomposition in deeper substrate. Activated charcoal
+      (not barbecue charcoal — the surface-area-maximised horticultural kind) adsorbs these toxins.
+      Think of it as the terrarium's kidney. In a small, closed system, toxic waste build-up can
+      acidify the substrate and inhibit bacterial and plant function.</p>
+
+      <h3>Layer 3: Substrate (Soil, 5–8 cm)</h3>
+      <p><strong>Why it's there:</strong> The soil is the nitrogen cycle engine. It contains bacteria
+      (decomposers, nitrifiers, nitrogen fixers if using moss), plant roots, and stored nutrients.
+      Deeper soil allows plant roots to anchor and grow. The specific mix matters:</p>
+      <ul>
+        <li><em>Coco coir:</em> retains moisture, good structure, resists compaction</li>
+        <li><em>Perlite:</em> adds drainage, prevents soil compaction, keeps root zone aerated</li>
+        <li><em>Organic compost:</em> initial nutrient load for plants + bacterial inoculum</li>
+      </ul>
+
+      <h3>Assembly Steps</h3>
+      <div class="diagram">
+        <strong>Build Order</strong><br><br>
+        1. Clean the glass with diluted white vinegar (kills surface mould, rinse thoroughly)<br>
+        2. Add drainage layer: 2–3 cm pebbles<br>
+        3. Add mesh/grit separation layer<br>
+        4. Add activated charcoal layer: 1 cm<br>
+        5. Add substrate: 5–8 cm, gently pressed flat but not compacted<br>
+        6. Create planting holes with tweezers or a skewer<br>
+        7. Remove plants from pots — gently shake soil off roots<br>
+        8. Plant with roots fully covered — do not bury stems<br>
+        9. Add moss last (it fills gaps and creates humidity surface)<br>
+        10. Lightly mist the interior walls and soil surface<br>
+        11. Check: soil should be visibly moist but not waterlogged (squeeze a handful — no water drips)<br>
+        12. Seal the container<br><br>
+        <strong>First 2 weeks:</strong> Leave sealed. You will see condensation on the glass — this is
+        the water cycle working. If condensation covers &gt;50% of glass at all times, briefly open to
+        release some moisture (too wet → root rot). If there's no condensation at all, add more water.
+      </div>
+
+      <div class="quiz-block" data-correct="c">
+        <p class="quiz-q">Q: You build a closed terrarium with the drainage layer, charcoal, and soil. Two weeks in, you notice the soil looks very wet, the glass is covered in condensation constantly, and a plant stem looks brown and slimy at the base. What happened and what can you fix?</p>
+        <div class="quiz-btns">
+          <button class="quiz-btn" data-value="a">The charcoal is filtering out too many nutrients — remove it</button>
+          <button class="quiz-btn" data-value="b">The drainage layer is blocking water flow — remove the pebbles</button>
+          <button class="quiz-btn" data-value="c">The terrarium was initially overwatered — root rot is developing. Open the lid for a few days to let excess moisture evaporate, trim dead stem sections, and rebalance the water level</button>
+          <button class="quiz-btn" data-value="d">The terrarium is working perfectly — condensation means the water cycle is active</button>
+        </div>
+        <div class="quiz-explanation">
+          <p>Brown, slimy stem at the base = root rot = anaerobic conditions around roots = too much
+          water. Condensation across the entire glass surface all day is a sign of oversaturation.
+          A healthy terrarium has condensation on one side (usually the cooler side) but not complete
+          coverage. Fix: open the lid partially for a few days to allow evaporative loss, then trim the
+          rotting stem sections (dead tissue invites fungal mold that can spread). This is a closed-system
+          feedback failing — too much input during setup unbalanced the cycle before bacterial communities
+          could establish and regulate.</p>
+        </div>
+      </div>
+
+      <h2>All Four Cycles in Your Terrarium</h2>
+
+      <p>Trace the actual paths happening inside your sealed glass container:</p>
+
+      <div class="cycle">
+        <span class="cnode green">Light enters glass</span>
+        <span class="carrow">→</span>
+        <span class="cnode green">Plant photosynthesis: CO₂ + H₂O → C₆H₁₂O₆ + O₂</span>
+        <span class="carrow">→</span>
+        <span class="cnode">Plant tissue grows (carbon + nitrogen stored)</span>
+        <span class="carrow">→</span>
+        <span class="cnode orange">Old leaves die, fall to soil</span>
+        <span class="carrow">→</span>
+        <span class="cnode teal">Bacteria/fungi decompose: organic C → CO₂, organic N → NH₄⁺</span>
+        <span class="carrow">→</span>
+        <span class="cnode teal">Nitrification: NH₄⁺ → NO₃⁻</span>
+        <span class="carrow">→</span>
+        <span class="cnode green">Plant roots assimilate NO₃⁻ → protein synthesis</span>
+      </div>
+
+      <p>Simultaneously, the water cycle runs:</p>
+
+      <div class="cycle">
+        <span class="cnode teal">Soil moisture</span>
+        <span class="carrow">→</span>
+        <span class="cnode">Plant roots absorb water → up through stems</span>
+        <span class="carrow">→</span>
+        <span class="cnode teal">Transpiration: water vapour through leaves</span>
+        <span class="carrow">→</span>
+        <span class="cnode teal">Condensation on glass walls</span>
+        <span class="carrow">→</span>
+        <span class="cnode teal">Drips back to soil</span>
+      </div>
+
+      <p>Energy is the only thing that doesn't cycle. Light comes in, drives photosynthesis, and
+      ultimately leaves as heat. Without a continuous light input, the terrarium's energy budget
+      runs to zero and all metabolism eventually stops.</p>
+
+      <h2>Quick Summary</h2>
+      <ul>
+        <li>A closed terrarium is a miniature ecosystem where matter cycles internally — only energy (light) enters and leaves as heat</li>
+        <li>All four cycles operate: water (transpiration → condensation), carbon (photosynthesis → decomposition), nitrogen (decay → nitrification → assimilation), energy (light → plant → decomposers → heat)</li>
+        <li>Each physical layer has a function: drainage (prevents root anaerobia), charcoal (toxin adsorption), soil (nitrogen cycle + plant support)</li>
+        <li>Closed terrariums need high-humidity tropical plants; open terrariums suit arid plants</li>
+        <li>The most common failures: overwatering (root rot) and direct sunlight (temperature spike kills bacteria and plants)</li>
+        <li>David Latimer's bottle garden ran for 53 years on a single watering — testimony to what a balanced ecosystem can do in a closed system</li>
+      </ul>
+
+    </div><!-- /lesson-content -->
+
+    <footer class="lesson-footer">
+      <p><strong>Next:</strong> <a href="0009-ocean-ecosystems.html">Lesson 09 — Ocean Ecosystems →</a></p>
+      <p style="margin-top:0.75rem;font-size:0.9rem;">
+        <a href="../reference/glossary.html">Glossary</a> ·
+        <a href="../index.html">Course Home</a>
+      </p>
+    </footer>
+
+  </div>
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>
