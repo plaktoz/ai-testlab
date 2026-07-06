@@ -1,0 +1,216 @@
+/* Shared lesson stylesheet — HTML for Kids course */
+
+:root {
+  --yellow:  #FFD43B;
+  --orange:  #FF922B;
+  --pink:    #F06595;
+  --purple:  #845EF7;
+  --blue:    #339AF0;
+  --green:   #51CF66;
+  --red:     #FF6B6B;
+  --ink:     #1A1A2E;
+  --soft:    #F8F9FA;
+  --border:  #DEE2E6;
+  --radius:  14px;
+  --shadow:  0 4px 16px rgba(0,0,0,0.10);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  background: var(--soft);
+  color: var(--ink);
+  padding: 0 1rem 4rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ── Header banner ─────────────────────────────────────────── */
+.lesson-header {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 100%);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 2rem 2.5rem;
+  margin: 2rem 0;
+  box-shadow: var(--shadow);
+}
+.lesson-header .lesson-number {
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 0.3rem;
+}
+.lesson-header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.lesson-header .tagline {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-top: 0.5rem;
+}
+
+/* ── Section cards ──────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 1.8rem 2rem;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow);
+  border-left: 6px solid var(--blue);
+}
+.card.yellow  { border-color: var(--yellow); }
+.card.orange  { border-color: var(--orange); }
+.card.pink    { border-color: var(--pink); }
+.card.purple  { border-color: var(--purple); }
+.card.green   { border-color: var(--green); }
+
+.card h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Code blocks ────────────────────────────────────────────── */
+.code-block {
+  background: #1A1A2E;
+  color: #E2E8F0;
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.1rem;
+  line-height: 1.9;
+  margin: 1rem 0;
+  overflow-x: auto;
+  white-space: pre;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+}
+.code-block .tag   { color: #93C5FD; }   /* blue  */
+.code-block .value { color: #86EFAC; }   /* green */
+.code-block .text  { color: #FDE68A; }   /* yellow */
+
+/* ── Try-it box ─────────────────────────────────────────────── */
+.try-it {
+  background: linear-gradient(135deg, #FFF9DB, #FFF0F6);
+  border: 2px dashed var(--orange);
+  border-radius: var(--radius);
+  padding: 1.8rem 2rem;
+  margin: 1.5rem 0;
+}
+.try-it h2 { color: var(--orange); }
+
+.step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin: 0.8rem 0;
+}
+.step-num {
+  background: var(--orange);
+  color: #fff;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+}
+.step-text { padding-top: 0.25rem; }
+
+/* ── Inline code ────────────────────────────────────────────── */
+code {
+  background: #E9ECEF;
+  color: var(--purple);
+  border-radius: 5px;
+  padding: 0.15em 0.45em;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+/* ── Callout bubbles ────────────────────────────────────────── */
+.callout {
+  background: #EFF6FF;
+  border: 1.5px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 1rem 1.4rem;
+  margin: 1rem 0;
+  font-size: 1rem;
+}
+.callout.tip    { background: #ECFDF5; border-color: var(--green); }
+.callout.fun    { background: #FFF0F6; border-color: var(--pink); }
+
+/* ── Navigation ─────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 3rem 0 1rem;
+  flex-wrap: wrap;
+}
+.nav a {
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.nav a:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+
+/* ── Quiz widget ────────────────────────────────────────────── */
+.quiz { margin: 1.2rem 0; }
+.quiz-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.8rem; }
+.quiz-btn {
+  display: inline-block;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin: 0.3rem 0.4rem 0.3rem 0;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.quiz-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.quiz-btn:disabled { opacity: 0.7; cursor: default; }
+.quiz-btn.quiz-correct { background: var(--green); }
+.quiz-btn.quiz-wrong   { background: var(--red); }
+.quiz-feedback {
+  margin-top: 0.7rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  min-height: 1.5rem;
+}
+.quiz-win  { color: #1a7a45; }
+.quiz-lose { color: #c0392b; }
+
+/* ── Ask your teacher footer ────────────────────────────────── */
+.ask-teacher {
+  text-align: center;
+  margin: 3rem 0 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  border-radius: var(--radius);
+  color: #fff;
+  font-weight: 600;
+}

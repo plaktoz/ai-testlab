@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4 — Needs vs Wants | Money School</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .sort-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .items-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: 60px;
+      background: #f9f9f9;
+      border: 2px dashed #bbb;
+      border-radius: 14px;
+      padding: 14px;
+      align-items: flex-start;
+    }
+    .drop-zones {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .drop-zone {
+      min-height: 120px;
+      border-radius: 14px;
+      padding: 14px;
+      border: 3px dashed;
+    }
+    .drop-zone.needs { border-color: #4CAF50; background: #F1F8E9; }
+    .drop-zone.wants { border-color: #FF6B35; background: #FFF3E0; }
+    .drop-zone h4 { font-size: 1.1rem; font-weight: 900; margin-bottom: 10px; }
+    .drop-zone.needs h4 { color: #2E7D32; }
+    .drop-zone.wants h4 { color: #E65100; }
+    .sort-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: #fff;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .sort-item:hover { border-color: #2196F3; background: #E3F2FD; transform: scale(1.05); }
+    .sort-item.placed-need  { border-color: #4CAF50; background: #E8F5E9; }
+    .sort-item.placed-want  { border-color: #FF6B35; background: #FFF3E0; }
+    .sort-item.correct-glow { animation: glow-green 0.6s ease; }
+    .sort-item.wrong-glow   { animation: glow-red 0.6s ease; }
+    @keyframes glow-green { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 12px #4CAF50} }
+    @keyframes glow-red   { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 12px #F44336} }
+
+    .nw-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .nw-box {
+      border-radius: 14px;
+      padding: 22px 18px;
+    }
+    .nw-box.need { background: #E8F5E9; border: 3px solid #4CAF50; }
+    .nw-box.want { background: #FFF3E0; border: 3px solid #FF6B35; }
+    .nw-box h3 { font-size: 1.2rem; margin-bottom: 10px; }
+    .nw-box.need h3 { color: #2E7D32; }
+    .nw-box.want h3 { color: #E65100; }
+    .nw-box ul { padding-left: 20px; font-size: 0.95rem; }
+    .nw-box ul li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="course-header">
+    <span class="lesson-badge">Lesson 4 of 7</span>
+    <span class="emoji">🤔</span>
+    <h1>Needs vs Wants</h1>
+    <p class="subtitle">Do I HAVE to have it, or do I just WANT it?</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-box">
+    <div class="story-title">📖 Story Time</div>
+    <p>Zara had saved <strong>20 coins</strong>! She went to the shop with her dad.</p>
+    <p>She saw SO many things she wanted: a toy dinosaur 🦕, a new colouring book 🎨,
+    yummy biscuits 🍪, and some new shoes 👟.</p>
+    <p>Her dad said: <em>"We only have 20 coins, Zara. Let's think — which things do you
+    <strong>need</strong>, and which are things you just <strong>want</strong>?"</em></p>
+    <p>Zara stopped and thought hard... 🤔</p>
+  </div>
+
+  <!-- Knowledge -->
+  <div class="card">
+    <h2>💡 Needs and Wants</h2>
+
+    <div class="nw-comparison">
+      <div class="nw-box need">
+        <h3>✅ A NEED</h3>
+        <p>Something you <strong>must</strong> have to be healthy and safe.</p>
+        <p>Without it, you could get sick or hurt.</p>
+        <ul>
+          <li>🍎 Food</li>
+          <li>💧 Water</li>
+          <li>🏠 A home</li>
+          <li>👕 Clothes</li>
+          <li>💊 Medicine when sick</li>
+        </ul>
+      </div>
+      <div class="nw-box want">
+        <h3>🌟 A WANT</h3>
+        <p>Something <strong>nice to have</strong> — but you can live happily without it.</p>
+        <p>It makes life more fun, but you don't need it to be safe.</p>
+        <ul>
+          <li>🦕 Toy dinosaur</li>
+          <li>🍩 Doughnuts</li>
+          <li>🎮 Video games</li>
+          <li>🎨 New colouring book</li>
+          <li>🍦 Ice cream</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="word">💡 The BIG question to ask yourself:</div>
+      <div class="meaning">"Would I get sick or hurt if I didn't have this?" <br>
+      If YES → it's probably a <strong>need</strong>. <br>
+      If NO → it's probably a <strong>want</strong>. 🤓</div>
+    </div>
+
+    <p><strong>Trick question:</strong> Are <em>new</em> shoes a need or a want? 🤔<br>
+    <em>Basic shoes</em> = a NEED (you need to protect your feet). But the <em>fanciest</em> shoes when you already have good ones = a WANT!</p>
+
+    <p class="source-cite">📚 Source: <a href="https://www.econedlink.org/resources/?grades=k-2&topics=personal-finance" target="_blank">Council for Economic Education — Financial Literacy K–2</a></p>
+  </div>
+
+  <!-- Sorting game -->
+  <div class="card">
+    <h2>🎮 Sorting Game!</h2>
+    <p>Click each item to put it in the right box — <strong>Need</strong> or <strong>Want</strong>!</p>
+
+    <div class="sort-container">
+      <div class="items-pool" id="items-pool">
+        <span class="sort-item" data-type="need" onclick="sortItem(this)">🍎 Apple</span>
+        <span class="sort-item" data-type="want" onclick="sortItem(this)">🎮 Video game</span>
+        <span class="sort-item" data-type="need" onclick="sortItem(this)">💧 Water</span>
+        <span class="sort-item" data-type="want" onclick="sortItem(this)">🍩 Doughnut</span>
+        <span class="sort-item" data-type="need" onclick="sortItem(this)">👕 T-shirt</span>
+        <span class="sort-item" data-type="want" onclick="sortItem(this)">🦕 Toy dino</span>
+        <span class="sort-item" data-type="need" onclick="sortItem(this)">🏠 A house</span>
+        <span class="sort-item" data-type="want" onclick="sortItem(this)">🍦 Ice cream</span>
+      </div>
+      <div class="drop-zones">
+        <div class="drop-zone needs" id="needs-zone">
+          <h4>✅ NEEDS</h4>
+        </div>
+        <div class="drop-zone wants" id="wants-zone">
+          <h4>🌟 WANTS</h4>
+        </div>
+      </div>
+    </div>
+    <p id="sort-result" style="font-weight:700; text-align:center; margin-top:10px; font-size:1.1rem;"></p>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>🎯 Quiz Time!</h2>
+    <p class="quiz-intro">Show me you know the difference! Click the right answer.</p>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q1 — Which one is a NEED?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">🍎 Food to eat every day</button>
+        <button class="quiz-btn">🎮 A brand new video game</button>
+        <button class="quiz-btn">🍫 A big chocolate bar</button>
+        <button class="quiz-btn">🛹 A skateboard</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! Food is a NEED — your body needs it every day to grow and be strong!</div>
+      <div class="feedback-box wrong">🙈 <strong>Food</strong> is the need! Your body must have food to be healthy!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q2 — Which one is a WANT?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">💧 Clean drinking water</button>
+        <button class="quiz-btn">👕 A warm winter coat</button>
+        <button class="quiz-btn">🏠 A safe house to live in</button>
+        <button class="quiz-btn">🦕 A toy dinosaur</button>
+      </div>
+      <div class="feedback-box correct">✅ Right! A toy dinosaur is a WANT — fun to have, but you don't need it to be safe!</div>
+      <div class="feedback-box wrong">🙈 The <strong>toy dinosaur</strong> is a want — it's lovely but not needed to stay healthy!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q3 — Zara has 10 coins. She needs food (8 coins) and wants a toy (6 coins). What should she buy FIRST?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">The toy, because it's more fun</button>
+        <button class="quiz-btn">Both at the same time</button>
+        <button class="quiz-btn">The food, because it's a need</button>
+        <button class="quiz-btn">Nothing at all</button>
+      </div>
+      <div class="feedback-box correct">✅ Smart thinking! Always buy what you NEED first. Then see if you have coins left for wants!</div>
+      <div class="feedback-box wrong">🙈 Always buy <strong>needs first</strong>! Food is a need, so it comes before the toy!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q4 — Is medicine a need or a want?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">A want — it's nice but not important</button>
+        <button class="quiz-btn">A need — it keeps you healthy when sick</button>
+        <button class="quiz-btn">Neither — it's something else</button>
+        <button class="quiz-btn">It depends on the flavour</button>
+      </div>
+      <div class="feedback-box correct">✅ Absolutely! Medicine is a NEED when you're sick — your body needs help to get better!</div>
+      <div class="feedback-box wrong">🙈 Medicine is a <strong>need</strong> when you're sick — it helps your body fight illness!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q5 — The BEST question to ask about any item is:</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">"Would I get sick or hurt without this?"</button>
+        <button class="quiz-btn">"Does it come in my favourite colour?"</button>
+        <button class="quiz-btn">"Has my friend got one already?"</button>
+        <button class="quiz-btn">"Is it on the top shelf?"</button>
+      </div>
+      <div class="feedback-box correct">✅ Perfect! Ask yourself: "Would I get sick or hurt without it?" That tells you if it's a need!</div>
+      <div class="feedback-box wrong">🙈 The smart question is: <strong>"Would I get sick or hurt without this?"</strong> That's how you spot a need!</div>
+    </div>
+
+    <div class="score-box">
+      <div class="score-number"></div>
+      <div class="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <h3>🌟 Real-Life Challenge!</h3>
+    <p>Walk around your home with a grown-up. Point to 3 things that are <strong>NEEDS</strong> and 3 things that are <strong>WANTS</strong>.</p>
+    <p>Can you explain <em>why</em> each one is a need or a want? 🗣️</p>
+    <p>You can even draw them in two columns: ✅ Needs | 🌟 Wants</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>🙋 Got a question?</strong><br>
+    Is something a need OR a want and you're not sure? Ask me — some things can be tricky!
+  </div>
+
+  <nav class="nav-bar">
+    <a href="0003-earning-money.html" class="nav-btn prev">⬅️ Previous</a>
+    <a href="../lessons/index.html" class="nav-btn home">🏠 All Lessons</a>
+    <a href="0005-saving-vs-spending.html" class="nav-btn next">Next Lesson ➡️</a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+let sortCount = 0;
+let sortCorrect = 0;
+const total = document.querySelectorAll('.sort-item').length;
+
+function sortItem(el) {
+  if (el.dataset.sorted) return;
+  el.dataset.sorted = '1';
+  const type = el.dataset.type;
+  const zone = document.getElementById(type + 's-zone');
+  zone.appendChild(el);
+
+  if (type === 'need') {
+    el.classList.add('placed-need', 'correct-glow');
+  } else {
+    el.classList.add('placed-want', 'correct-glow');
+  }
+  sortCorrect++;
+  sortCount++;
+
+  if (sortCount === total) {
+    const res = document.getElementById('sort-result');
+    if (sortCorrect === total) {
+      res.textContent = '🎉 You sorted ALL of them correctly! Amazing work!';
+      res.style.color = '#2E7D32';
+    } else {
+      res.textContent = '👏 Great try! ' + sortCorrect + '/' + total + ' correct!';
+      res.style.color = '#FF6B35';
+    }
+  }
+}
+</script>
+</body>
+</html>

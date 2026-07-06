@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mental Model #46 — Normal Distribution</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="progress-bar">
+    <div class="progress-bar__fill" style="width: 92%"></div>
+  </div>
+
+  <p class="course-tag">Mental Models · Lesson 46 of 50</p>
+  <div class="model-badge"># 46 of 50</div>
+  <h1>Normal Distribution</h1>
+  <p class="subtitle">Most outcomes cluster around the average — with rare extremes at each end</p>
+
+  <h2>The Big Idea</h2>
+
+  <p>
+    Imagine you lined up every adult in your city by height, shortest on the left, tallest on the right.
+    What would you see? A few very short people. A few very tall people.
+    And a huge crowd of people in the middle, clustered around average height.
+    That shape — like a hill or a bell — is the normal distribution.
+  </p>
+
+  <div class="big-idea">
+    Normal Distribution = most outcomes cluster near the middle, with fewer and fewer at the extremes.<br>
+    Also called the bell curve. Average is the most common outcome.
+  </div>
+
+  <p>
+    This pattern appears everywhere in nature: height, weight, test scores, reaction times, and many measurements in science.
+    Understanding it helps you know when something is genuinely unusual.
+    If you score in the top 5% of something, you are genuinely rare.
+    Most people, most of the time, end up somewhere near the middle — and that is not a failure. It is the mathematics of natural variation.
+  </p>
+
+  <h2>The Trap: Assuming Everything Is a Bell Curve When It Isn't</h2>
+
+  <p>
+    The bell curve is real and useful — but it only applies to certain kinds of data.
+    Many important things in modern life do NOT follow a normal distribution.
+    Wealth, social media followers, company valuations, book sales, and city populations
+    all follow what's called a power law: a tiny number of people or things hold most of the value,
+    and the rest have very little.
+  </p>
+  <p>
+    This is why it was so catastrophic when financial models assumed that market crashes follow a bell curve.
+    Extreme events — the kind that would be six or seven standard deviations from average in a normal distribution —
+    happen far more often in financial markets than the bell curve predicts.
+    Never assume the bell curve applies without checking first.
+  </p>
+
+  <h2>Real-Life Examples</h2>
+
+  <div class="examples">
+
+    <div class="example">
+      <div class="example__label">Example 1 — Heights in a Population</div>
+      <div class="example__text">
+        The average height for adult men in the UK is about 5 feet 9 inches (175 cm).
+        Most men fall between 5 feet 6 and 6 feet. Very few are shorter than 5 feet 2 or taller than 6 feet 4.
+        If you meet someone who is 6 feet 7, it feels remarkable — because it is.
+        They are sitting in the far right tail of the bell curve, where almost nobody lives.
+        The bell curve explains why being very tall or very short makes you stand out.
+        Extremes are genuinely rare by definition.
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example__label">Example 2 — Exam Scores in a Class</div>
+      <div class="example__text">
+        In a well-designed exam taken by a large class, you usually see a bell curve of scores.
+        A handful of students ace it. A handful struggle badly. Most cluster somewhere in the middle.
+        Teachers use this to set fair grades — they look for where the main cluster sits and calibrate from there.
+        If you scored in the top 10%, the distribution tells you something important:
+        only one person in ten matched or beat your score. That is meaningfully good, not just slightly above average.
+        The bell curve turns raw numbers into context.
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example__label">Example 3 — Where the Bell Curve Fails: Wealth</div>
+      <div class="example__text">
+        If wealth followed a normal distribution, extreme wealth would be essentially impossible.
+        The richest person in the world would be perhaps three or four times richer than the average person.
+        But we know that isn't true. A handful of people hold more wealth than billions of others combined.
+        Wealth follows a power law — where winners take an enormous share and most people have very little.
+        This is why financial planning models that assumed bell-curve returns were dangerously wrong in 2008.
+        When the data doesn't look bell-shaped, don't use bell-curve thinking.
+      </div>
+    </div>
+
+  </div>
+
+  <h2>How To Use It (3 Steps)</h2>
+
+  <p><strong>Step 1 — Ask what the distribution looks like.</strong> Before you make any prediction about outcomes, ask: is this the kind of data that would form a bell curve, or could it be a power law? Heights and test scores: bell curve. Wealth and viral content: power law.</p>
+  <p><strong>Step 2 — Calibrate what "unusual" means.</strong> If you are measuring yourself against others — in skill, performance, or results — use the distribution to understand how rare your position actually is. Being in the top 10% is one-in-ten. Top 1% is one-in-a-hundred.</p>
+  <p><strong>Step 3 — Respect the tails.</strong> Even in a true bell curve, extreme events happen. They are rare, not impossible. Always leave room in your planning for outcomes that sit far from average — in both directions.</p>
+
+  <div class="ask-teacher">
+    💬 <strong>Ask your teacher anything!</strong> If anything here is confusing, just type your question — your teacher (the AI) will explain it in a different way.
+  </div>
+
+  <!-- QUIZ 1 -->
+  <div class="quiz"
+    data-correct="0"
+    data-correct-msg="✓ Correct! A normal distribution clusters most outcomes near the average, with rare results at each extreme end."
+    data-wrong-msg="✗ Not quite. Think about that line of people sorted by height — where do most of them end up? Try again!">
+    <div class="quiz__header">Quiz — Question 1 of 3</div>
+    <div class="quiz__question">
+      What does a normal distribution (bell curve) look like?
+    </div>
+    <div class="quiz__options">
+      <button class="quiz__option">Most outcomes are near the average, with rare extremes</button>
+      <button class="quiz__option">Every outcome is equally likely across the entire range</button>
+      <button class="quiz__option">A few big winners take most of the total value available</button>
+      <button class="quiz__option">Outcomes pile up at both extreme ends of the full range</button>
+    </div>
+    <div class="quiz__feedback"></div>
+    <button class="quiz__retry">↩ Try again</button>
+    <div class="quiz__score"></div>
+  </div>
+
+  <!-- QUIZ 2 -->
+  <div class="quiz"
+    data-correct="2"
+    data-correct-msg="✓ Exactly! In a bell curve, the top 5% is genuinely rare — almost nobody else reached your score. That is unusual."
+    data-wrong-msg="✗ Think about what the shape of the bell curve tells you about how many people sit at each score level. Try again!">
+    <div class="quiz__header">Quiz — Question 2 of 3</div>
+    <div class="quiz__question">
+      You score in the top 5% of a test. What does the bell curve tell you about this?
+    </div>
+    <div class="quiz__options">
+      <button class="quiz__option">Most people found the test easy and scored near your level</button>
+      <button class="quiz__option">The average score on this test was very high across the class</button>
+      <button class="quiz__option">Your result is genuinely unusual — almost nobody scored higher</button>
+      <button class="quiz__option">The test was too easy and the full results are not very valid</button>
+    </div>
+    <div class="quiz__feedback"></div>
+    <button class="quiz__retry">↩ Try again</button>
+    <div class="quiz__score"></div>
+  </div>
+
+  <!-- QUIZ 3 -->
+  <div class="quiz"
+    data-correct="1"
+    data-correct-msg="✓ Right! Wealth and many real-world things follow power laws, not bell curves — assuming otherwise leads to dangerous errors."
+    data-wrong-msg="✗ Think about what financial crises revealed about bell-curve assumptions in the real world. Try again!">
+    <div class="quiz__header">Quiz — Question 3 of 3</div>
+    <div class="quiz__question">
+      Why is it dangerous to assume that everything follows a normal bell curve?
+    </div>
+    <div class="quiz__options">
+      <button class="quiz__option">Bell curves make statistical calculations much too complex</button>
+      <button class="quiz__option">Some things like wealth follow power laws, not bell shapes</button>
+      <button class="quiz__option">Bell curves always overestimate how common average results are</button>
+      <button class="quiz__option">Most natural data actually follows a flat, random distribution</button>
+    </div>
+    <div class="quiz__feedback"></div>
+    <button class="quiz__retry">↩ Try again</button>
+    <div class="quiz__score"></div>
+  </div>
+
+  <!-- SOURCE -->
+  <div class="source">
+    <strong>Primary source:</strong>
+    <a href="https://fs.blog/mental-models/" target="_blank">Farnam Street — Mental Models</a><br>
+    Also recommended: <a href="https://fs.blog/mental-models/" target="_blank">Farnam Street — Mental Models</a>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <div class="next-steps">
+    <h2>What's Next</h2>
+    <p>You've learned how the bell curve describes natural variation — and where it fails. Next up: <strong>Black Swan</strong> — the rare, extreme events that nobody predicted but that change everything.</p>
+    <div class="nav-links">
+      <a class="nav-link" href="0045-inertia.html">← Inertia</a>
+      <a class="nav-link primary" href="0047-black-swan.html">Next: Black Swan →</a>
+      <a class="nav-link" href="../reference/mental-models-overview.html">All 50 Models</a>
+    </div>
+  </div>
+
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

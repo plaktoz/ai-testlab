@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3 — Earning Money | Money School</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .chore-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .chore-card {
+      background: #fff;
+      border: 3px solid #e0e0e0;
+      border-radius: 14px;
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .chore-card:hover { border-color: #FFD93D; background: #FFFDE7; transform: translateY(-3px); }
+    .chore-card.selected { border-color: #4CAF50; background: #E8F5E9; }
+    .chore-card .chore-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+    .chore-card .chore-coins { font-size: 0.8rem; color: #FF6B35; margin-top: 4px; }
+    .earn-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .earn-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .earn-row .job { flex: 1; font-weight: 600; }
+    .earn-row .coins { font-size: 1.3rem; letter-spacing: 4px; }
+    .earn-row .amount { font-weight: 700; color: #FF6B35; min-width: 60px; text-align: right; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="course-header">
+    <span class="lesson-badge">Lesson 3 of 7</span>
+    <span class="emoji">💪</span>
+    <h1>Earning Money</h1>
+    <p class="subtitle">Work hard → earn coins → get things you want!</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-box">
+    <div class="story-title">📖 Story Time</div>
+    <p>Zara the koala really, really wanted a new puzzle. It cost <strong>10 coins</strong>.</p>
+    <p>She asked her mum: <em>"Can I have 10 coins?"</em></p>
+    <p>Mum smiled and said: <em>"I'll give you coins when you help around the house!
+    That way, you <strong>earn</strong> them — just like I do at work!"</em></p>
+    <p>Zara thought about it... <em>"So if I do chores, I get coins? And then I can buy my puzzle?!"</em></p>
+    <p>Mum nodded. Zara jumped up and got to work! 💨🧹</p>
+  </div>
+
+  <!-- Knowledge -->
+  <div class="card">
+    <h2>💡 What Does "Earning" Mean?</h2>
+    <p><strong>Earning</strong> means you do a job or help someone, and they give you money to say <em>"thank you!"</em></p>
+
+    <div class="definition-box">
+      <div class="word">💡 Earn</div>
+      <div class="meaning">To get money by doing work or helping others.</div>
+    </div>
+
+    <p>Grown-ups earn money by going to <strong>work</strong> every day — like being a doctor, teacher, or baker.
+    When you're young, you can earn money by helping at home — these are called <strong>chores</strong>!</p>
+
+    <h3>🏠 Chores Zara can do to earn coins:</h3>
+    <p>Click the chores that sound like ones YOU could do! 👇</p>
+
+    <div class="chore-grid">
+      <div class="chore-card" onclick="this.classList.toggle('selected')">
+        <span class="chore-emoji">🛏️</span>
+        Make the bed
+        <div class="chore-coins">🪙 1 coin</div>
+      </div>
+      <div class="chore-card" onclick="this.classList.toggle('selected')">
+        <span class="chore-emoji">🧹</span>
+        Sweep the floor
+        <div class="chore-coins">🪙🪙 2 coins</div>
+      </div>
+      <div class="chore-card" onclick="this.classList.toggle('selected')">
+        <span class="chore-emoji">🍽️</span>
+        Set the table
+        <div class="chore-coins">🪙 1 coin</div>
+      </div>
+      <div class="chore-card" onclick="this.classList.toggle('selected')">
+        <span class="chore-emoji">🐾</span>
+        Feed the pet
+        <div class="chore-coins">🪙🪙 2 coins</div>
+      </div>
+      <div class="chore-card" onclick="this.classList.toggle('selected')">
+        <span class="chore-emoji">🌿</span>
+        Water plants
+        <div class="chore-coins">🪙 1 coin</div>
+      </div>
+      <div class="chore-card" onclick="this.classList.toggle('selected')">
+        <span class="chore-emoji">📦</span>
+        Tidy toys away
+        <div class="chore-coins">🪙🪙 2 coins</div>
+      </div>
+    </div>
+
+    <h3>📊 How it all adds up:</h3>
+    <div class="earn-chart">
+      <div class="earn-row">
+        <span style="font-size:1.4rem">🛏️</span>
+        <span class="job">Make the bed (Mon–Fri)</span>
+        <span class="coins">🪙🪙🪙🪙🪙</span>
+        <span class="amount">5 coins</span>
+      </div>
+      <div class="earn-row">
+        <span style="font-size:1.4rem">🍽️</span>
+        <span class="job">Set the table (Mon–Fri)</span>
+        <span class="coins">🪙🪙🪙🪙🪙</span>
+        <span class="amount">5 coins</span>
+      </div>
+      <div class="earn-row" style="background:#FFF8E1; border: 2px solid #FFD93D;">
+        <span style="font-size:1.4rem">🏆</span>
+        <span class="job"><strong>Total for the week!</strong></span>
+        <span class="coins">🪙🪙🪙🪙🪙🪙🪙🪙🪙🪙</span>
+        <span class="amount" style="color:#2E7D32; font-size:1.2rem">10 coins!</span>
+      </div>
+    </div>
+    <p><strong>Zara did it! 🎉</strong> After one week of chores, she had enough for her puzzle!</p>
+
+    <p class="source-cite">📚 Source: <a href="https://www.consumerfinance.gov/consumer-tools/money-as-you-grow/" target="_blank">CFPB — Money as You Grow (Ages 3–5)</a></p>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>🎯 Quiz Time!</h2>
+    <p class="quiz-intro">Think carefully! Pick the best answer for each question.</p>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q1 — What does it mean to EARN money?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Find it on the floor</button>
+        <button class="quiz-btn">Ask someone to give it</button>
+        <button class="quiz-btn">Get money by doing work</button>
+        <button class="quiz-btn">Wish for it very hard</button>
+      </div>
+      <div class="feedback-box correct">✅ That's right! Earning means doing work and getting paid for it! 💪</div>
+      <div class="feedback-box wrong">🙈 Earning means <strong>getting money by doing work</strong> — like chores or a job!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q2 — What is a CHORE?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">A type of sweet candy</button>
+        <button class="quiz-btn">A helpful job you do at home</button>
+        <button class="quiz-btn">A special dance move</button>
+        <button class="quiz-btn">A kind of singing</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! A chore is a helpful job at home — like sweeping or making your bed!</div>
+      <div class="feedback-box wrong">🙈 A <strong>chore</strong> is a helpful job at home — like sweeping, tidying, or watering plants!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q3 — Zara earns 2 coins each day. How many coins does she have after 3 days?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">6 coins</button>
+        <button class="quiz-btn">5 coins</button>
+        <button class="quiz-btn">2 coins</button>
+        <button class="quiz-btn">9 coins</button>
+      </div>
+      <div class="feedback-box correct">✅ Amazing maths! 2 + 2 + 2 = 6! You're brilliant! 🧮</div>
+      <div class="feedback-box wrong">🙈 2 coins × 3 days = <strong>6 coins</strong>! Count with your fingers: 2, 4, 6!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q4 — Why do grown-ups go to work?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Because they like waking up early</button>
+        <button class="quiz-btn">To avoid eating breakfast</button>
+        <button class="quiz-btn">To get away from the house</button>
+        <button class="quiz-btn">To earn money for the family</button>
+      </div>
+      <div class="feedback-box correct">✅ Exactly right! Grown-ups work to earn money so the family can buy food, clothes, and a home!</div>
+      <div class="feedback-box wrong">🙈 Grown-ups work to <strong>earn money for the family</strong> — to pay for food, clothes, and a home!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q5 — Which is an example of EARNING money?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Finding a coin on the footpath</button>
+        <button class="quiz-btn">Washing the dishes and getting paid</button>
+        <button class="quiz-btn">Borrowing money from a friend</button>
+        <button class="quiz-btn">Getting a birthday gift</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! Washing dishes + getting paid = earning! You did a job and got rewarded! 🙌</div>
+      <div class="feedback-box wrong">🙈 <strong>Earning</strong> is doing a job and getting paid — like washing dishes and receiving coins!</div>
+    </div>
+
+    <div class="score-box">
+      <div class="score-number"></div>
+      <div class="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <h3>🌟 Real-Life Challenge!</h3>
+    <p>Talk to a grown-up about <strong>one chore</strong> you can do this week to earn a small amount of money.</p>
+    <p>Write it down (or draw it!) and put it somewhere you can see — like the fridge. 📋</p>
+    <p>When you do it, collect your coins and keep them safe! 💰</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>🙋 Got a question?</strong><br>
+    Wondering how much a chore should earn? Ask me and we can work it out together!
+  </div>
+
+  <nav class="nav-bar">
+    <a href="0002-coins-and-bills.html" class="nav-btn prev">⬅️ Previous</a>
+    <a href="../lessons/index.html" class="nav-btn home">🏠 All Lessons</a>
+    <a href="0004-needs-vs-wants.html" class="nav-btn next">Next Lesson ➡️</a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

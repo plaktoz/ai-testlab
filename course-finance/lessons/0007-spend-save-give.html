@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 7 — Spend, Save, Give | Money School</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .jar-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+    .jar {
+      width: 170px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .jar-glass {
+      width: 130px;
+      height: 180px;
+      margin: 0 auto;
+      border-radius: 0 0 24px 24px;
+      border: 4px solid #ccc;
+      border-top: none;
+      position: relative;
+      overflow: hidden;
+      background: #f9f9f9;
+      display: flex;
+      align-items: flex-end;
+    }
+    .jar-fill {
+      width: 100%;
+      transition: height 0.4s ease;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      padding-bottom: 6px;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      line-height: 1.6;
+    }
+    .jar-fill.spend-fill { background: linear-gradient(0deg, #FF6B35 0%, #FFB347 100%); }
+    .jar-fill.save-fill  { background: linear-gradient(0deg, #4CAF50 0%, #A5D6A7 100%); }
+    .jar-fill.give-fill  { background: linear-gradient(0deg, #9C27B0 0%, #CE93D8 100%); }
+    .jar-lid {
+      width: 150px;
+      height: 22px;
+      border-radius: 8px;
+      margin: 0 auto;
+    }
+    .jar-lid.spend-lid { background: #FF6B35; }
+    .jar-lid.save-lid  { background: #4CAF50; }
+    .jar-lid.give-lid  { background: #9C27B0; }
+    .jar-label { font-weight: 900; font-size: 1rem; margin-top: 8px; }
+    .jar-amount { font-size: 0.85rem; color: #888; margin-top: 4px; }
+    .jar.spend-jar .jar-label { color: #E65100; }
+    .jar.save-jar  .jar-label { color: #2E7D32; }
+    .jar.give-jar  .jar-label { color: #6A1B9A; }
+
+    .coin-to-drop {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #FFF8E1;
+      border: 2px solid #FFD93D;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .coin-to-drop:hover { transform: scale(1.05); background: #FFFDE7; }
+    .coin-to-drop.used { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    .drop-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 16px 0; }
+    .drop-btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .drop-btn:hover { opacity: 0.85; transform: translateY(-2px); }
+    .drop-btn.spend { background: #FF6B35; color: #fff; }
+    .drop-btn.save  { background: #4CAF50; color: #fff; }
+    .drop-btn.give  { background: #9C27B0; color: #fff; }
+
+    .rule-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .rule-card {
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .rule-card.spend { background: #FFF3E0; border: 3px solid #FF6B35; }
+    .rule-card.save  { background: #E8F5E9; border: 3px solid #4CAF50; }
+    .rule-card.give  { background: #F3E5F5; border: 3px solid #9C27B0; }
+    .rule-card .rc-emoji { font-size: 2.5rem; margin-bottom: 8px; display: block; }
+    .rule-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .rule-card.spend h3 { color: #E65100; }
+    .rule-card.save  h3 { color: #2E7D32; }
+    .rule-card.give  h3 { color: #6A1B9A; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="course-header">
+    <span class="lesson-badge">Lesson 7 of 7 — FINAL LESSON!</span>
+    <span class="emoji">🏆</span>
+    <h1>Spend · Save · Give</h1>
+    <p class="subtitle">The three magic jars that make you a money champion!</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot active"></div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-box">
+    <div class="story-title">📖 Story Time — The Big Finish!</div>
+    <p>Zara's grandpa came to visit. He brought her a birthday gift — <strong>30 coins</strong>! 😲</p>
+    <p>Zara remembered everything she had learned. She took three jars from the cupboard and
+    put a sticker on each one:</p>
+    <ul style="margin: 10px 0 10px 24px;">
+      <li>🛍️ <strong>SPEND</strong> — for things I want now</li>
+      <li>🐷 <strong>SAVE</strong> — for something big later</li>
+      <li>❤️ <strong>GIVE</strong> — to help others</li>
+    </ul>
+    <p>She carefully put <strong>10 coins in each jar</strong>. Her grandpa watched, then said:</p>
+    <p><em>"Zara, you are already smarter about money than most grown-ups I know."</em> 🌟</p>
+  </div>
+
+  <!-- Knowledge -->
+  <div class="card">
+    <h2>💡 The Three-Jar System</h2>
+    <p>When you get money — from chores, birthdays, or gifts — split it into <strong>three parts</strong>:</p>
+
+    <div class="rule-cards">
+      <div class="rule-card spend">
+        <span class="rc-emoji">🛍️</span>
+        <h3>SPEND</h3>
+        <p>Use this for small things you want right now — a snack, a small toy, a book.</p>
+        <p><strong>About 1/3 of your money</strong></p>
+      </div>
+      <div class="rule-card save">
+        <span class="rc-emoji">🐷</span>
+        <h3>SAVE</h3>
+        <p>Keep this for a bigger goal — something special you're working towards.</p>
+        <p><strong>About 1/3 of your money</strong></p>
+      </div>
+      <div class="rule-card give">
+        <span class="rc-emoji">❤️</span>
+        <h3>GIVE</h3>
+        <p>Share a little with people who need help — a charity, a friend, or a food bank.</p>
+        <p><strong>About 1/3 of your money</strong></p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="word">💡 Why Give?</div>
+      <div class="meaning">Giving feels AMAZING. Science shows that when we help others,
+      our brains release happy chemicals. You feel warm and proud. 🤩<br>
+      Giving also reminds us that money isn't just about us — it can change someone's day!</div>
+    </div>
+
+    <p class="source-cite">📚 Source: <a href="https://www.consumerfinance.gov/consumer-tools/money-as-you-grow/" target="_blank">CFPB — Money as You Grow</a> &amp; <a href="https://www.pbs.org/parents/thrive/how-to-teach-kids-about-money-at-every-age" target="_blank">PBS Parents</a></p>
+  </div>
+
+  <!-- Jar game -->
+  <div class="card">
+    <h2>🎮 Fill the Jars!</h2>
+    <p>You have <strong>12 coins</strong>. Click a button to put 1 coin into each jar. Try to fill each jar with <strong>4 coins each</strong>!</p>
+
+    <div class="jar-container">
+      <div class="jar spend-jar">
+        <div class="jar-lid spend-lid"></div>
+        <div class="jar-glass">
+          <div class="jar-fill spend-fill" id="spend-fill" style="height:0%"></div>
+        </div>
+        <div class="jar-label">🛍️ SPEND</div>
+        <div class="jar-amount" id="spend-amt">0 coins</div>
+      </div>
+      <div class="jar save-jar">
+        <div class="jar-lid save-lid"></div>
+        <div class="jar-glass">
+          <div class="jar-fill save-fill" id="save-fill" style="height:0%"></div>
+        </div>
+        <div class="jar-label">🐷 SAVE</div>
+        <div class="jar-amount" id="save-amt">0 coins</div>
+      </div>
+      <div class="jar give-jar">
+        <div class="jar-lid give-lid"></div>
+        <div class="jar-glass">
+          <div class="jar-fill give-fill" id="give-fill" style="height:0%"></div>
+        </div>
+        <div class="jar-label">❤️ GIVE</div>
+        <div class="jar-amount" id="give-amt">0 coins</div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-bottom:16px;">
+      <strong>Coins left: <span id="coins-left">12</span> 🪙</strong>
+    </div>
+
+    <div class="drop-btns">
+      <button class="drop-btn spend" onclick="addToJar('spend')">🛍️ Add to SPEND</button>
+      <button class="drop-btn save"  onclick="addToJar('save')">🐷 Add to SAVE</button>
+      <button class="drop-btn give"  onclick="addToJar('give')">❤️ Add to GIVE</button>
+    </div>
+
+    <div id="jar-result" style="text-align:center; font-weight:700; font-size:1.1rem; margin-top:12px;"></div>
+  </div>
+
+  <!-- Grand Quiz -->
+  <div class="quiz-section">
+    <h2>🏆 Grand Final Quiz!</h2>
+    <p class="quiz-intro">This is the BIG quiz — covering EVERYTHING you've learned! You've got this! 💪</p>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q1 — What are the THREE jars called?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Stop, Wait, Go</button>
+        <button class="quiz-btn">Spend, Save, Give</button>
+        <button class="quiz-btn">Eat, Sleep, Play</button>
+        <button class="quiz-btn">Big, Medium, Small</button>
+      </div>
+      <div class="feedback-box correct">✅ Perfect! Spend, Save, Give — the three magic jars! 🛍️🐷❤️</div>
+      <div class="feedback-box wrong">🙈 The three jars are: <strong>Spend, Save, Give</strong>! Say it out loud: Spend, Save, Give!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q2 — Why do we have a GIVE jar?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">To throw coins at birds</button>
+        <button class="quiz-btn">To have the most coins in the class</button>
+        <button class="quiz-btn">To share with people who need help</button>
+        <button class="quiz-btn">To keep coins cool in summer</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! Giving helps others AND makes YOU feel wonderful! Kindness is powerful! ❤️</div>
+      <div class="feedback-box wrong">🙈 The Give jar is for <strong>sharing with people who need help</strong> — and it feels amazing to give!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q3 — Zara gets 9 coins. She splits them equally into 3 jars. How many coins per jar?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">3 coins each</button>
+        <button class="quiz-btn">9 coins each</button>
+        <button class="quiz-btn">1 coin each</button>
+        <button class="quiz-btn">6 coins each</button>
+      </div>
+      <div class="feedback-box correct">✅ Brilliant maths! 9 ÷ 3 = 3 coins in each jar! You're so clever! 🧮🌟</div>
+      <div class="feedback-box wrong">🙈 9 ÷ 3 = <strong>3 coins each</strong>! Divide the total coins by the number of jars!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q4 — Which jar do you use for saving up to buy a bicycle?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">The SPEND jar</button>
+        <button class="quiz-btn">The GIVE jar</button>
+        <button class="quiz-btn">Any jar — it doesn't matter</button>
+        <button class="quiz-btn">The SAVE jar</button>
+      </div>
+      <div class="feedback-box correct">✅ Correct! The SAVE jar is for big goals — like saving up for a bicycle! 🐷🚲</div>
+      <div class="feedback-box wrong">🙈 Use the <strong>SAVE jar</strong> for big goals! It's where your future dreams live! 🚲</div>
+    </div>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q5 — Money comes from ___</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Trees in the garden</button>
+        <button class="quiz-btn">Doing work and earning it</button>
+        <button class="quiz-btn">Wishing on a star</button>
+        <button class="quiz-btn">Growing in the fridge</button>
+      </div>
+      <div class="feedback-box correct">✅ Exactly right! Money comes from working — chores at home, or a job when you're grown up! 💪</div>
+      <div class="feedback-box wrong">🙈 Money comes from <strong>doing work and earning it</strong> — chores for you, jobs for grown-ups!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q6 — A NEED is different from a WANT because:</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Needs are always cheaper</button>
+        <button class="quiz-btn">Wants come in nicer colours</button>
+        <button class="quiz-btn">Without a need you could get sick or hurt</button>
+        <button class="quiz-btn">Needs are more fun to play with</button>
+      </div>
+      <div class="feedback-box correct">✅ That's it! A need keeps you healthy and safe — without it, something bad could happen!</div>
+      <div class="feedback-box wrong">🙈 A need is something you <strong>must have to stay healthy and safe</strong> — like food, water, and shelter!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q7 — True or False: A penny is worth MORE than a quarter.</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">False — a quarter is worth more!</button>
+        <button class="quiz-btn">True — pennies are bigger</button>
+        <button class="quiz-btn">They are worth the same</button>
+        <button class="quiz-btn">It depends on the shop</button>
+      </div>
+      <div class="feedback-box correct">✅ False! A quarter (25¢) is worth WAY more than a penny (1¢). Size doesn't mean more! 🌟</div>
+      <div class="feedback-box wrong">🙈 <strong>False!</strong> A quarter (25¢) is worth much more than a penny (1¢) — always check the number!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q8 — What is the BEST thing to do with money you've just earned?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Spend it all straight away on sweets</button>
+        <button class="quiz-btn">Hide it under your bed and never use it</button>
+        <button class="quiz-btn">Give it all away immediately</button>
+        <button class="quiz-btn">Split it into Spend, Save, and Give jars</button>
+      </div>
+      <div class="feedback-box correct">✅ You've learned everything! Split it up — a little to spend, some to save, some to give! CHAMPION! 🏆</div>
+      <div class="feedback-box wrong">🙈 The BEST move: <strong>split it — Spend some, Save some, Give some!</strong> Balance is the key!</div>
+    </div>
+
+    <div class="score-box">
+      <div class="score-number"></div>
+      <div class="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Graduation message -->
+  <div class="card" style="background: linear-gradient(135deg, #FFF8E1, #FFF3E0); border: 3px solid #FFD93D; text-align: center;">
+    <h2>🎓 Congratulations, Money Champion!</h2>
+    <p style="font-size:3rem;">🏆🌟💰</p>
+    <p>You've finished <strong>all 7 lessons</strong>! You now know:</p>
+    <ul style="text-align:left; display:inline-block; margin: 16px 0;">
+      <li>✅ What money is and what it looks like</li>
+      <li>✅ How to recognise coins and bills</li>
+      <li>✅ That money is earned through hard work</li>
+      <li>✅ The difference between needs and wants</li>
+      <li>✅ How to save instead of spending everything</li>
+      <li>✅ How to set a savings goal and reach it</li>
+      <li>✅ How to use the Spend · Save · Give system</li>
+    </ul>
+    <p style="font-size:1.2rem; font-weight:700; margin-top:16px;">You are already amazing with money. Keep practising! 💪</p>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <h3>🌟 Final Real-Life Challenge!</h3>
+    <p>Get three jars (or boxes, or envelopes). Label them: <strong>Spend</strong> 🛍️, <strong>Save</strong> 🐷, <strong>Give</strong> ❤️.</p>
+    <p>Next time you get any money, split it into the three jars. Even 3 coins — 1 in each — is a great start!</p>
+    <p>Ask a grown-up to help you decide on a SAVE goal and a GIVE cause. 🌍</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>🙋 Questions? Keep learning!</strong><br>
+    You can always ask me anything about money. Great learners keep asking questions — forever!
+  </div>
+
+  <nav class="nav-bar">
+    <a href="0006-saving-for-a-goal.html" class="nav-btn prev">⬅️ Previous</a>
+    <a href="../lessons/index.html" class="nav-btn home">🏠 All Lessons</a>
+    <a href="../reference/glossary.html" class="nav-btn next">📖 Glossary ➡️</a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+const jars = { spend: 0, save: 0, give: 0 };
+let coinsLeft = 12;
+const MAX_EACH = 4;
+
+function addToJar(type) {
+  if (coinsLeft <= 0) return;
+  if (jars[type] >= MAX_EACH) {
+    document.getElementById('jar-result').textContent = '⚠️ That jar is full! Try another jar.';
+    document.getElementById('jar-result').style.color = '#FF6B35';
+    return;
+  }
+  jars[type]++;
+  coinsLeft--;
+  document.getElementById('coins-left').textContent = coinsLeft;
+  document.getElementById(type + '-amt').textContent = jars[type] + ' coins';
+
+  const pct = (jars[type] / MAX_EACH) * 100;
+  document.getElementById(type + '-fill').style.height = pct + '%';
+
+  const res = document.getElementById('jar-result');
+  if (coinsLeft === 0) {
+    if (jars.spend === 4 && jars.save === 4 && jars.give === 4) {
+      res.textContent = '🎉 Perfect split! 4 in each jar — you are a money champion! 🏆';
+      res.style.color = '#2E7D32';
+    } else {
+      res.textContent = '👍 All coins placed! Great job splitting your money into jars!';
+      res.style.color = '#FF6B35';
+    }
+  } else {
+    res.textContent = '';
+  }
+}
+</script>
+</body>
+</html>

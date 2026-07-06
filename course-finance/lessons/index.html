@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money School — All Lessons</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .lesson-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .lesson-entry {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s;
+      border: 3px solid transparent;
+    }
+    .lesson-entry:hover { border-color: var(--orange); transform: translateX(6px); box-shadow: 0 4px 18px rgba(0,0,0,0.13); }
+    .lesson-num {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--yellow), var(--orange));
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    }
+    .lesson-info { flex: 1; }
+    .lesson-info h3 { font-size: 1.1rem; font-weight: 900; margin-bottom: 4px; color: #333; }
+    .lesson-info p  { font-size: 0.88rem; color: #888; margin: 0; }
+    .lesson-emoji { font-size: 1.8rem; flex-shrink: 0; }
+
+    .ref-link {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-top: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s;
+    }
+    .ref-link:hover { transform: translateX(6px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .ref-link .ref-icon { font-size: 2rem; }
+    .ref-link h3 { font-size: 1rem; font-weight: 900; color: #3949AB; margin-bottom: 2px; }
+    .ref-link p  { font-size: 0.85rem; color: #5C6BC0; margin: 0; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <header class="course-header">
+    <span class="emoji">🏫</span>
+    <h1>Money School</h1>
+    <p class="subtitle">7 fun lessons to become a money champion! 🏆</p>
+  </header>
+
+  <div class="card">
+    <h2>👋 Welcome, Money Learner!</h2>
+    <p>This course will teach you everything you need to know about money — what it is, how to earn it, and how to be really smart with it!</p>
+    <p>Each lesson takes about <strong>10–15 minutes</strong>. There are fun stories, games, and quizzes in every single one. Start at Lesson 1 and go in order — each one builds on the last! 🚀</p>
+  </div>
+
+  <div class="lesson-list">
+    <a href="0001-what-is-money.html" class="lesson-entry">
+      <div class="lesson-num">1</div>
+      <span class="lesson-emoji">💰</span>
+      <div class="lesson-info">
+        <h3>What is Money?</h3>
+        <p>Discover why money exists and how trading led to coins and bills.</p>
+      </div>
+    </a>
+
+    <a href="0002-coins-and-bills.html" class="lesson-entry">
+      <div class="lesson-num">2</div>
+      <span class="lesson-emoji">🪙</span>
+      <div class="lesson-info">
+        <h3>Coins and Bills</h3>
+        <p>Learn to recognise every coin and bill by name and value.</p>
+      </div>
+    </a>
+
+    <a href="0003-earning-money.html" class="lesson-entry">
+      <div class="lesson-num">3</div>
+      <span class="lesson-emoji">💪</span>
+      <div class="lesson-info">
+        <h3>Earning Money</h3>
+        <p>Find out how chores and hard work turn into coins in your pocket!</p>
+      </div>
+    </a>
+
+    <a href="0004-needs-vs-wants.html" class="lesson-entry">
+      <div class="lesson-num">4</div>
+      <span class="lesson-emoji">🤔</span>
+      <div class="lesson-info">
+        <h3>Needs vs Wants</h3>
+        <p>Master the most important money question: do I HAVE to have it?</p>
+      </div>
+    </a>
+
+    <a href="0005-saving-vs-spending.html" class="lesson-entry">
+      <div class="lesson-num">5</div>
+      <span class="lesson-emoji">🐷</span>
+      <div class="lesson-info">
+        <h3>Saving vs Spending</h3>
+        <p>Discover the magic of the piggy bank and the Golden Rule of money!</p>
+      </div>
+    </a>
+
+    <a href="0006-saving-for-a-goal.html" class="lesson-entry">
+      <div class="lesson-num">6</div>
+      <span class="lesson-emoji">🎯</span>
+      <div class="lesson-info">
+        <h3>Saving for a Goal</h3>
+        <p>Pick something you really want and make a plan to save up for it!</p>
+      </div>
+    </a>
+
+    <a href="0007-spend-save-give.html" class="lesson-entry">
+      <div class="lesson-num">7</div>
+      <span class="lesson-emoji">🏆</span>
+      <div class="lesson-info">
+        <h3>Spend · Save · Give</h3>
+        <p>The three-jar system that makes you a true money champion — FINAL LESSON!</p>
+      </div>
+    </a>
+  </div>
+
+  <h2 style="margin-top: 32px; margin-bottom: 12px; color: #555;">📚 Reference</h2>
+
+  <a href="../reference/glossary.html" class="ref-link">
+    <span class="ref-icon">📖</span>
+    <div>
+      <h3>Money Glossary</h3>
+      <p>Every money word explained in simple language. Look things up whenever you forget!</p>
+    </div>
+  </a>
+
+  <div class="ask-teacher" style="margin-top: 32px;">
+    <strong>🙋 Ready to start?</strong><br>
+    Click Lesson 1 above to begin your adventure! Ask me any question along the way — I'm always here!
+  </div>
+
+</div>
+</body>
+</html>

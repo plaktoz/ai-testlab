@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Big Titles!</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Heading preview boxes */
+    .heading-demo { background:#fff; border-radius:12px; padding:1.4rem 1.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.08); margin:0.8rem 0; }
+    .heading-demo .demo-h1 { font-size:2.6rem; font-weight:800; color:var(--purple); line-height:1.2; }
+    .heading-demo .demo-h2 { font-size:1.9rem; font-weight:700; color:var(--blue); line-height:1.3; }
+    .heading-demo .demo-h3 { font-size:1.4rem; font-weight:700; color:var(--pink); line-height:1.4; }
+    .demo-label { font-size:0.8rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#999; margin-bottom:0.2rem; }
+  </style>
+</head>
+<body>
+
+  <header class="lesson-header" style="background: linear-gradient(135deg, #F06595 0%, #845EF7 100%);">
+    <div class="lesson-number">Lesson 2 of 5</div>
+    <h1>Big Titles! &#x1F4D6;</h1>
+    <p class="tagline">Make your page shout with giant headings!</p>
+  </header>
+
+  <!-- ── Quick recap ── -->
+  <section class="card yellow">
+    <h2>&#x1F501; Quick Recap from Lesson 1</h2>
+    <p>You already know:</p>
+    <ul style="margin: 0.6rem 0 0 1.5rem; line-height:2.2;">
+      <li>HTML uses <strong>tags</strong> that look like <code>&lt;this&gt;</code></li>
+      <li>Tags come in pairs: <code>&lt;b&gt;</code> and <code>&lt;/b&gt;</code></li>
+      <li>Every page has <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;body&gt;</code></li>
+    </ul>
+    <div class="callout tip" style="margin-top:0.8rem;">
+      Haven't done Lesson 1 yet? <a href="0001-hello-html.html">Start there first!</a>
+    </div>
+  </section>
+
+  <!-- ── What is a heading? ── -->
+  <section class="card purple">
+    <h2>&#x1F3AF; What is a Heading?</h2>
+    <p>
+      A <strong>heading</strong> is a big title on your page — like the title on the cover of a book.<br><br>
+      HTML has <strong>six sizes</strong> of headings. Today we'll learn the three biggest:
+    </p>
+
+    <div class="heading-demo">
+      <div class="demo-label">h1 — The BIGGEST title (your page's name!)</div>
+      <div class="demo-h1">My Amazing Page</div>
+    </div>
+
+    <div class="heading-demo">
+      <div class="demo-label">h2 — A section title</div>
+      <div class="demo-h2">About Me</div>
+    </div>
+
+    <div class="heading-demo">
+      <div class="demo-label">h3 — A smaller section title</div>
+      <div class="demo-h3">My Favourite Things</div>
+    </div>
+
+    <div class="callout fun" style="margin-top:1rem;">
+      &#x1F4A1; <strong>The number tells you the size.</strong>
+      <code>&lt;h1&gt;</code> = biggest, <code>&lt;h6&gt;</code> = tiniest. Think of it like a ruler — 1 is at the top!
+    </div>
+  </section>
+
+  <!-- ── How to write it ── -->
+  <section class="card pink">
+    <h2>&#x270F;&#xFE0F; How to Write a Heading</h2>
+    <p>Just like <code>&lt;b&gt;</code>, every heading tag has a <strong>start</strong> and an <strong>end</strong>:</p>
+
+    <div class="code-block"><span class="tag">&lt;h1&gt;</span><span class="text">This is my page!</span><span class="tag">&lt;/h1&gt;</span>
+
+<span class="tag">&lt;h2&gt;</span><span class="text">About Me</span><span class="tag">&lt;/h2&gt;</span>
+
+<span class="tag">&lt;h3&gt;</span><span class="text">My Favourite Colour</span><span class="tag">&lt;/h3&gt;</span></div>
+
+    <div class="callout">
+      <strong>Rule of thumb:</strong> Use only <strong>one</strong> <code>&lt;h1&gt;</code> per page — it's the star of the show!
+      You can use as many <code>&lt;h2&gt;</code> and <code>&lt;h3&gt;</code> tags as you like.
+    </div>
+  </section>
+
+  <!-- ── Quiz ── -->
+  <section class="card orange">
+    <h2>&#x1F9E0; Quick Quiz!</h2>
+    <p style="margin-bottom:1rem;">Let's see if you remember — tap the right answer!</p>
+
+    <div class="quiz" data-correct="1"
+         data-win="&#x1F389; YES! &lt;h1&gt; is the biggest — it's the superstar title!"
+         data-lose="Not quite! &lt;h1&gt; is the biggest. The lower the number, the larger the text!">
+      <p class="quiz-question">Which tag makes the BIGGEST title on the page?</p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;h1&gt;</code> — the first heading</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;h3&gt;</code> — the third heading</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;h6&gt;</code> — the sixth heading</button>
+      <p class="quiz-feedback"></p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #eee; margin: 1.5rem 0;">
+
+    <div class="quiz" data-correct="2"
+         data-win="&#x1F31F; Brilliant! &lt;/h2&gt; closes the h2 tag. Don't forget the slash!"
+         data-lose="Remember: the closing tag always has a / before the name!">
+      <p class="quiz-question">How do you CLOSE an h2 heading?</p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;h2&gt;</code></button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;/h2&gt;</code></button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;h2/&gt;</code></button>
+      <p class="quiz-feedback"></p>
+    </div>
+  </section>
+
+  <!-- ── Try it! ── -->
+  <section class="try-it">
+    <h2>&#x270F;&#xFE0F; Try It — Update Your Page!</h2>
+    <p style="margin-bottom:1rem;">
+      Open the <code>mypage.html</code> file you made in Lesson 1 and make it look like this:
+    </p>
+
+    <div class="code-block"><span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+
+    <span class="tag">&lt;h1&gt;</span><span class="text">My name is YOUR NAME!</span><span class="tag">&lt;/h1&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">About Me</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="text">Hello! My name is </span><span class="tag">&lt;b&gt;</span><span class="text">YOUR NAME</span><span class="tag">&lt;/b&gt;</span><span class="text">!</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">My Favourite Things</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="text">I love ...</span>
+
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Replace <em>YOUR NAME</em> with your real name</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Fill in what you love (animals? LEGO? pizza?)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Save and open the file in your browser — your name should be <strong>huge</strong>!</div>
+    </div>
+
+    <div class="callout" style="margin-top:1.2rem;">
+      <strong>What should you see?</strong> Your name as a giant title, two smaller section titles, and your bold name in a sentence.
+    </div>
+  </section>
+
+  <!-- ── What you learned ── -->
+  <section class="card green">
+    <h2>&#x1F4DA; What Did You Learn Today?</h2>
+    <ul style="margin-left: 1.5rem; line-height: 2.2;">
+      <li><code>&lt;h1&gt;</code> makes the <strong>biggest</strong> title — use it once per page</li>
+      <li><code>&lt;h2&gt;</code> makes a medium title — great for sections</li>
+      <li><code>&lt;h3&gt;</code> makes a smaller title — great for sub-sections</li>
+      <li>Lower number = larger text</li>
+    </ul>
+    <p style="margin-top:0.8rem;">
+      See all the tags in one place:
+      <a href="../reference/html-tags-cheatsheet.html">&#x1F4CB; HTML Tags Cheat Sheet</a>
+    </p>
+  </section>
+
+  <!-- ── Primary source ── -->
+  <section class="card" style="border-color:#ADB5BD; background:#F8F9FA; font-size:0.95rem;">
+    <h2 style="font-size:1.1rem; color:#495057;">&#x1F4D6; Want to Read More?</h2>
+    <p>
+      This lesson is based on
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/HTML_text_fundamentals#the_basics_headings_and_paragraphs" target="_blank" rel="noopener">
+        MDN Web Docs — HTML Text Fundamentals: Headings
+      </a>.
+    </p>
+  </section>
+
+  <div class="ask-teacher">
+    &#x1F9D1;&#x200D;&#x1F3EB; Got a question? Ask your teacher! There are no silly questions.
+  </div>
+
+  <div class="nav">
+    <a href="0001-hello-html.html">&#x2190; Lesson 1: Hello HTML</a>
+    <a href="0003-bold-and-italic.html">Next: Bold &amp; Italic &#x2192;</a>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5 — My About Me Page!</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Celebration confetti header */
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.25);
+      border-radius: 40px;
+      padding: 0.3rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+
+    /* Tag review grid */
+    .tag-review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.7rem;
+      margin: 1rem 0;
+    }
+    .tag-pill {
+      background: #fff;
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1rem;
+    }
+    .tag-pill .pill-icon { font-size: 1.3rem; }
+    .tag-pill code { font-size: 0.95rem; }
+
+    /* Live About Me preview */
+    .page-preview {
+      background: #fff;
+      border-radius: 14px;
+      padding: 2rem 2.4rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      border: 3px solid var(--green);
+      margin: 1rem 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .page-preview h1 { font-size: 2rem; font-weight: 800; color: #1A1A2E; margin-bottom: 0.8rem; }
+    .page-preview h2 { font-size: 1.35rem; font-weight: 700; color: #495057; margin: 1.2rem 0 0.4rem; border-bottom: 2px solid #eee; padding-bottom: 0.2rem; }
+    .page-preview p  { font-size: 1rem; line-height: 1.7; color: #333; }
+    .page-preview ul { margin: 0.4rem 0 0 1.5rem; }
+    .page-preview li { font-size: 1rem; line-height: 2; color: #333; }
+    .preview-label   { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #aaa; margin-bottom: 0.4rem; }
+    .preview-badge   { display: inline-block; background: var(--green); color: #fff; border-radius: 6px; font-size: 0.75rem; font-weight: 700; padding: 0.15rem 0.5rem; margin-left: 0.4rem; vertical-align: middle; }
+
+    /* Annotated code section callouts */
+    .anno-row {
+      display: flex;
+      gap: 1rem;
+      margin: 0.6rem 0;
+      align-items: flex-start;
+    }
+    .anno-badge {
+      min-width: 2rem;
+      height: 2rem;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+    .anno-text { font-size: 1rem; line-height: 1.6; }
+
+    /* Final celebration */
+    .celebration {
+      background: linear-gradient(135deg, #FFD43B, #FF922B, #F06595, #845EF7, #339AF0, #51CF66);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      color: #fff;
+      box-shadow: var(--shadow);
+      margin: 2rem 0;
+    }
+    .celebration h2 { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .celebration p  { font-size: 1.15rem; opacity: 0.95; }
+
+    /* What's next paths */
+    .next-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .next-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-top: 4px solid var(--blue);
+    }
+    .next-card.green { border-top-color: var(--green); }
+    .next-card.pink  { border-top-color: var(--pink); }
+    .next-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .next-card p  { font-size: 0.9rem; color: #555; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+  <header class="lesson-header" style="background: linear-gradient(135deg, #845EF7 0%, #F06595 50%, #FF922B 100%);">
+    <div class="hero-badge">&#x1F3C6; Final Lesson — Lesson 5 of 5</div>
+    <h1>My About Me Page! &#x1F31F;</h1>
+    <p class="tagline">Put <em>everything</em> you've learned together and build your very own page!</p>
+  </header>
+
+  <!-- ── You made it! ── -->
+  <section class="card yellow">
+    <h2>&#x1F389; You Made It This Far — Amazing!</h2>
+    <p>Look at everything you now know. Read through these tags — you learned <strong>all of them</strong>:</p>
+
+    <div class="tag-review-grid" style="margin-top:1rem;">
+      <div class="tag-pill"><span class="pill-icon">🧱</span><div><code>&lt;html&gt;</code><br><small>the whole page</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">🤫</span><div><code>&lt;head&gt;</code><br><small>secret info</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">👀</span><div><code>&lt;body&gt;</code><br><small>what you see</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">👑</span><div><code>&lt;h1&gt;</code><br><small>biggest title</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">📌</span><div><code>&lt;h2&gt;</code><br><small>section title</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">📍</span><div><code>&lt;h3&gt;</code><br><small>smaller title</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">📝</span><div><code>&lt;p&gt;</code><br><small>paragraph</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">💪</span><div><code>&lt;strong&gt;</code><br><small>bold + important</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">🎭</span><div><code>&lt;em&gt;</code><br><small>italic, expressive</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">🛒</span><div><code>&lt;ul&gt;</code><br><small>bullet list</small></div></div>
+      <div class="tag-pill"><span class="pill-icon">•</span><div><code>&lt;li&gt;</code><br><small>one list item</small></div></div>
+    </div>
+  </section>
+
+  <!-- ── What you're building ── -->
+  <section class="card green">
+    <h2>&#x1F3AF; What You're Going to Build</h2>
+    <p style="margin-bottom:0.8rem;">Here's what your finished About Me page will look like in the browser:</p>
+
+    <div class="preview-label">&#x1F440; Your page — open in the browser <span class="preview-badge">GOAL</span></div>
+    <div class="page-preview">
+      <h1>My name is Alex! &#x1F44B;</h1>
+      <h2>About Me</h2>
+      <p>Hello! My name is <strong>Alex</strong>. I am <strong>5</strong> years old.
+         I live in a house with my family. I love <em>exploring</em> new things!</p>
+      <h2>My Favourite Things</h2>
+      <ul>
+        <li>LEGO — I can build <em>anything</em>!</li>
+        <li>Dinosaurs — especially <strong>T-Rex</strong></li>
+        <li>Pizza with extra cheese</li>
+        <li>Playing in the park</li>
+      </ul>
+      <h2>My Favourite Colour</h2>
+      <p>My favourite colour is <strong>blue</strong>. It looks like the sky on a sunny day.</p>
+    </div>
+    <div class="callout tip" style="margin-top:0.6rem;">
+      <strong>Your page will have YOUR name, YOUR age, YOUR favourite things.</strong>
+      Alex is just an example — make it truly yours!
+    </div>
+  </section>
+
+  <!-- ── The full code ── -->
+  <section class="card purple">
+    <h2>&#x1F4CB; The Full Code — Copy This!</h2>
+    <p style="margin-bottom:0.8rem;">Here is the complete code for your About Me page. We'll walk through it piece by piece below.</p>
+
+    <div class="code-block"><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;head&gt;</span>
+    <span class="tag">&lt;title&gt;</span><span class="text">MY NAME's Page</span><span class="tag">&lt;/title&gt;</span>
+  <span class="tag">&lt;/head&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+
+    <span class="tag">&lt;h1&gt;</span><span class="text">My name is MY NAME! 👋</span><span class="tag">&lt;/h1&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">About Me</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span>
+      <span class="text">Hello! My name is </span><span class="tag">&lt;strong&gt;</span><span class="text">MY NAME</span><span class="tag">&lt;/strong&gt;</span><span class="text">.</span>
+      <span class="text">I am </span><span class="tag">&lt;strong&gt;</span><span class="text">MY AGE</span><span class="tag">&lt;/strong&gt;</span><span class="text"> years old.</span>
+      <span class="text">I love </span><span class="tag">&lt;em&gt;</span><span class="text">exploring</span><span class="tag">&lt;/em&gt;</span><span class="text"> new things!</span>
+    <span class="tag">&lt;/p&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">My Favourite Things</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;ul&gt;</span>
+      <span class="tag">&lt;li&gt;</span><span class="text">FAVOURITE THING 1</span><span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;li&gt;</span><span class="text">FAVOURITE THING 2</span><span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;li&gt;</span><span class="text">FAVOURITE THING 3</span><span class="tag">&lt;/li&gt;</span>
+    <span class="tag">&lt;/ul&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">My Favourite Colour</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span><span class="text">My favourite colour is </span><span class="tag">&lt;strong&gt;</span><span class="text">COLOUR</span><span class="tag">&lt;/strong&gt;</span><span class="text">.</span><span class="tag">&lt;/p&gt;</span>
+
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+
+    <div class="callout">
+      <strong>New tag alert!</strong> <code>&lt;title&gt;</code> goes inside <code>&lt;head&gt;</code> and sets the
+      name you see on the browser <em>tab</em> at the top. It doesn't appear on the page itself.
+    </div>
+    <div class="callout" style="margin-top:0.6rem;">
+      <strong>Also new:</strong> <code>&lt;!DOCTYPE html&gt;</code> on the very first line tells the browser
+      "this is an HTML5 page." It has no closing tag — it's a one-line announcement!
+    </div>
+  </section>
+
+  <!-- ── Walk-through ── -->
+  <section class="card orange">
+    <h2>&#x1F50D; Let's Walk Through It</h2>
+
+    <div class="anno-row">
+      <div class="anno-badge">1</div>
+      <div class="anno-text">
+        <code>&lt;!DOCTYPE html&gt;</code> + <code>&lt;html&gt;</code> — the envelope for the whole page.
+        Every HTML file ever made starts exactly like this.
+      </div>
+    </div>
+    <div class="anno-row">
+      <div class="anno-badge">2</div>
+      <div class="anno-text">
+        <code>&lt;head&gt;&lt;title&gt;</code>MY NAME<code>&lt;/title&gt;&lt;/head&gt;</code> —
+        secret info for the browser. Replace MY NAME so your tab shows YOUR name!
+      </div>
+    </div>
+    <div class="anno-row">
+      <div class="anno-badge">3</div>
+      <div class="anno-text">
+        <code>&lt;h1&gt;</code> — your name in huge letters. The star of the show. Use it only once.
+      </div>
+    </div>
+    <div class="anno-row">
+      <div class="anno-badge">4</div>
+      <div class="anno-text">
+        <code>&lt;h2&gt;</code> + <code>&lt;p&gt;</code> — a section title and a paragraph. Use
+        <code>&lt;strong&gt;</code> inside the paragraph to highlight your name and age.
+        Use <code>&lt;em&gt;</code> to add feeling.
+      </div>
+    </div>
+    <div class="anno-row">
+      <div class="anno-badge">5</div>
+      <div class="anno-text">
+        <code>&lt;ul&gt;</code> + <code>&lt;li&gt;</code> — the shopping bag and its items!
+        Add as many <code>&lt;li&gt;</code> lines as you like.
+      </div>
+    </div>
+    <div class="anno-row">
+      <div class="anno-badge">6</div>
+      <div class="anno-text">
+        The last <code>&lt;h2&gt;</code> + <code>&lt;p&gt;</code> adds your favourite colour section.
+        You can add more sections — a pet section, a food section, anything!
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Try it! ── -->
+  <section class="try-it">
+    <h2>&#x270F;&#xFE0F; Build It — Step by Step</h2>
+    <p style="margin-bottom:1rem;">
+      Create a <strong>brand new file</strong> called <code>about-me.html</code> on your Desktop.
+      Then follow these steps:
+    </p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Copy the full code from the purple box above into your new file</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Replace every word written in CAPITALS with your own real information</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Add at least 3 things to your favourite things list</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Save the file, then double-click it to open in your browser</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-text">
+        Look at the browser tab at the top — does it show your name?
+        Look at the page — do you see your big h1 title? Your list?
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.2rem;">
+      <strong>Want to add more?</strong> Invent your own sections!
+      Try <code>&lt;h2&gt;My Pet&lt;/h2&gt;</code> or <code>&lt;h2&gt;My Family&lt;/h2&gt;</code>
+      and fill them in with <code>&lt;p&gt;</code> and <code>&lt;strong&gt;</code>.
+      This is <em>your</em> page — make it as big as you like!
+    </div>
+  </section>
+
+  <!-- ── Celebration ── -->
+  <div class="celebration">
+    <h2>&#x1F3C6; You Did It! &#x1F3C6;</h2>
+    <p>
+      You started from zero — never having written a single line of HTML —
+      and now you have built a real webpage about yourself.<br>
+      <strong>That is something to be very, very proud of.</strong>
+    </p>
+  </div>
+
+  <!-- ── What you learned ── -->
+  <section class="card green">
+    <h2>&#x1F4DA; Everything You Learned in This Course</h2>
+    <ul style="margin-left: 1.5rem; line-height: 2.2;">
+      <li><strong>Lesson 1</strong> — HTML tags, page skeleton: <code>html</code>, <code>head</code>, <code>body</code>, <code>b</code></li>
+      <li><strong>Lesson 2</strong> — Headings: <code>h1</code>, <code>h2</code>, <code>h3</code></li>
+      <li><strong>Lesson 3</strong> — Bold, italic, paragraphs: <code>strong</code>, <code>em</code>, <code>p</code></li>
+      <li><strong>Lesson 4</strong> — Lists: <code>ul</code>, <code>li</code></li>
+      <li><strong>Lesson 5</strong> — Putting it all together: a full About Me page!</li>
+    </ul>
+    <p style="margin-top:0.8rem;">
+      &#x1F4CB; <a href="../reference/html-tags-cheatsheet.html">HTML Tags Cheat Sheet</a> — keep this to look things up anytime
+    </p>
+  </section>
+
+  <!-- ── What's next ── -->
+  <section class="card">
+    <h2>&#x1F680; What Can You Learn Next?</h2>
+    <p style="margin-bottom:0.8rem;">HTML is just the beginning. Here are three directions you could go:</p>
+
+    <div class="next-grid">
+      <div class="next-card">
+        <h3>&#x1F3A8; CSS — Make it Beautiful</h3>
+        <p>CSS adds colours, fonts, and layouts to your page. Want to make your h1 bright red? CSS can do that!</p>
+      </div>
+      <div class="next-card green">
+        <h3>&#x26A1; More HTML Tags</h3>
+        <p>Learn images (<code>&lt;img&gt;</code>), links (<code>&lt;a&gt;</code>), and more. MDN has a full tag library!</p>
+      </div>
+      <div class="next-card pink">
+        <h3>&#x1F9E0; JavaScript</h3>
+        <p>JavaScript makes pages interactive — buttons, games, animations. It's the magic behind the internet.</p>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:0.8rem;">
+      The best next step?
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web" target="_blank" rel="noopener">
+        MDN — Getting Started with the Web
+      </a>
+      — it's free, friendly, and goes step by step.
+    </div>
+  </section>
+
+  <!-- ── Primary source ── -->
+  <section class="card" style="border-color:#ADB5BD; background:#F8F9FA; font-size:0.95rem;">
+    <h2 style="font-size:1.1rem; color:#495057;">&#x1F4D6; Recommended Reading</h2>
+    <p>
+      This whole course was built from
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started" target="_blank" rel="noopener">
+        MDN Web Docs — Getting Started with HTML
+      </a>.
+      Bookmark it — it's the most trusted HTML reference on the internet.
+    </p>
+  </section>
+
+  <div class="ask-teacher">
+    &#x1F9D1;&#x200D;&#x1F3EB; Finished your page? Show your teacher — they'd love to see it! &#x1F31F;
+  </div>
+
+  <div class="nav">
+    <a href="0004-lists.html">&#x2190; Lesson 4: Lists</a>
+    <a href="../reference/html-tags-cheatsheet.html">&#x1F4CB; Cheat Sheet</a>
+  </div>
+
+</body>
+</html>

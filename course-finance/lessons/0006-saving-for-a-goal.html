@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6 — Saving for a Goal | Money School</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .goal-tracker {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 3px 14px rgba(0,0,0,0.09);
+      margin: 20px 0;
+    }
+    .goal-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .goal-icon { font-size: 2.8rem; }
+    .goal-title { font-size: 1.2rem; font-weight: 900; }
+    .goal-cost  { font-size: 0.9rem; color: #888; }
+    .progress-bar-wrap {
+      background: #f0f0f0;
+      border-radius: 999px;
+      height: 28px;
+      overflow: hidden;
+      position: relative;
+      margin: 10px 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #4CAF50, #8BC34A);
+      transition: width 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .progress-bar-fill.full { background: linear-gradient(90deg, #FFD93D, #FF6B35); }
+    .goal-stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #888; margin-top: 6px; }
+    .goal-add-btn {
+      margin-top: 16px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 12px;
+      background: #4CAF50;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .goal-add-btn:hover { background: #388E3C; transform: translateY(-2px); }
+    .goal-add-btn:disabled { background: #bbb; cursor: not-allowed; transform: none; }
+    .goal-complete { display: none; text-align: center; padding: 14px; background: #FFF8E1; border-radius: 12px; margin-top: 14px; font-size: 1.1rem; font-weight: 700; color: #FF6B35; }
+    .goal-complete.show { display: block; }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin: 14px 0;
+    }
+    .cal-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #bbb;
+      border: 2px solid transparent;
+    }
+    .cal-cell.saved { background: #E8F5E9; color: #2E7D32; border-color: #4CAF50; }
+    .cal-cell.today { border-color: #FF6B35; color: #FF6B35; font-weight: 900; }
+    .cal-cell.coin  { background: #FFF8E1; color: #FF6B35; border-color: #FFD93D; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="course-header">
+    <span class="lesson-badge">Lesson 6 of 7</span>
+    <span class="emoji">🎯</span>
+    <h1>Saving for a Goal</h1>
+    <p class="subtitle">Pick something you want, then save up to get it!</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-box">
+    <div class="story-title">📖 Story Time</div>
+    <p>Zara saw a beautiful telescope at the shop. 🔭 She could see the moon through it!</p>
+    <p>The price tag said: <strong>20 coins</strong>. That was a LOT! Zara only had 3 coins.</p>
+    <p>She could have cried. But instead, she said: <em>"I'm going to save up for it!"</em></p>
+    <p>Every week, she put 4 coins away in her piggy bank. She put a picture of the telescope on the fridge
+    so she would remember her goal. 📸</p>
+    <p>After 5 weeks — she had <strong>20 coins</strong> plus her original 3! She bought the telescope AND had coins to spare!
+    🎉🔭</p>
+    <p>The waiting made it feel even more special when she got it.</p>
+  </div>
+
+  <!-- Knowledge -->
+  <div class="card">
+    <h2>💡 What is a Savings Goal?</h2>
+    <p>A <strong>savings goal</strong> is something you <em>decide</em> you want to save up for.
+    You pick the thing, find out the price, and make a plan to save enough coins to buy it.</p>
+
+    <div class="definition-box">
+      <div class="word">💡 Three steps to reach a savings goal</div>
+      <div class="meaning">
+        <strong>Step 1:</strong> 🎯 Choose what you want and find out the price.<br>
+        <strong>Step 2:</strong> 📅 Decide how many coins to save each week.<br>
+        <strong>Step 3:</strong> 🐷 Keep saving until you get there — don't give up!
+      </div>
+    </div>
+
+    <h3>⏳ Waiting is a superpower!</h3>
+    <p>When you wait and save, you feel <em>so</em> proud when you finally get the thing you wanted.
+    It feels 10 times better than buying something on a whim! This is called <strong>delayed gratification</strong>
+    — a very grown-up skill that even most adults find hard! 💪</p>
+
+    <p class="source-cite">📚 Source: <a href="https://www.pbs.org/parents/thrive/how-to-teach-kids-about-money-at-every-age" target="_blank">PBS Parents — Teaching Kids About Money at Every Age</a></p>
+  </div>
+
+  <!-- Interactive goal tracker -->
+  <div class="card">
+    <h2>🎮 Goal Tracker!</h2>
+    <p>Zara wants a telescope that costs <strong>20 coins</strong>. She already has <strong>3 coins</strong>.
+    Click the button each week to add her savings. How many weeks does she need?</p>
+
+    <div class="goal-tracker">
+      <div class="goal-header">
+        <span class="goal-icon">🔭</span>
+        <div>
+          <div class="goal-title">Zara's Telescope</div>
+          <div class="goal-cost">Goal: 20 coins</div>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="goal-fill" style="width:15%">3</div>
+      </div>
+      <div class="goal-stats">
+        <span id="goal-saved">Saved: 3 coins</span>
+        <span id="goal-left">Still need: 17 coins</span>
+      </div>
+      <div id="week-label" style="font-size:0.85rem; color:#888; margin-top:8px;">Week 0 — Start!</div>
+      <button class="goal-add-btn" id="goal-btn" onclick="addWeek()">➕ Add 4 coins (Week 1)</button>
+      <div class="goal-complete" id="goal-complete">
+        🎉 Zara reached her goal! She bought the telescope after <span id="weeks-taken"></span> weeks of saving! 🔭✨
+      </div>
+    </div>
+
+    <h3>📅 Your own savings plan:</h3>
+    <p>Think of something YOU want. How much does it cost?
+    If you save 2 coins per week, how many weeks until you can buy it?</p>
+    <div style="background:#f9f9f9; border-radius:12px; padding:16px; margin-top:12px; font-size:0.95rem;">
+      <p>🧮 <strong>Formula:</strong> Weeks needed = Price ÷ Coins saved per week</p>
+      <p>Example: A $5 toy ÷ save $1 per week = <strong>5 weeks</strong>!</p>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>🎯 Quiz Time!</h2>
+    <p class="quiz-intro">Final stretch! You've learned so much. Show me! 🌟</p>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q1 — What is a savings GOAL?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">A place to keep your shoes</button>
+        <button class="quiz-btn">When you score in football</button>
+        <button class="quiz-btn">Something you decide to save up to buy</button>
+        <button class="quiz-btn">A really long nap</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! A savings goal is something you decide to save up to buy! 🎯</div>
+      <div class="feedback-box wrong">🙈 A savings goal is <strong>something you decide to save up to buy</strong> — like a toy or a book!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q2 — A toy costs 12 coins. You save 3 coins a week. How many weeks to reach your goal?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">4 weeks</button>
+        <button class="quiz-btn">3 weeks</button>
+        <button class="quiz-btn">12 weeks</button>
+        <button class="quiz-btn">6 weeks</button>
+      </div>
+      <div class="feedback-box correct">✅ Brilliant! 12 ÷ 3 = 4 weeks! You're a maths superstar! 🧮</div>
+      <div class="feedback-box wrong">🙈 12 coins ÷ 3 coins per week = <strong>4 weeks</strong>! Divide the price by what you save!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q3 — What is the FIRST step to save for a goal?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Go to the shop straight away</button>
+        <button class="quiz-btn">Choose what you want and find out the price</button>
+        <button class="quiz-btn">Ask for it as a gift</button>
+        <button class="quiz-btn">Give up and buy something cheap</button>
+      </div>
+      <div class="feedback-box correct">✅ Exactly! First you pick your goal and find the price — then you can make a plan!</div>
+      <div class="feedback-box wrong">🙈 Step 1: <strong>choose what you want and find out the price</strong> — then you know how much to save!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q4 — Zara has 8 coins saved for a 20-coin telescope. How many more does she need?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">8 coins</button>
+        <button class="quiz-btn">20 coins</button>
+        <button class="quiz-btn">28 coins</button>
+        <button class="quiz-btn">12 coins</button>
+      </div>
+      <div class="feedback-box correct">✅ Spot on! 20 − 8 = 12 more coins needed! 🧮🌟</div>
+      <div class="feedback-box wrong">🙈 20 − 8 = <strong>12 coins</strong> more to go! Subtract what you have from the price!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q5 — Why does waiting and saving feel SO good when you finally get the thing?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Because waiting makes you hungry</button>
+        <button class="quiz-btn">Because the shop gives you extra for free</button>
+        <button class="quiz-btn">Because YOU worked hard and earned it yourself!</button>
+        <button class="quiz-btn">Because the thing changes colour</button>
+      </div>
+      <div class="feedback-box correct">✅ YES! When you earn it yourself, it feels AMAZING — much better than just being given it! 💪🏆</div>
+      <div class="feedback-box wrong">🙈 It feels great because <strong>YOU worked hard and earned it</strong> — that pride is the best feeling!</div>
+    </div>
+
+    <div class="score-box">
+      <div class="score-number"></div>
+      <div class="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <h3>🌟 Real-Life Challenge!</h3>
+    <p>With a grown-up, pick ONE thing you'd like to save up for. Find out how much it costs.</p>
+    <p>Decide how many coins you'll save each week. Draw a progress bar and colour it in each week as you get closer! 🎨</p>
+    <p>Stick it somewhere you can see it every day — the fridge is perfect! 🧲</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>🙋 Got a question?</strong><br>
+    Need help picking a savings goal or making a plan? Ask me — let's figure it out together!
+  </div>
+
+  <nav class="nav-bar">
+    <a href="0005-saving-vs-spending.html" class="nav-btn prev">⬅️ Previous</a>
+    <a href="../lessons/index.html" class="nav-btn home">🏠 All Lessons</a>
+    <a href="0007-spend-save-give.html" class="nav-btn next">Next Lesson ➡️</a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+let saved = 3;
+const GOAL = 20;
+const WEEKLY = 4;
+let week = 0;
+
+function addWeek() {
+  week++;
+  saved += WEEKLY;
+  if (saved > GOAL) saved = GOAL;
+
+  const pct = Math.round((saved / GOAL) * 100);
+  const fill = document.getElementById('goal-fill');
+  fill.style.width = pct + '%';
+  fill.textContent = saved;
+  if (saved >= GOAL) fill.classList.add('full');
+
+  document.getElementById('goal-saved').textContent = 'Saved: ' + saved + ' coins';
+  document.getElementById('goal-left').textContent  = 'Still need: ' + Math.max(0, GOAL - saved) + ' coins';
+  document.getElementById('week-label').textContent = 'Week ' + week;
+
+  const btn = document.getElementById('goal-btn');
+  if (saved >= GOAL) {
+    btn.disabled = true;
+    btn.textContent = '🎉 Goal reached!';
+    const comp = document.getElementById('goal-complete');
+    document.getElementById('weeks-taken').textContent = week;
+    comp.classList.add('show');
+  } else {
+    btn.textContent = '➕ Add 4 coins (Week ' + (week + 1) + ')';
+  }
+}
+</script>
+</body>
+</html>
