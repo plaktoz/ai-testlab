@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5 — Saving vs Spending | Money School</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .piggy-bank {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .piggy-bank .pig { font-size: 5rem; cursor: pointer; transition: transform 0.2s; display: inline-block; }
+    .piggy-bank .pig:hover { transform: scale(1.15) rotate(-5deg); }
+    .piggy-display {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #FF6B35;
+      margin-top: 8px;
+    }
+    .piggy-coins {
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+      min-height: 36px;
+      margin: 8px 0;
+    }
+
+    .sim-section { background: #fff; border-radius: 14px; padding: 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin: 16px 0; }
+    .sim-balance { font-size: 2rem; font-weight: 900; color: #2196F3; margin: 10px 0; }
+    .sim-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+    .sim-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .sim-btn.spend { background: #FF6B35; color: #fff; }
+    .sim-btn.save  { background: #4CAF50; color: #fff; }
+    .sim-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+    .sim-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .sim-log { margin-top: 14px; font-size: 0.9rem; color: #666; max-height: 100px; overflow-y: auto; }
+    .sim-log p { margin-bottom: 4px; }
+    .sim-log .log-save { color: #2E7D32; }
+    .sim-log .log-spend { color: #C62828; }
+
+    .vs-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 20px 0;
+    }
+    .vs-side {
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .vs-side.save { background: #E8F5E9; border: 3px solid #4CAF50; }
+    .vs-side.spend { background: #FFEBEE; border: 3px solid #F44336; }
+    .vs-side h3 { font-size: 1.1rem; margin-bottom: 10px; }
+    .vs-side.save h3 { color: #2E7D32; }
+    .vs-side.spend h3 { color: #C62828; }
+    .vs-side .big-emoji { font-size: 2.5rem; margin-bottom: 8px; display: block; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="course-header">
+    <span class="lesson-badge">Lesson 5 of 7</span>
+    <span class="emoji">🐷</span>
+    <h1>Saving vs Spending</h1>
+    <p class="subtitle">Keep some, use some — the secret of the piggy bank!</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot done"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-box">
+    <div class="story-title">📖 Story Time</div>
+    <p>Zara got <strong>5 coins</strong> for her birthday from Grandma. 🎂</p>
+    <p>Her friend Leo spent ALL his birthday coins the same day — on sweets, a balloon, and stickers. Fun!
+    But the next week, Leo had <strong>nothing left</strong> and couldn't buy the cool book he really wanted. 😢</p>
+    <p>Zara remembered what her mum said: <em>"Save some, spend some — and you'll always have something for later!"</em></p>
+    <p>Zara put 3 coins in her piggy bank 🐷 and spent 2 coins on a yummy apple juice. 🧃</p>
+    <p>The next week, Zara used her saved coins PLUS new coins from chores to buy that book! 📚🎉</p>
+  </div>
+
+  <!-- Knowledge -->
+  <div class="card">
+    <h2>💡 Saving vs Spending</h2>
+
+    <div class="vs-card">
+      <div class="vs-side save">
+        <span class="big-emoji">🐷</span>
+        <h3>SAVING</h3>
+        <p>Keeping money for <strong>later</strong>.<br>
+        The more you save, the more you'll have for something BIG!</p>
+      </div>
+      <div class="vs-side spend">
+        <span class="big-emoji">🛍️</span>
+        <h3>SPENDING</h3>
+        <p>Using money <strong>now</strong> to buy something.<br>
+        Once you spend it, it's gone!</p>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="word">💡 The Golden Rule</div>
+      <div class="meaning">Never spend ALL your money at once!
+      Always save <em>some</em> — even a little bit — for later. 🌟</div>
+    </div>
+
+    <h3>🐷 Meet the Piggy Bank!</h3>
+    <p>A <strong>piggy bank</strong> is a safe place to keep your saved coins.
+    Every time you put a coin in, your savings GROW — like a plant! 🌱</p>
+    <p>The longer you leave the coins in, the more coins you'll have when you need them!</p>
+  </div>
+
+  <!-- Interactive piggy bank -->
+  <div class="card">
+    <h2>🎮 Piggy Bank Simulator!</h2>
+    <p>You have <strong id="wallet-display">8 coins</strong> 🪙. Each time you click, you can save one or spend one. Try to keep your balance high!</p>
+
+    <div class="sim-section">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="font-size:0.85rem; color:#888; font-weight:600;">YOUR WALLET</div>
+          <div class="sim-balance" id="wallet">🪙 8</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.85rem; color:#888; font-weight:600;">PIGGY BANK</div>
+          <div class="sim-balance" style="color:#4CAF50;" id="piggy">🐷 0</div>
+        </div>
+      </div>
+
+      <div class="sim-btns">
+        <button class="sim-btn save" onclick="doSave()">🐷 Save 1 coin</button>
+        <button class="sim-btn spend" onclick="doSpend()">🛍️ Spend 1 coin</button>
+      </div>
+      <div class="sim-log" id="sim-log"></div>
+    </div>
+
+    <p style="font-size:0.9rem; color:#888; text-align:center;">What happens when you spend all your coins? 🤔</p>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>🎯 Quiz Time!</h2>
+    <p class="quiz-intro">You're doing great! Show me what you know!</p>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q1 — What does SAVING money mean?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Giving it all to a friend</button>
+        <button class="quiz-btn">Keeping it for later</button>
+        <button class="quiz-btn">Using it all right now</button>
+        <button class="quiz-btn">Throwing it away</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! Saving means keeping money so you have it for something later! 🐷</div>
+      <div class="feedback-box wrong">🙈 Saving means <strong>keeping money for later</strong> — like putting it in a piggy bank!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q2 — Leo spent ALL his coins on sweets. Next week he wanted a book but had no money. What was his mistake?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">He bought the wrong sweets</button>
+        <button class="quiz-btn">He should have bought more books</button>
+        <button class="quiz-btn">He spent everything and saved nothing</button>
+        <button class="quiz-btn">He didn't have a piggy bank</button>
+      </div>
+      <div class="feedback-box correct">✅ Exactly right! Leo spent ALL his money and had none left for later. Always save some!</div>
+      <div class="feedback-box wrong">🙈 Leo's mistake was <strong>spending everything</strong> with no savings left for what he really wanted!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q3 — Zara has 10 coins. She spends 4 coins on a snack. How many does she have left?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">6 coins</button>
+        <button class="quiz-btn">4 coins</button>
+        <button class="quiz-btn">14 coins</button>
+        <button class="quiz-btn">10 coins</button>
+      </div>
+      <div class="feedback-box correct">✅ Great maths! 10 − 4 = 6 coins left! Well done! 🧮</div>
+      <div class="feedback-box wrong">🙈 10 − 4 = <strong>6 coins</strong>! When you spend, you take away from your total!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q4 — What is a PIGGY BANK used for?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">To feed real pigs</button>
+        <button class="quiz-btn">To store your sandwiches</button>
+        <button class="quiz-btn">To count very fast</button>
+        <button class="quiz-btn">To keep your saved coins safely</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! A piggy bank keeps your saved coins safe so they grow over time! 🐷✨</div>
+      <div class="feedback-box wrong">🙈 A piggy bank is used to <strong>keep saved coins safely</strong> — so your money grows!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q5 — The Golden Rule about spending is:</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Spend everything as fast as you can</button>
+        <button class="quiz-btn">Always save some, never spend it all</button>
+        <button class="quiz-btn">Only spend on Tuesdays</button>
+        <button class="quiz-btn">Never spend any money, ever</button>
+      </div>
+      <div class="feedback-box correct">✅ The Golden Rule! Always save some — even just a little — for later. Smart! 🌟</div>
+      <div class="feedback-box wrong">🙈 The Golden Rule: <strong>always save some, don't spend it all</strong>! Keep a little back for later!</div>
+    </div>
+
+    <div class="score-box">
+      <div class="score-number"></div>
+      <div class="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <h3>🌟 Real-Life Challenge!</h3>
+    <p>Get (or make!) a piggy bank. If you get any coins this week — maybe from chores — put <em>at least half</em> in the piggy bank before spending the rest.</p>
+    <p>At the end of the week, count what's in the piggy bank. How much did you save? 💰</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>🙋 Got a question?</strong><br>
+    How much should you save vs spend? Ask me and we'll figure it out for your situation!
+  </div>
+
+  <nav class="nav-bar">
+    <a href="0004-needs-vs-wants.html" class="nav-btn prev">⬅️ Previous</a>
+    <a href="../lessons/index.html" class="nav-btn home">🏠 All Lessons</a>
+    <a href="0006-saving-for-a-goal.html" class="nav-btn next">Next Lesson ➡️</a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+let wallet = 8;
+let piggy  = 0;
+
+function updateDisplay() {
+  document.getElementById('wallet').textContent = '🪙 ' + wallet;
+  document.getElementById('piggy').textContent  = '🐷 ' + piggy;
+  document.querySelector('.sim-btn.save').disabled  = wallet <= 0;
+  document.querySelector('.sim-btn.spend').disabled = wallet <= 0;
+}
+
+function log(msg, cls) {
+  const log = document.getElementById('sim-log');
+  const p = document.createElement('p');
+  p.className = cls;
+  p.textContent = msg;
+  log.prepend(p);
+}
+
+function doSave() {
+  if (wallet <= 0) return;
+  wallet--;
+  piggy++;
+  log('🐷 Saved 1 coin → Piggy Bank now has ' + piggy + ' coins', 'log-save');
+  updateDisplay();
+}
+
+function doSpend() {
+  if (wallet <= 0) return;
+  wallet--;
+  log('🛍️ Spent 1 coin → Wallet now has ' + wallet + ' coins', 'log-spend');
+  if (wallet === 0) log('😬 Uh oh! Your wallet is empty! Good thing you saved some!', 'log-spend');
+  updateDisplay();
+}
+
+updateDisplay();
+</script>
+</body>
+</html>

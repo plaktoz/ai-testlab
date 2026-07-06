@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4 — Lists!</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Shopping list visual */
+    .shopping-list {
+      background: #fff;
+      border: 3px solid var(--yellow);
+      border-radius: 14px;
+      padding: 1.4rem 1.8rem;
+      max-width: 340px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+      font-size: 1.15rem;
+    }
+    .shopping-list .list-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #aaa;
+      border-bottom: 2px dashed #eee;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .shopping-list ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .shopping-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.35rem 0;
+      font-size: 1.1rem;
+    }
+    .shopping-list li::before {
+      content: '✔';
+      font-size: 1rem;
+      color: var(--green);
+    }
+
+    /* Live rendered list preview */
+    .render-preview {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.4rem 1.8rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 1.15rem;
+      margin-top: 0.8rem;
+    }
+    .render-preview ul {
+      margin: 0.4rem 0 0 1.5rem;
+      line-height: 2;
+    }
+
+    /* Label below demo areas */
+    .demo-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #999;
+      margin-top: 0.4rem;
+    }
+
+    .two-col {
+      display: flex;
+      gap: 1.4rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin: 1rem 0;
+    }
+    .two-col > * { flex: 1; min-width: 220px; }
+  </style>
+</head>
+<body>
+
+  <header class="lesson-header" style="background: linear-gradient(135deg, #51CF66 0%, #339AF0 100%);">
+    <div class="lesson-number">Lesson 4 of 5</div>
+    <h1>Lists! &#x1F4DD;</h1>
+    <p class="tagline">Make a bullet list — like a shopping list, but for your webpage!</p>
+  </header>
+
+  <!-- ── Quick recap ── -->
+  <section class="card yellow">
+    <h2>&#x1F501; Quick Recap</h2>
+    <p>You already know how to use:</p>
+    <ul style="margin: 0.6rem 0 0 1.5rem; line-height:2.2;">
+      <li>Page skeleton: <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;body&gt;</code></li>
+      <li>Titles: <code>&lt;h1&gt;</code>, <code>&lt;h2&gt;</code>, <code>&lt;h3&gt;</code></li>
+      <li>Bold &amp; italic: <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>, <code>&lt;b&gt;</code></li>
+      <li>Paragraphs: <code>&lt;p&gt;</code></li>
+    </ul>
+    <div class="callout tip" style="margin-top:0.8rem;">
+      Missed a lesson? Jump back: <a href="0001-hello-html.html">Lesson 1</a> ·
+      <a href="0002-big-titles.html">Lesson 2</a> ·
+      <a href="0003-bold-and-italic.html">Lesson 3</a>
+    </div>
+  </section>
+
+  <!-- ── Shopping list analogy ── -->
+  <section class="card green">
+    <h2>&#x1F6D2; Think of a Shopping List</h2>
+    <p>
+      Imagine Mum writes a shopping list before going to the supermarket.
+      Each item goes on its own line — milk, eggs, bread, apples.
+    </p>
+    <div style="margin: 1rem 0;">
+      <div class="shopping-list">
+        <div class="list-title">&#x1F6D2; Shopping List</div>
+        <ul>
+          <li>Milk</li>
+          <li>Eggs</li>
+          <li>Bread</li>
+          <li>Apples</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:1rem;">
+      In HTML, a list works exactly the same way.
+      You need <strong>two</strong> magic words to make one:
+    </p>
+    <ul style="margin: 0.6rem 0 0 1.5rem; line-height:2.4; font-size:1.1rem;">
+      <li><code>&lt;ul&gt;</code> — the <strong>shopping bag</strong> that holds all the items</li>
+      <li><code>&lt;li&gt;</code> — one <strong>list item</strong> (one thing in the bag)</li>
+    </ul>
+  </section>
+
+  <!-- ── How it works ── -->
+  <section class="card purple">
+    <h2>&#x270F;&#xFE0F; How to Write a List</h2>
+    <p>Put <code>&lt;li&gt;</code> items <em>inside</em> the <code>&lt;ul&gt;</code> bag:</p>
+
+    <div class="two-col">
+      <div>
+        <div class="code-block"><span class="tag">&lt;ul&gt;</span>
+  <span class="tag">&lt;li&gt;</span><span class="text">Pizza</span><span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span><span class="text">Ice Cream</span><span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span><span class="text">LEGO</span><span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span></div>
+        <div class="demo-label">&#x2190; You type this</div>
+      </div>
+      <div>
+        <div class="render-preview">
+          <ul>
+            <li>Pizza</li>
+            <li>Ice Cream</li>
+            <li>LEGO</li>
+          </ul>
+        </div>
+        <div class="demo-label">&#x2190; Browser shows this</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Remember:</strong> <code>&lt;ul&gt;</code> is the bag — it goes outside.
+      <code>&lt;li&gt;</code> is each item — they go inside. Just like putting things
+      into a bag!
+    </div>
+  </section>
+
+  <!-- ── Nesting tip ── -->
+  <section class="card orange">
+    <h2>&#x1F4A1; The Indenting Trick</h2>
+    <p>
+      Developers move <code>&lt;li&gt;</code> items to the right (press <kbd>Tab</kbd>)
+      to show they are <em>inside</em> the <code>&lt;ul&gt;</code>.
+      The browser doesn't care — but it makes the code much easier to read!
+    </p>
+
+    <div class="two-col">
+      <div>
+        <div class="code-block" style="font-size:0.95rem;"><span style="color:#FF6B6B;">Hard to read:</span>
+<span class="tag">&lt;ul&gt;</span><span class="tag">&lt;li&gt;</span><span class="text">Cat</span><span class="tag">&lt;/li&gt;</span><span class="tag">&lt;li&gt;</span><span class="text">Dog</span><span class="tag">&lt;/li&gt;</span><span class="tag">&lt;/ul&gt;</span></div>
+      </div>
+      <div>
+        <div class="code-block" style="font-size:0.95rem;"><span style="color:#86EFAC;">Easy to read:</span>
+<span class="tag">&lt;ul&gt;</span>
+  <span class="tag">&lt;li&gt;</span><span class="text">Cat</span><span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span><span class="text">Dog</span><span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Quiz ── -->
+  <section class="card orange">
+    <h2>&#x1F9E0; Quick Quiz!</h2>
+
+    <div class="quiz" data-correct="1"
+         data-win="&#x1F6D2; Correct! &lt;ul&gt; is the bag that holds all list items inside it!"
+         data-lose="&lt;ul&gt; is the shopping bag — it wraps all the &lt;li&gt; items inside.">
+      <p class="quiz-question">
+        Which tag is the "shopping bag" that holds all your list items?
+      </p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;ul&gt;</code> — it holds all items</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;li&gt;</code> — it is one item</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;p&gt;</code> — it is a paragraph</button>
+      <p class="quiz-feedback"></p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #eee; margin: 1.5rem 0;">
+
+    <div class="quiz" data-correct="2"
+         data-win="&#x1F3C6; Yes! &lt;li&gt; is one list item — like one thing on a shopping list!"
+         data-lose="&lt;li&gt; = one list item. Think of one thing from the shopping list.">
+      <p class="quiz-question">
+        You want to add the word "Dinosaurs" as one bullet on a list.
+        Which tag do you use around it?
+      </p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;ul&gt;</code> — it holds all items</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;li&gt;</code> — it is one item</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;em&gt;</code> — it tilts the text</button>
+      <p class="quiz-feedback"></p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #eee; margin: 1.5rem 0;">
+
+    <div class="quiz" data-correct="3"
+         data-win="&#x1F389; Right! &lt;li&gt; items always go INSIDE &lt;ul&gt; — like items in a bag!"
+         data-lose="The &lt;li&gt; items must go INSIDE the &lt;ul&gt; bag — &lt;ul&gt; goes outside.">
+      <p class="quiz-question">
+        Which tag goes on the OUTSIDE — wrapping all the others?
+      </p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;li&gt;</code> — the list item tag</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;p&gt;</code> — the paragraph tag</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;ul&gt;</code> — the list wrapper tag</button>
+      <p class="quiz-feedback"></p>
+    </div>
+  </section>
+
+  <!-- ── Try it! ── -->
+  <section class="try-it">
+    <h2>&#x270F;&#xFE0F; Try It — Add Your Favourite Things List!</h2>
+    <p style="margin-bottom:1rem;">
+      Open your <code>mypage.html</code> and add a bullet list of your favourite things.
+      Here's what it should look like — fill in YOUR favourites!
+    </p>
+
+    <div class="code-block"><span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+
+    <span class="tag">&lt;h1&gt;</span><span class="text">My name is YOUR NAME!</span><span class="tag">&lt;/h1&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">About Me</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span><span class="text">Hello! My name is </span><span class="tag">&lt;strong&gt;</span><span class="text">YOUR NAME</span><span class="tag">&lt;/strong&gt;</span><span class="text">. I am </span><span class="tag">&lt;strong&gt;</span><span class="text">5</span><span class="tag">&lt;/strong&gt;</span><span class="text"> years old.</span><span class="tag">&lt;/p&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">My Favourite Things</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;ul&gt;</span>
+      <span class="tag">&lt;li&gt;</span><span class="text">FAVOURITE THING 1</span><span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;li&gt;</span><span class="text">FAVOURITE THING 2</span><span class="tag">&lt;/li&gt;</span>
+      <span class="tag">&lt;li&gt;</span><span class="text">FAVOURITE THING 3</span><span class="tag">&lt;/li&gt;</span>
+    <span class="tag">&lt;/ul&gt;</span>
+
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Replace <em>FAVOURITE THING 1, 2, 3</em> with things you truly love</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Save and open the file — you should see a bullet list appear!</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        Want more items? Add more <code>&lt;li&gt;</code> lines inside the <code>&lt;ul&gt;</code>.
+        You can have as many as you like &#x1F31F;
+      </div>
+    </div>
+  </section>
+
+  <!-- ── What you learned ── -->
+  <section class="card green">
+    <h2>&#x1F4DA; What Did You Learn Today?</h2>
+    <ul style="margin-left: 1.5rem; line-height: 2.2;">
+      <li><code>&lt;ul&gt;</code> creates a bullet list — the "shopping bag"</li>
+      <li><code>&lt;li&gt;</code> is one item in the list — always goes <em>inside</em> <code>&lt;ul&gt;</code></li>
+      <li>Indent your <code>&lt;li&gt;</code> items with <kbd>Tab</kbd> to keep code tidy</li>
+    </ul>
+    <p style="margin-top: 1rem;">
+      &#x1F4CB; <a href="../reference/html-tags-cheatsheet.html">HTML Tags Cheat Sheet</a> — see every tag you've learned
+    </p>
+    <div class="callout tip" style="margin-top: 0.8rem;">
+      <strong>One more lesson to go!</strong> Next up: you'll put <em>everything</em> together
+      and build your very own About Me page. &#x1F680;
+    </div>
+  </section>
+
+  <!-- ── Primary source ── -->
+  <section class="card" style="border-color:#ADB5BD; background:#F8F9FA; font-size:0.95rem;">
+    <h2 style="font-size:1.1rem; color:#495057;">&#x1F4D6; Want to Read More?</h2>
+    <p>
+      This lesson is based on
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/HTML_text_fundamentals#lists" target="_blank" rel="noopener">
+        MDN Web Docs — HTML Text Fundamentals: Lists
+      </a>.
+    </p>
+  </section>
+
+  <div class="ask-teacher">
+    &#x1F9D1;&#x200D;&#x1F3EB; Got a question? Ask your teacher! There are no silly questions.
+  </div>
+
+  <div class="nav">
+    <a href="0003-bold-and-italic.html">&#x2190; Lesson 3: Bold &amp; Italic</a>
+    <a href="0005-about-me-page.html">Next: My About Me Page &#x2192;</a>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

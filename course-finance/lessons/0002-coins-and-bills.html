@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Coins and Bills | Money School</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .flip-card {
+      perspective: 800px;
+      width: 130px;
+      height: 130px;
+      cursor: pointer;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+    }
+    .flip-card:hover .flip-card-inner,
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-front, .flip-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+    .flip-back {
+      transform: rotateY(180deg);
+      background: #f5f5f5;
+      border: 3px dashed #ccc;
+      font-size: 0.85rem;
+      text-align: center;
+      color: #444;
+      padding: 8px;
+      border-radius: 50%;
+    }
+    .coin-row { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 20px 0; }
+    .count-game { background: #f0fdf4; border-radius: 14px; padding: 20px 24px; margin: 18px 0; }
+    .count-game .q { font-weight: 700; font-size: 1.05rem; margin-bottom: 12px; }
+    .count-coins { font-size: 2.2rem; letter-spacing: 6px; margin-bottom: 14px; }
+    .count-input { display: flex; gap: 12px; flex-wrap: wrap; }
+    .count-btn {
+      padding: 12px 22px;
+      border: 3px solid #ccc;
+      border-radius: 12px;
+      background: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .count-btn:hover { border-color: #4CAF50; background: #E8F5E9; }
+    .count-btn.correct { border-color: #4CAF50; background: #E8F5E9; color: #2E7D32; }
+    .count-btn.wrong   { border-color: #F44336; background: #FFEBEE; color: #C62828; }
+    .count-feedback { margin-top: 10px; font-weight: 600; display: none; }
+    .count-feedback.show { display: block; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <header class="course-header">
+    <span class="lesson-badge">Lesson 2 of 7</span>
+    <span class="emoji">🪙</span>
+    <h1>Coins and Bills</h1>
+    <p class="subtitle">Learn to recognise every piece of money!</p>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-dots">
+    <div class="dot done"></div>
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Story -->
+  <div class="story-box">
+    <div class="story-title">📖 Story Time</div>
+    <p>Zara the koala went to the market with her mum. She saw so many things to buy! 🍎🧃🪀</p>
+    <p>But then her mum said: <em>"Zara, here are some coins. You can choose ONE thing."</em>
+    Zara looked at the coins in her paw. She saw different shapes and colours...</p>
+    <p><strong>Which coin is worth more?</strong> Zara needed to know! Let's help her! 🌟</p>
+  </div>
+
+  <!-- Coins knowledge -->
+  <div class="card">
+    <h2>🪙 The Four Main Coins</h2>
+    <p>Hover over each coin to flip it and see its value! 👇</p>
+
+    <div class="coin-row">
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front coin coin-penny"><span class="value">¢1</span><span class="name">Penny</span></div>
+          <div class="flip-back">1 cent<br>🟤 Brown / copper<br>Smallest value!</div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front coin coin-nickel"><span class="value">¢5</span><span class="name">Nickel</span></div>
+          <div class="flip-back">5 cents<br>⬜ Silver colour<br>= 5 pennies!</div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front coin coin-dime" style="width:75px;height:75px"><span class="value">¢10</span><span class="name">Dime</span></div>
+          <div class="flip-back">10 cents<br>⬜ Tiny silver<br>= 10 pennies!</div>
+        </div>
+      </div>
+      <div class="flip-card" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-front coin coin-quarter"><span class="value">¢25</span><span class="name">Quarter</span></div>
+          <div class="flip-back">25 cents<br>⬜ Silver, larger<br>= 25 pennies!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <div class="word">💡 Did you know?</div>
+      <div class="meaning">The <strong>dime</strong> is the <em>smallest coin</em> but it's worth MORE than a nickel.
+      Big doesn't always mean more! 😄</div>
+    </div>
+
+    <h3>📊 Coins from smallest to biggest value:</h3>
+    <p style="font-size:1.2rem; text-align:center; padding: 12px 0;">
+      🟤 Penny (1¢) &nbsp;→&nbsp; ⬜ Nickel (5¢) &nbsp;→&nbsp; ⬜ Dime (10¢) &nbsp;→&nbsp; ⬜ Quarter (25¢)
+    </p>
+
+    <p class="source-cite">📚 Source: <a href="https://www.fdic.gov/resources/consumers/money-smart/" target="_blank">FDIC MoneySmart for Young People</a></p>
+  </div>
+
+  <!-- Bills knowledge -->
+  <div class="card">
+    <h2>💵 Bills (Paper Money)</h2>
+    <p>Bills are paper money. They are worth a lot more than coins! Click each bill to see who's on it.</p>
+
+    <div class="bill-grid">
+      <div class="bill bill-1"><span class="bill-value">$1</span><span class="bill-name">ONE DOLLAR</span></div>
+      <div class="bill bill-5"><span class="bill-value">$5</span><span class="bill-name">FIVE DOLLARS</span></div>
+      <div class="bill bill-10"><span class="bill-value">$10</span><span class="bill-name">TEN DOLLARS</span></div>
+      <div class="bill bill-20"><span class="bill-value">$20</span><span class="bill-name">TWENTY DOLLARS</span></div>
+    </div>
+
+    <div class="definition-box">
+      <div class="word">💡 100 cents = $1</div>
+      <div class="meaning">100 pennies make one dollar. A $20 bill is worth two thousand pennies! That's a LOT of coins! 😲</div>
+    </div>
+  </div>
+
+  <!-- Counting game -->
+  <div class="card">
+    <h2>🎮 Counting Game!</h2>
+    <p>Can you add up these coins? Click the right answer!</p>
+
+    <div class="count-game" id="cg1">
+      <div class="q">How much are these coins worth together?</div>
+      <div class="count-coins">🪙🪙🪙</div>
+      <p style="color:#888; font-size:0.9rem">Three pennies (¢1 + ¢1 + ¢1)</p>
+      <div class="count-input">
+        <button class="count-btn" onclick="checkCount(this,'cg1',false)">2 cents</button>
+        <button class="count-btn" onclick="checkCount(this,'cg1',true)">3 cents</button>
+        <button class="count-btn" onclick="checkCount(this,'cg1',false)">5 cents</button>
+      </div>
+      <div class="count-feedback" id="cg1-fb"></div>
+    </div>
+
+    <div class="count-game" id="cg2">
+      <div class="q">How many pennies equal one nickel?</div>
+      <div class="count-coins">🪙 = ? × 🟤</div>
+      <p style="color:#888; font-size:0.9rem">One nickel = how many pennies?</p>
+      <div class="count-input">
+        <button class="count-btn" onclick="checkCount(this,'cg2',false)">2 pennies</button>
+        <button class="count-btn" onclick="checkCount(this,'cg2',false)">3 pennies</button>
+        <button class="count-btn" onclick="checkCount(this,'cg2',true)">5 pennies</button>
+        <button class="count-btn" onclick="checkCount(this,'cg2',false)">10 pennies</button>
+      </div>
+      <div class="count-feedback" id="cg2-fb"></div>
+    </div>
+
+    <div class="count-game" id="cg3">
+      <div class="q">Which coin is worth the MOST?</div>
+      <div class="count-coins">🟤 ⬜ ⬜ ⬜</div>
+      <div class="count-input">
+        <button class="count-btn" onclick="checkCount(this,'cg3',false)">The Penny</button>
+        <button class="count-btn" onclick="checkCount(this,'cg3',false)">The Nickel</button>
+        <button class="count-btn" onclick="checkCount(this,'cg3',false)">The Dime</button>
+        <button class="count-btn" onclick="checkCount(this,'cg3',true)">The Quarter</button>
+      </div>
+      <div class="count-feedback" id="cg3-fb"></div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="quiz-section">
+    <h2>🎯 Quiz Time!</h2>
+    <p class="quiz-intro">Ready to show what you know? Click the best answer!</p>
+
+    <div class="quiz-block" data-correct="1">
+      <div class="question">Q1 — What colour is a penny?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">Silver and shiny</button>
+        <button class="quiz-btn">Copper or brown</button>
+        <button class="quiz-btn">Green like grass</button>
+        <button class="quiz-btn">Blue like the sky</button>
+      </div>
+      <div class="feedback-box correct">✅ Yes! Pennies are brown/copper coloured! They're easy to spot! 🟤</div>
+      <div class="feedback-box wrong">🙈 Pennies are <strong>brown / copper</strong> coloured — different from all the others!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="2">
+      <div class="question">Q2 — A dime is worth how many cents?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">1 cent</button>
+        <button class="quiz-btn">5 cents</button>
+        <button class="quiz-btn">10 cents</button>
+        <button class="quiz-btn">25 cents</button>
+      </div>
+      <div class="feedback-box correct">✅ Perfect! A dime = 10 cents! Remember: D for Dime, D for 10 (dix in French 😄)!</div>
+      <div class="feedback-box wrong">🙈 A dime is worth <strong>10 cents</strong>. It's small but mighty!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q3 — How many pennies make a quarter (25¢)?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">25 pennies</button>
+        <button class="quiz-btn">10 pennies</button>
+        <button class="quiz-btn">5 pennies</button>
+        <button class="quiz-btn">100 pennies</button>
+      </div>
+      <div class="feedback-box correct">✅ That's right! 25 pennies = 1 quarter! Great counting! 🎉</div>
+      <div class="feedback-box wrong">🙈 A quarter = <strong>25 pennies</strong>! Count them: 1, 2, 3... all the way to 25!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="3">
+      <div class="question">Q4 — Which is worth MORE — a $1 bill or 3 quarters?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">3 quarters (75¢)</button>
+        <button class="quiz-btn">They are the same</button>
+        <button class="quiz-btn">It depends on the day</button>
+        <button class="quiz-btn">A $1 bill (100¢)</button>
+      </div>
+      <div class="feedback-box correct">✅ Brilliant! $1 = 100 cents, but 3 quarters = only 75 cents. The bill wins! 💵</div>
+      <div class="feedback-box wrong">🙈 A <strong>$1 bill</strong> is worth 100 cents. Three quarters are only 75 cents — so the bill wins!</div>
+    </div>
+
+    <div class="quiz-block" data-correct="0">
+      <div class="question">Q5 — Which coin is the SMALLEST in size but still worth more than a penny?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn">The dime</button>
+        <button class="quiz-btn">The nickel</button>
+        <button class="quiz-btn">The quarter</button>
+        <button class="quiz-btn">The dollar coin</button>
+      </div>
+      <div class="feedback-box correct">✅ Super smart! The <strong>dime</strong> is tiny but worth 10 cents! Size is tricky! 😄</div>
+      <div class="feedback-box wrong">🙈 The <strong>dime</strong> is the smallest coin, but it's worth 10 cents — more than a nickel!</div>
+    </div>
+
+    <div class="score-box">
+      <div class="score-number"></div>
+      <div class="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Challenge -->
+  <div class="challenge-box">
+    <h3>🌟 Real-Life Challenge!</h3>
+    <p>Ask a grown-up for some real coins. Sort them into four groups: Penny, Nickel, Dime, Quarter.</p>
+    <p>Then count how many cents you have in total. Can you say each coin's name out loud?</p>
+    <p>Bonus: Can you find something that costs less than 25 cents? 🛒</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>🙋 Got a question?</strong><br>
+    Not sure about a coin? Ask your teacher — I love questions!
+  </div>
+
+  <nav class="nav-bar">
+    <a href="0001-what-is-money.html" class="nav-btn prev">⬅️ Previous</a>
+    <a href="../lessons/index.html" class="nav-btn home">🏠 All Lessons</a>
+    <a href="0003-earning-money.html" class="nav-btn next">Next Lesson ➡️</a>
+  </nav>
+
+</div>
+<script src="../assets/quiz.js"></script>
+<script>
+function checkCount(btn, gameId, isCorrect) {
+  const game = document.getElementById(gameId);
+  if (game.dataset.answered) return;
+  game.dataset.answered = '1';
+  const btns = game.querySelectorAll('.count-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById(gameId + '-fb');
+  if (isCorrect) {
+    btn.classList.add('correct');
+    fb.textContent = '✅ Correct! Well done! 🌟';
+    fb.style.color = '#2E7D32';
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '🙈 Not quite — look at the coins again and try to remember!';
+    fb.style.color = '#C62828';
+    btns.forEach(b => { if (b !== btn && b.onclick.toString().includes('true')) b.classList.add('correct'); });
+  }
+  fb.classList.add('show');
+}
+</script>
+</body>
+</html>

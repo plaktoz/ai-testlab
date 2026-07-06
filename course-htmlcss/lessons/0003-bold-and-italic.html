@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3 — Bold &amp; Italic</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .demo-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    .demo-box {
+      flex: 1;
+      min-width: 180px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .demo-box .preview {
+      font-size: 1.6rem;
+      margin-bottom: 0.6rem;
+      min-height: 2.2rem;
+    }
+    .demo-box .label { font-size: 0.85rem; color: #888; font-weight: 600; }
+    .demo-box code   { display: block; margin-top: 0.4rem; font-size: 0.9rem; }
+
+    /* voice-bubble analogy */
+    .voice-bubble {
+      border-radius: 16px;
+      padding: 1rem 1.4rem;
+      margin: 0.8rem 0;
+      position: relative;
+      font-size: 1.1rem;
+    }
+    .voice-bubble.shout {
+      background: #FFF9DB;
+      border: 2px solid var(--yellow);
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
+    .voice-bubble.whisper {
+      background: #F0F4FF;
+      border: 2px solid var(--blue);
+      font-style: italic;
+    }
+    .bubble-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #aaa; margin-bottom: 0.3rem; letter-spacing: 0.07em; }
+  </style>
+</head>
+<body>
+
+  <header class="lesson-header" style="background: linear-gradient(135deg, #FF922B 0%, #F06595 100%);">
+    <div class="lesson-number">Lesson 3 of 5</div>
+    <h1>Bold &amp; Italic &#x1F4AA;</h1>
+    <p class="tagline">Give your words personality — shout, whisper, and everything in between!</p>
+  </header>
+
+  <!-- ── Quick recap ── -->
+  <section class="card yellow">
+    <h2>&#x1F501; Quick Recap</h2>
+    <p>You already know how to:</p>
+    <ul style="margin: 0.6rem 0 0 1.5rem; line-height:2.2;">
+      <li>Build the skeleton of a page: <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;body&gt;</code></li>
+      <li>Add big titles: <code>&lt;h1&gt;</code>, <code>&lt;h2&gt;</code>, <code>&lt;h3&gt;</code></li>
+      <li>Make text bold with <code>&lt;b&gt;</code></li>
+    </ul>
+    <div class="callout tip" style="margin-top:0.8rem;">
+      Haven't done Lessons 1 &amp; 2 yet? <a href="0001-hello-html.html">Start at Lesson 1!</a>
+    </div>
+  </section>
+
+  <!-- ── strong ── -->
+  <section class="card purple">
+    <h2>&#x1F4AA; <code>&lt;strong&gt;</code> — Super Important Words</h2>
+    <p>
+      You know <code>&lt;b&gt;</code> makes text bold. <code>&lt;strong&gt;</code> does the same thing —
+      but it also tells the computer <em>"this word really matters!"</em>
+    </p>
+
+    <div class="voice-bubble shout">
+      <div class="bubble-label">&#x1F50A; Strong = like shouting something important</div>
+      Watch out — the floor is <strong>very hot!</strong>
+    </div>
+
+    <p style="margin-top:1rem;">Here is how you write it:</p>
+    <div class="code-block"><span class="tag">&lt;p&gt;</span><span class="text">The most important thing is to have </span><span class="tag">&lt;strong&gt;</span><span class="text">fun</span><span class="tag">&lt;/strong&gt;</span><span class="text">!</span><span class="tag">&lt;/p&gt;</span></div>
+
+    <div class="callout">
+      <strong>Notice anything new?</strong> That's <code>&lt;p&gt;</code> — it stands for <em>paragraph</em>.
+      It wraps a sentence or block of normal text. You'll use it a lot on your About Me page!
+    </div>
+  </section>
+
+  <!-- ── em ── -->
+  <section class="card pink">
+    <h2>&#x1F4AC; <code>&lt;em&gt;</code> — Words Said with Feeling</h2>
+    <p>
+      <code>&lt;em&gt;</code> stands for <strong>emphasis</strong>. It tilts your text sideways — that's called <em>italic</em>.
+      Use it when a word should be said in a special, expressive way.
+    </p>
+
+    <div class="voice-bubble whisper">
+      <div class="bubble-label">&#x1F3AD; Em = leaning in with feeling</div>
+      I <em>love</em> pizza more than anything in the world.
+    </div>
+
+    <p style="margin-top:1rem;">Here is how you write it:</p>
+    <div class="code-block"><span class="tag">&lt;p&gt;</span><span class="text">My </span><span class="tag">&lt;em&gt;</span><span class="text">favourite</span><span class="tag">&lt;/em&gt;</span><span class="text"> colour is blue.</span><span class="tag">&lt;/p&gt;</span></div>
+  </section>
+
+  <!-- ── Side-by-side all text tags ── -->
+  <section class="card">
+    <h2>&#x1F4CA; Spot the Difference</h2>
+    <p style="margin-bottom:1rem;">All four text tags — see how each one looks:</p>
+    <div class="demo-row">
+      <div class="demo-box">
+        <div class="preview">Hello</div>
+        <div class="label">Normal text</div>
+        <code>Hello</code>
+      </div>
+      <div class="demo-box">
+        <div class="preview"><b>Hello</b></div>
+        <div class="label">Bold — <code>&lt;b&gt;</code></div>
+        <code>&lt;b&gt;Hello&lt;/b&gt;</code>
+      </div>
+      <div class="demo-box">
+        <div class="preview"><strong>Hello</strong></div>
+        <div class="label">Important bold — <code>&lt;strong&gt;</code></div>
+        <code>&lt;strong&gt;Hello&lt;/strong&gt;</code>
+      </div>
+      <div class="demo-box">
+        <div class="preview"><em>Hello</em></div>
+        <div class="label">Italic — <code>&lt;em&gt;</code></div>
+        <code>&lt;em&gt;Hello&lt;/em&gt;</code>
+      </div>
+    </div>
+    <div class="callout tip" style="margin-top:0.5rem;">
+      <strong>Tip:</strong> <code>&lt;b&gt;</code> and <code>&lt;strong&gt;</code> look the same on screen —
+      but web developers prefer <code>&lt;strong&gt;</code> because it also tells the computer the word is important.
+    </div>
+  </section>
+
+  <!-- ── Quiz ── -->
+  <section class="card orange">
+    <h2>&#x1F9E0; Quick Quiz!</h2>
+
+    <div class="quiz" data-correct="2"
+         data-win="&#x1F4AA; Correct! &lt;strong&gt; is the best tag for important bold words!"
+         data-lose="Remember: &lt;strong&gt; = important bold. &lt;em&gt; = italic with feeling.">
+      <p class="quiz-question">
+        You want to make the word "danger" bold AND tell the computer it is very important.
+        Which tag do you use?
+      </p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;em&gt;</code> — emphasis italic tag</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;strong&gt;</code> — important bold tag</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;h3&gt;</code> — small heading tag</button>
+      <p class="quiz-feedback"></p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #eee; margin: 1.5rem 0;">
+
+    <div class="quiz" data-correct="3"
+         data-win="&#x1F3AD; Perfect! &lt;em&gt; tilts words sideways to show feeling!"
+         data-lose="&lt;em&gt; makes italic — tilted text that shows expression.">
+      <p class="quiz-question">
+        You want to write: "I <em>love</em> ice cream" — the word love is tilted.
+        Which tag makes tilted italic text?
+      </p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;b&gt;</code> — the bold text tag</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;strong&gt;</code> — important bold tag</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;em&gt;</code> — the emphasis tag</button>
+      <p class="quiz-feedback"></p>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #eee; margin: 1.5rem 0;">
+
+    <div class="quiz" data-correct="1"
+         data-win="&#x1F31F; Yes! &lt;p&gt; is for paragraphs — normal blocks of text!"
+         data-lose="&lt;p&gt; = paragraph. It wraps sentences of normal everyday text.">
+      <p class="quiz-question">
+        Which tag wraps a normal sentence or paragraph of text?
+      </p>
+      <button class="quiz-btn" data-choice="1"><code>&lt;p&gt;</code> — the paragraph tag</button>
+      <button class="quiz-btn" data-choice="2"><code>&lt;h1&gt;</code> — the big title tag</button>
+      <button class="quiz-btn" data-choice="3"><code>&lt;em&gt;</code> — the emphasis tag</button>
+      <p class="quiz-feedback"></p>
+    </div>
+  </section>
+
+  <!-- ── Try it! ── -->
+  <section class="try-it">
+    <h2>&#x270F;&#xFE0F; Try It — Make Your Page More Exciting!</h2>
+    <p style="margin-bottom:1rem;">
+      Open your <code>mypage.html</code> and update the body to look like this.
+      Fill in the blanks with things <em>you</em> love!
+    </p>
+
+    <div class="code-block"><span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+
+    <span class="tag">&lt;h1&gt;</span><span class="text">My name is YOUR NAME!</span><span class="tag">&lt;/h1&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">About Me</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span><span class="text">Hello! My name is </span><span class="tag">&lt;strong&gt;</span><span class="text">YOUR NAME</span><span class="tag">&lt;/strong&gt;</span><span class="text">. I am </span><span class="tag">&lt;strong&gt;</span><span class="text">5</span><span class="tag">&lt;/strong&gt;</span><span class="text"> years old.</span><span class="tag">&lt;/p&gt;</span>
+
+    <span class="tag">&lt;h2&gt;</span><span class="text">My Favourite Things</span><span class="tag">&lt;/h2&gt;</span>
+    <span class="tag">&lt;p&gt;</span><span class="text">I </span><span class="tag">&lt;em&gt;</span><span class="text">love</span><span class="tag">&lt;/em&gt;</span><span class="text"> FAVOURITE THING. It makes me </span><span class="tag">&lt;em&gt;</span><span class="text">so happy</span><span class="tag">&lt;/em&gt;</span><span class="text">!</span><span class="tag">&lt;/p&gt;</span>
+
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Replace <em>YOUR NAME</em> and <em>FAVOURITE THING</em> with your real answers</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Save and open the file in your browser</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        You should see your name in <strong>bold</strong> and some words in <em>italic</em> —
+        your page is getting a personality! &#x1F389;
+      </div>
+    </div>
+  </section>
+
+  <!-- ── What you learned ── -->
+  <section class="card green">
+    <h2>&#x1F4DA; What Did You Learn Today?</h2>
+    <ul style="margin-left: 1.5rem; line-height: 2.2;">
+      <li><code>&lt;strong&gt;</code> makes text <strong>bold</strong> and tells the computer it's important</li>
+      <li><code>&lt;em&gt;</code> makes text <em>italic</em> — tilted and expressive</li>
+      <li><code>&lt;p&gt;</code> wraps a normal paragraph of text</li>
+    </ul>
+    <p style="margin-top:0.8rem;">
+      See all tags so far:
+      <a href="../reference/html-tags-cheatsheet.html">&#x1F4CB; HTML Tags Cheat Sheet</a>
+    </p>
+  </section>
+
+  <!-- ── Primary source ── -->
+  <section class="card" style="border-color:#ADB5BD; background:#F8F9FA; font-size:0.95rem;">
+    <h2 style="font-size:1.1rem; color:#495057;">&#x1F4D6; Want to Read More?</h2>
+    <p>
+      This lesson is based on
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/HTML_text_fundamentals#emphasis_and_importance" target="_blank" rel="noopener">
+        MDN Web Docs — Emphasis and Importance
+      </a>.
+    </p>
+  </section>
+
+  <div class="ask-teacher">
+    &#x1F9D1;&#x200D;&#x1F3EB; Got a question? Ask your teacher! There are no silly questions.
+  </div>
+
+  <div class="nav">
+    <a href="0002-big-titles.html">&#x2190; Lesson 2: Big Titles</a>
+    <a href="0004-lists.html">Next: Lists &#x2192;</a>
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+</body>
+</html>

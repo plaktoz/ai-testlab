@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Tags Cheat Sheet</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    @media print {
+      body { background: #fff; }
+      .no-print { display: none; }
+    }
+
+    body { max-width: 900px; }
+
+    .cheat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .tag-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-top: 5px solid var(--blue);
+    }
+    .tag-card.purple { border-top-color: var(--purple); }
+    .tag-card.pink   { border-top-color: var(--pink); }
+    .tag-card.green  { border-top-color: var(--green); }
+    .tag-card.yellow { border-top-color: var(--yellow); }
+    .tag-card.orange { border-top-color: var(--orange); }
+
+    .tag-name {
+      font-family: 'Courier New', monospace;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--purple);
+      margin-bottom: 0.3rem;
+    }
+    .tag-desc { font-size: 0.95rem; color: #555; margin-bottom: 0.6rem; }
+    .tag-example {
+      background: #1A1A2E;
+      color: #E2E8F0;
+      border-radius: 7px;
+      padding: 0.5rem 0.8rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .tag-example .t { color: #93C5FD; }
+    .tag-example .v { color: #FDE68A; }
+
+    .lesson-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 0.5rem;
+    }
+
+    h2.section-title {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #888;
+      margin: 2rem 0 0.8rem;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="lesson-header" style="background: linear-gradient(135deg, #1A1A2E 0%, #845EF7 100%);">
+    <div class="lesson-number">Reference Document</div>
+    <h1>HTML Tags Cheat Sheet</h1>
+    <p class="tagline">All the magic words you've learned — in one place!</p>
+  </header>
+
+  <!-- ── Page structure ── -->
+  <h2 class="section-title">Page Structure — Lesson 1</h2>
+  <div class="cheat-grid">
+
+    <div class="tag-card">
+      <div class="lesson-badge">Lesson 1</div>
+      <div class="tag-name">&lt;html&gt; … &lt;/html&gt;</div>
+      <div class="tag-desc">The big box that wraps the whole page. Every HTML file starts and ends with this.</div>
+      <div class="tag-example"><span class="t">&lt;html&gt;</span>
+  everything goes here
+<span class="t">&lt;/html&gt;</span></div>
+    </div>
+
+    <div class="tag-card green">
+      <div class="lesson-badge">Lesson 1</div>
+      <div class="tag-name">&lt;head&gt; … &lt;/head&gt;</div>
+      <div class="tag-desc">Secret info about the page (title, language). Not shown on screen.</div>
+      <div class="tag-example"><span class="t">&lt;head&gt;</span>
+  secret stuff
+<span class="t">&lt;/head&gt;</span></div>
+    </div>
+
+    <div class="tag-card orange">
+      <div class="lesson-badge">Lesson 1</div>
+      <div class="tag-name">&lt;body&gt; … &lt;/body&gt;</div>
+      <div class="tag-desc">Everything the user SEES goes inside here.</div>
+      <div class="tag-example"><span class="t">&lt;body&gt;</span>
+  hello world!
+<span class="t">&lt;/body&gt;</span></div>
+    </div>
+
+  </div>
+
+  <!-- ── Text formatting ── -->
+  <h2 class="section-title">Text Formatting — Lessons 1, 2 &amp; 3</h2>
+  <div class="cheat-grid">
+
+    <div class="tag-card yellow">
+      <div class="lesson-badge">Lesson 1</div>
+      <div class="tag-name">&lt;b&gt; … &lt;/b&gt;</div>
+      <div class="tag-desc">Makes text <strong>bold</strong> (thick and heavy).</div>
+      <div class="tag-example"><span class="t">&lt;b&gt;</span><span class="v">I am bold!</span><span class="t">&lt;/b&gt;</span></div>
+    </div>
+
+    <div class="tag-card purple">
+      <div class="lesson-badge">Lesson 2</div>
+      <div class="tag-name">&lt;h1&gt; … &lt;/h1&gt;</div>
+      <div class="tag-desc">The BIGGEST title. Use only once per page — it's the star!</div>
+      <div class="tag-example"><span class="t">&lt;h1&gt;</span><span class="v">My Page!</span><span class="t">&lt;/h1&gt;</span></div>
+    </div>
+
+    <div class="tag-card">
+      <div class="lesson-badge">Lesson 2</div>
+      <div class="tag-name">&lt;h2&gt; … &lt;/h2&gt;</div>
+      <div class="tag-desc">A big section title. Use as many as you like.</div>
+      <div class="tag-example"><span class="t">&lt;h2&gt;</span><span class="v">About Me</span><span class="t">&lt;/h2&gt;</span></div>
+    </div>
+
+    <div class="tag-card pink">
+      <div class="lesson-badge">Lesson 2</div>
+      <div class="tag-name">&lt;h3&gt; … &lt;/h3&gt;</div>
+      <div class="tag-desc">A smaller section title. Good for details inside an h2 section.</div>
+      <div class="tag-example"><span class="t">&lt;h3&gt;</span><span class="v">My Hobbies</span><span class="t">&lt;/h3&gt;</span></div>
+    </div>
+
+    <div class="tag-card orange">
+      <div class="lesson-badge">Lesson 3</div>
+      <div class="tag-name">&lt;strong&gt; … &lt;/strong&gt;</div>
+      <div class="tag-desc">Makes text <strong>bold AND important</strong>. The computer knows this word really matters!</div>
+      <div class="tag-example"><span class="t">&lt;strong&gt;</span><span class="v">Watch out!</span><span class="t">&lt;/strong&gt;</span></div>
+    </div>
+
+    <div class="tag-card pink">
+      <div class="lesson-badge">Lesson 3</div>
+      <div class="tag-name">&lt;em&gt; … &lt;/em&gt;</div>
+      <div class="tag-desc">Makes text <em>italic</em> — tilted sideways, showing feeling or emphasis.</div>
+      <div class="tag-example"><span class="t">&lt;em&gt;</span><span class="v">I love it!</span><span class="t">&lt;/em&gt;</span></div>
+    </div>
+
+    <div class="tag-card green">
+      <div class="lesson-badge">Lesson 3</div>
+      <div class="tag-name">&lt;p&gt; … &lt;/p&gt;</div>
+      <div class="tag-desc">A paragraph of normal text — a sentence or two that belongs together.</div>
+      <div class="tag-example"><span class="t">&lt;p&gt;</span><span class="v">Hello! I am five years old.</span><span class="t">&lt;/p&gt;</span></div>
+    </div>
+
+  </div>
+
+  <!-- ── Lists ── -->
+  <h2 class="section-title">Lists — Lesson 4</h2>
+  <div class="cheat-grid">
+
+    <div class="tag-card green">
+      <div class="lesson-badge">Lesson 4</div>
+      <div class="tag-name">&lt;ul&gt; … &lt;/ul&gt;</div>
+      <div class="tag-desc">An <strong>unordered list</strong> — the "shopping bag" that holds all list items. Makes bullet points.</div>
+      <div class="tag-example"><span class="t">&lt;ul&gt;</span>
+  <span class="t">&lt;li&gt;</span><span class="v">item</span><span class="t">&lt;/li&gt;</span>
+<span class="t">&lt;/ul&gt;</span></div>
+    </div>
+
+    <div class="tag-card">
+      <div class="lesson-badge">Lesson 4</div>
+      <div class="tag-name">&lt;li&gt; … &lt;/li&gt;</div>
+      <div class="tag-desc">One <strong>list item</strong>. Always goes <em>inside</em> a <code>&lt;ul&gt;</code> (or <code>&lt;ol&gt;</code>). One per line.</div>
+      <div class="tag-example"><span class="t">&lt;li&gt;</span><span class="v">Pizza!</span><span class="t">&lt;/li&gt;</span></div>
+    </div>
+
+  </div>
+
+  <!-- ── Size chart ── -->
+  <section class="card" style="margin-top:1.5rem;">
+    <h2>Heading Size Chart</h2>
+    <div style="line-height: 2;">
+      <div style="font-size:2.2rem; font-weight:800; color:var(--purple);">h1 — This is h1 (the biggest!)</div>
+      <div style="font-size:1.7rem; font-weight:700; color:var(--blue);">h2 — This is h2</div>
+      <div style="font-size:1.35rem; font-weight:700; color:var(--pink);">h3 — This is h3</div>
+      <div style="font-size:1.1rem; font-weight:700; color:var(--green);">h4 — This is h4</div>
+      <div style="font-size:0.95rem; font-weight:700; color:var(--orange);">h5 — This is h5</div>
+      <div style="font-size:0.85rem; font-weight:700; color:#888;">h6 — This is h6 (the smallest)</div>
+    </div>
+  </section>
+
+  <div class="no-print" style="margin-top:2rem; text-align:center;">
+    <p style="color:#888; font-size:0.9rem; margin-bottom:0.5rem;">This sheet is designed to be printed!</p>
+    <button onclick="window.print()" style="background:var(--purple); color:#fff; border:none; border-radius:9px; padding:0.7rem 1.4rem; font-size:1rem; font-weight:700; cursor:pointer;">
+      &#x1F5A8;&#xFE0F; Print this sheet
+    </button>
+  </div>
+
+  <div class="no-print nav">
+    <a href="../lessons/0001-hello-html.html">&#x2190; Lesson 1</a>
+    <a href="../lessons/0002-big-titles.html">Lesson 2</a>
+    <a href="../lessons/0003-bold-and-italic.html">Lesson 3</a>
+    <a href="../lessons/0004-lists.html">Lesson 4</a>
+    <a href="../lessons/0005-about-me-page.html">Lesson 5 — About Me &#x2192;</a>
+  </div>
+
+</body>
+</html>

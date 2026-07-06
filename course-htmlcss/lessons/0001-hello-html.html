@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — Hello, HTML!</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <header class="lesson-header">
+    <div class="lesson-number">Lesson 1 of 5</div>
+    <h1>Hello, HTML! &#x1F44B;</h1>
+    <p class="tagline">Learn the magic words that make web pages!</p>
+  </header>
+
+  <!-- ── What is HTML? ── -->
+  <section class="card yellow">
+    <h2>&#x1F3E0; What is HTML?</h2>
+    <p>
+      HTML is the <strong>secret language</strong> computers use to show web pages.<br><br>
+      Think of it like building a house with LEGO blocks.<br>
+      Each LEGO block is a <strong>tag</strong> — a special word inside
+      <code>&lt;</code> pointy brackets <code>&gt;</code>.
+    </p>
+    <div class="callout fun">
+      <strong>Every tag has a START and an END.</strong><br>
+      The end tag has a little slash <code>/</code> in it — like closing a box!
+    </div>
+  </section>
+
+  <!-- ── Anatomy of a tag ── -->
+  <section class="card purple">
+    <h2>&#x1F9E9; How a Tag Works</h2>
+    <p>Here is a tag that makes text <strong>big and bold</strong>:</p>
+
+    <div class="code-block"><span class="tag">&lt;b&gt;</span><span class="text">I am super strong!</span><span class="tag">&lt;/b&gt;</span></div>
+
+    <p>The computer reads this as:</p>
+    <ul style="margin: 0.8rem 0 0 1.5rem; line-height: 2;">
+      <li><code>&lt;b&gt;</code> — "Start making text <strong>bold</strong>"</li>
+      <li>The words in the middle show on the page</li>
+      <li><code>&lt;/b&gt;</code> — "Stop making text bold"</li>
+    </ul>
+
+    <div class="callout tip">
+      <strong>Tip for grown-ups:</strong> <code>&lt;b&gt;</code> stands for <em>bold</em>.
+      It is one of the simplest HTML tags and a great first win.
+    </div>
+  </section>
+
+  <!-- ── The magic 3 ── -->
+  <section class="card pink">
+    <h2>&#x2728; Every Web Page Has These 3 Magic Words</h2>
+    <p>Every single webpage in the world starts with these three:</p>
+
+    <div class="code-block"><span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;head&gt;</span>
+    <span class="text">This is the page's secret information</span>
+  <span class="tag">&lt;/head&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+    <span class="text">Everything you SEE goes in here!</span>
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem; text-align: center; font-weight: 600;">
+      <div style="background:#EDE9FE; border-radius:10px; padding: 1rem;">
+        <div style="font-size:1.8rem;">&#x1F4E6;</div>
+        <code>&lt;html&gt;</code><br>
+        <small>The big box that holds everything</small>
+      </div>
+      <div style="background:#FFF9DB; border-radius:10px; padding: 1rem;">
+        <div style="font-size:1.8rem;">&#x1F9E0;</div>
+        <code>&lt;head&gt;</code><br>
+        <small>Secret info (the page's brain)</small>
+      </div>
+      <div style="background:#ECFDF5; border-radius:10px; padding: 1rem;">
+        <div style="font-size:1.8rem;">&#x1F440;</div>
+        <code>&lt;body&gt;</code><br>
+        <small>What you SEE on the page</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Try it! ── -->
+  <section class="try-it">
+    <h2>&#x270F;&#xFE0F; Try It Yourself!</h2>
+    <p style="margin-bottom:1rem;">
+      Let's make your very first web page! Ask a grown-up to help you save the file.
+    </p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Open <strong>Notepad</strong> (Windows) or <strong>TextEdit</strong> (Mac). Ask a grown-up if you need help!</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Type these magic words exactly — you can change <em>"YOUR NAME"</em> to your real name!</div>
+    </div>
+
+    <div class="code-block"><span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+    <span class="text">Hello! My name is </span><span class="tag">&lt;b&gt;</span><span class="text">YOUR NAME</span><span class="tag">&lt;/b&gt;</span><span class="text">!</span>
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Save the file. Name it <code>mypage.html</code> — the <strong>.html</strong> part is very important!</div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Double-click the file to open it in your web browser. You made a real web page — <strong>well done!</strong> &#x1F389;</div>
+    </div>
+
+    <div class="callout" style="margin-top:1.2rem;">
+      <strong>What should you see?</strong> Your name should appear in
+      <strong>bold</strong> in the browser — because you used the
+      <code>&lt;b&gt;</code> tag!
+    </div>
+  </section>
+
+  <!-- ── What's next ── -->
+  <section class="card green">
+    <h2>&#x1F4DA; What Did You Learn Today?</h2>
+    <ul style="margin-left: 1.5rem; line-height: 2.2;">
+      <li>HTML is the language of web pages</li>
+      <li>Tags look like <code>&lt;this&gt;</code> and always come in pairs</li>
+      <li><code>&lt;b&gt;</code> makes text <strong>bold</strong></li>
+      <li>Every page needs <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code></li>
+    </ul>
+  </section>
+
+  <!-- ── Primary source ── -->
+  <section class="card" style="border-color:#ADB5BD; background:#F8F9FA; font-size:0.95rem;">
+    <h2 style="font-size:1.1rem; color:#495057;">&#x1F4D6; Want to Read More?</h2>
+    <p>
+      This lesson is based on
+      <a href="https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics" target="_blank" rel="noopener">
+        MDN Web Docs — HTML Basics
+      </a>, the most trusted guide for learning HTML on the web.
+    </p>
+  </section>
+
+  <div class="ask-teacher">
+    &#x1F9D1;&#x200D;&#x1F3EB; Got a question? Ask your teacher! There are no silly questions.
+  </div>
+
+  <div class="nav">
+    <span></span>
+    <a href="0002-big-titles.html">Next Lesson: Big Titles &#x2192;</a>
+  </div>
+
+</body>
+</html>
