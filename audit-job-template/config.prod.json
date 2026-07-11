@@ -1,0 +1,15 @@
+{
+  "RdsEndpoint": "<PROD_RDS_ENDPOINT>",
+  "ConnectionString": "Server=<PROD_RDS_ENDPOINT>;Database=<PROD_DATABASE>;Integrated Security=True;",
+  "AwsBucket": "<PROD_AUDIT_BUCKET>",
+  "NssmPath": "<PROD_NSSM_PATH>",
+  "ServiceAccount": "<PROD_SERVICE_ACCOUNT>",
+  "ServicePassword": "<PROD_SERVICE_PASSWORD>",
+  "InstallServices": [
+    {
+      "ServiceName": "<PROD_SERVICE_NAME>",
+      "JobName": "<PROD_JOB_NAME>",
+      "ScriptPath": "<PROD_SCRIPT_PATH>"
+    }
+  ]
+}
