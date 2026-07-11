@@ -1,0 +1,15 @@
+{
+  "RdsEndpoint": "your-rds-instance.region.rds.amazonaws.com",
+  "ConnectionString": "Server=your-rds-instance.region.rds.amazonaws.com;Database=YourDatabase;Integrated Security=True;",
+  "AwsBucket": "your-qa-audit-bucket",
+  "NssmPath": "C:\\nssm\\nssm.exe",
+  "ServiceAccount": "DOMAIN\\svc-auditjob-qa",
+  "ServicePassword": "YourQaServicePassword",
+  "InstallServices": [
+    {
+      "ServiceName": "SampleAuditJob-QA",
+      "JobName": "SampleJob",
+      "ScriptPath": "C:\\audit-jobs\\audit-job-template\\SampleJob.ps1"
+    }
+  ]
+}
