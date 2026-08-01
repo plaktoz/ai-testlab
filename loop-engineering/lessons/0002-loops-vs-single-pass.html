@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 — Why Loops Beat Single-Pass — The Empirical Case</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 1 — Foundations › Lesson 2 of 12</p>
+      <h1>Why Loops Beat Single-Pass — The Empirical Case</h1>
+      <div class="lesson-meta">
+        <span>~20 min</span>
+        <span>Module 1 — Foundations</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <p class="source-card-label">Primary Source</p>
+      <p><a href="https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/" target="_blank">DeepLearning.AI — Andrew Ng: How Agents Can Improve LLM Performance</a></p>
+      <p>GPT-3.5 in an agent loop scores 95.1% on HumanEval — surpassing GPT-4 zero-shot at 67.0% and nearly doubling GPT-3.5's own zero-shot score of 48.1%. The performance gap between single-pass and iterative approaches is larger than the gap between model generations.</p>
+    </div>
+
+    <h2>The No-Backspace Problem</h2>
+
+    <p>Andrew Ng's core observation is that current LLM use is mostly one-shot: we send a single prompt and accept whatever comes back. He describes this as "writing an essay without being allowed to backspace" — the model produces its output in one continuous forward pass with no opportunity to observe, evaluate, or revise.</p>
+
+    <p>Human writers do not work this way. A programmer does not write code without running it. A researcher does not publish a first draft. Every skilled practitioner applies some version of a feedback loop — produce, evaluate, revise — before accepting output as final. Single-pass LLM use forfeits all of that.</p>
+
+    <h2>The HumanEval Numbers</h2>
+
+    <p>The empirical case is stark. On the HumanEval benchmark for code generation:</p>
+
+    <ul>
+      <li><strong>GPT-3.5 zero-shot:</strong> 48.1%</li>
+      <li><strong>GPT-4 zero-shot:</strong> 67.0%</li>
+      <li><strong>GPT-3.5 in an agent loop:</strong> 95.1%</li>
+    </ul>
+
+    <p>Running GPT-3.5 in an iterative agent loop not only outperforms GPT-3.5 zero-shot by nearly 47 percentage points — it surpasses GPT-4 zero-shot by 28 percentage points. The performance gain from adding a loop to a smaller model exceeds the performance gain from upgrading to a larger model.</p>
+
+    <h2>Why Iteration Outperforms Model Size</h2>
+
+    <p>Ng argues that agentic workflows may drive more near-term AI progress than next-generation models. The root reason is architectural: a single forward pass through a model cannot observe the consequences of its own output. An agent loop can. Each iteration feeds back — failed tests, error messages, mismatched outputs — as new context for the next generation step.</p>
+
+    <p>This pattern generalizes beyond code. The 48.1% to 95.1% jump on HumanEval mirrors improvement patterns seen in other iterative systems: CI/CD pipelines (test-fix cycles), compiler design (parse-error-recompile loops), and iterative refinement in numerical optimization. The ability to observe, evaluate, and revise is a more powerful primitive than raw capability in a single pass.</p>
+
+    <h2>Four Agentic Design Patterns</h2>
+
+    <p>Ng identifies four design patterns that harness iterative loops to improve LLM performance:</p>
+
+    <ul>
+      <li><strong>Reflection:</strong> The model generates output, critiques its own work, and revises — cycling until quality criteria are met.</li>
+      <li><strong>Tool Use:</strong> The model calls external tools (code executors, search APIs, calculators) and incorporates the results before producing a final answer.</li>
+      <li><strong>Planning:</strong> The model decomposes a task into sub-steps at runtime, rather than following a predefined workflow.</li>
+      <li><strong>Multi-Agent Collaboration:</strong> Multiple specialized agents divide labor, check each other's work, and synthesize results.</li>
+    </ul>
+
+    <p>Each pattern is a variant of the same underlying structure: observe the current state, decide on the next action, act, then feed the observation back into the next cycle.</p>
+
+    <div class="callout key">
+      <p class="callout-label">Key Insight</p>
+      <p>The performance gap between GPT-3.5 in an agent loop (95.1%) and GPT-4 zero-shot (67.0%) on HumanEval shows that iteration is a more powerful primitive than raw model capability. Investing in loop design yields larger returns than waiting for the next model release.</p>
+    </div>
+
+    <div class="callout warning">
+      <p class="callout-label">Watch Out</p>
+      <p>The HumanEval benchmark measures code generation, where correctness is verifiable by running tests. The gains from iterative loops are largest when the feedback signal is tight and objective — tasks where quality is hard to measure automatically will see smaller improvements from adding a loop.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+
+    <p>This graph builds a <code>generate → test</code> loop where each failed <code>exec()</code> feeds back as the revision prompt for the next iteration. To reproduce the benchmark comparison, call <code>app.invoke</code> twice — once with <code>max_iterations=1</code> (zero-shot) and once with <code>max_iterations=5</code> (agentic).</p>
+
+    <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langchain_anthropic import ChatAnthropic
+from typing import TypedDict, Literal
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+
+class RefinementState(TypedDict):
+    task: str
+    code: str
+    error: str
+    iterations: int
+    max_iterations: int
+    passed: bool
+
+def generate(state: RefinementState) -> dict:
+    if state["error"]:
+        prompt = (
+            f"Fix this code.\nTask: {state['task']}\n"
+            f"Code:\n{state['code']}\nError: {state['error']}"
+        )
+    else:
+        prompt = f"Write Python code for: {state['task']}"
+    return {"code": llm.invoke(prompt).content, "iterations": state["iterations"] + 1}
+
+def test_code(state: RefinementState) -> dict:
+    try:
+        exec(state["code"], {})
+        return {"error": "", "passed": True}
+    except Exception as exc:
+        return {"error": str(exc), "passed": False}
+
+def continue_or_stop(state: RefinementState) -> Literal["generate", "__end__"]:
+    if state["passed"] or state["iterations"] >= state["max_iterations"]:
+        return END
+    return "generate"
+
+builder = StateGraph(RefinementState)
+builder.add_node("generate", generate)
+builder.add_node("test_code", test_code)
+builder.set_entry_point("generate")
+builder.add_edge("generate", "test_code")
+builder.add_conditional_edges("test_code", continue_or_stop)
+app = builder.compile()
+
+# Zero-shot (single pass)
+r1 = app.invoke({"task": "write a function sum_list(lst) that returns the sum", "error": "", "iterations": 0, "max_iterations": 1, "passed": False, "code": ""})
+# Agentic loop (up to 5 attempts)
+r2 = app.invoke({"task": "write a function sum_list(lst) that returns the sum", "error": "", "iterations": 0, "max_iterations": 5, "passed": False, "code": ""})
+print(f"Zero-shot passed: {r1['passed']}  |  Loop passed: {r2['passed']} in {r2['iterations']} iteration(s)")</code></pre>
+
+    <div class="quiz" id="quiz-2">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">What score did GPT-3.5 achieve on HumanEval when run in an agent loop?</p>
+      <div class="quiz-options">
+        <button>95.1 percent, an improvement over GPT-4 zero-shot</button>
+        <button>67.0 percent, matching the GPT-4 zero-shot score</button>
+        <button>48.1 percent, no change from zero-shot baseline</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Given a task description (e.g. "write a function that parses JSON"), rewrite it as an explicit loop: what does each iteration observe, evaluate, and revise? Write out 2–3 loop iterations as pseudocode.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0001-ooda-loop.html">← Previous</a>
+      <a href="0003-anatomy-agentic-loop.html" class="primary">Next →</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-2', 0, 'GPT-3.5 in an agent loop scored 95.1% on HumanEval, surpassing GPT-4 zero-shot at 67.0% and nearly doubling its own zero-shot score of 48.1%.');</script>
+
+  </div>
+</body>
+</html>

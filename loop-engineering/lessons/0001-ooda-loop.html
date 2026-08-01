@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 1 — The OODA Loop — Origins and Universal Structure</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb">
+        <a href="../lessons.md">Loop Engineering</a> &rsaquo; Module 1 &mdash; Foundations &rsaquo; Lesson 1 of 12
+      </p>
+      <h1>The OODA Loop &mdash; Origins and Universal Structure</h1>
+      <div class="lesson-meta">
+        <span>~20 min</span>
+        <span>Module 1 &mdash; Foundations</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <p class="source-card-label">Primary Source</p>
+      <p><a href="https://www.techtarget.com/searchcio/definition/OODA-loop" target="_blank" rel="noopener">TechTarget &mdash; OODA Loop</a></p>
+      <p>Developed by U.S. Air Force Colonel John Boyd from aerial combat analysis, the OODA loop is a universal decision-cycle framework for operating in uncertain, fast-changing environments. Boyd's core insight was that <em>tempo</em> &mdash; cycling faster than your opponent &mdash; creates strategic advantage independent of raw capability.</p>
+    </div>
+
+    <h2>Origins: Boyd and Aerial Combat</h2>
+    <p>The OODA loop was developed by U.S. Air Force Colonel John Boyd, who began by analyzing patterns in aerial dogfights. Boyd noticed that pilots who survived and won were not always the ones flying the most capable aircraft &mdash; they were the ones who completed their decision cycles fastest. His research produced a four-stage framework that described how any agent, human or machine, operates in a dynamic environment: Observe, Orient, Decide, Act.</p>
+    <p>Boyd's framework was built on a simple and powerful observation: every adaptive system &mdash; from a fighter pilot to a corporate strategist to a software agent &mdash; must cycle through the same four stages when responding to a changing world. The value of the model lies not in any single stage but in the cycle as a whole and, critically, in how fast that cycle can be completed.</p>
+
+    <h2>The Four Stages</h2>
+    <p>Each stage has a distinct role in the cycle:</p>
+    <ul>
+      <li><strong>Observe:</strong> Gather raw data from the environment &mdash; sensor readings, user input, API responses, or any signal from the outside world. This is passive data collection before any interpretation takes place.</li>
+      <li><strong>Orient:</strong> Interpret the new data against the agent's existing mental model. Orientation is the most cognitively demanding stage; it involves synthesising incoming signals with prior knowledge, cultural context, and learned patterns to form a current picture of the world.</li>
+      <li><strong>Decide:</strong> Select the best action given the updated orientation. The decision stage converts the agent's world model into a chosen course of action, drawing on the orientation to prioritise among alternatives.</li>
+      <li><strong>Act:</strong> Execute the chosen action and observe its effects. The action phase closes the loop &mdash; the consequences of acting become new environmental signals that feed directly into the next Observe phase.</li>
+    </ul>
+
+    <h2>Tempo: Cycling Speed as Competitive Advantage</h2>
+    <p>Boyd's most enduring contribution was the concept of <em>tempo</em>. The strategic insight is that cycling faster than an opponent &mdash; completing more OODA loops in a given timeframe &mdash; creates a decisive advantage even when raw capability is equal or inferior. A pilot who completes three decision cycles while an opponent completes one has, in effect, three opportunities to respond to the same threat.</p>
+    <p>This principle inverts the intuition that better equipment or greater raw capability is the primary lever. Instead, the speed and quality of the observe-to-act pipeline determines outcomes in uncertain, adversarial, or fast-moving environments. The loop is the capability.</p>
+
+    <h2>Applications Across Domains</h2>
+    <p>Because the OODA framework describes the fundamental structure of adaptive response, it has been adopted far beyond its military origins. In cybersecurity, the loop structures incident response: detect a threat (Observe), assess scope and nature (Orient), choose a containment strategy (Decide), execute and monitor (Act). In machine learning, Orient-phase models are used to identify potential outcomes from incoming data before committing to a prediction. In data analytics, the framework is used to cut through information overload by providing a disciplined sequence for moving from raw data to actionable decisions.</p>
+    <p>The loop applies anywhere a system's next action depends on environmental feedback &mdash; which is to say, in almost every interesting system design problem.</p>
+
+    <h2>The Iterative Structure: Each Cycle Feeds the Next</h2>
+    <p>A critical property of the OODA loop is that it is not a checklist to be completed once. The loop is inherently iterative and self-similar: each complete cycle feeds directly into the next Observe phase. The Act stage does not terminate the process &mdash; it generates new environmental signals that become the input for a fresh round of observation.</p>
+    <p>This recursive quality is what distinguishes loop engineering from single-pass design. A system that executes Observe-Orient-Decide-Act once and stops is not an OODA loop &mdash; it is a pipeline. The loop only becomes a loop when the output of Act is connected back to the input of Observe, creating a continuous adaptive cycle that runs until a goal condition is met.</p>
+
+    <div class="callout key">
+      <p class="callout-label">Key Insight</p>
+      <p>Cycling speed &mdash; not raw capability &mdash; is the decisive competitive advantage. Boyd's insight is that an agent who completes the observe-orient-decide-act cycle faster than its environment changes (or faster than an opponent) wins, regardless of whether it has superior resources in any single stage.</p>
+    </div>
+
+    <div class="callout warning">
+      <p class="callout-label">Watch Out</p>
+      <p>The OODA loop is commonly mistaken for a one-time, linear checklist. It is neither. The loop is continuous &mdash; the Act stage does not end the process; it generates new signals that flow immediately into the next Observe phase. A system that runs through the four stages once and stops is a pipeline, not a loop. The iterative, self-feeding quality is the entire point of the model.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>The code below wires the four OODA stages as named nodes in a LangGraph <code>StateGraph</code>. The conditional edge on <code>act</code> implements the "cycle back" behaviour that makes OODA iterative rather than a one-shot pipeline &mdash; the graph keeps looping through observe-orient-decide-act until the goal condition is met, then exits cleanly via <code>END</code>.</p>
+<pre><code class="language-python">from langgraph.graph import StateGraph, END
+from typing import TypedDict, Literal
+
+class OODAState(TypedDict):
+    environment_data: str
+    mental_model: str
+    decision: str
+    action_result: str
+    cycles: int
+    goal_achieved: bool
+
+def observe(state: OODAState) -> dict:
+    # Gather raw data from the environment (sensor, API, user input, etc.)
+    return {"environment_data": f"signal_{state['cycles']}", "cycles": state["cycles"] + 1}
+
+def orient(state: OODAState) -> dict:
+    # Interpret new data against the current mental model
+    return {"mental_model": f"model(prev={state['mental_model']!r}, new={state['environment_data']!r})"}
+
+def decide(state: OODAState) -> dict:
+    # Select the best action given the updated orientation
+    return {"decision": f"act_on({state['mental_model']})"}
+
+def act(state: OODAState) -> dict:
+    # Execute; evaluate whether the goal is now met
+    goal_achieved = state["cycles"] >= 3      # replace with real termination condition
+    return {"action_result": f"executed({state['decision']})", "goal_achieved": goal_achieved}
+
+def loop_or_stop(state: OODAState) -> Literal["observe", "__end__"]:
+    return END if state["goal_achieved"] else "observe"
+
+builder = StateGraph(OODAState)
+for fn in [observe, orient, decide, act]:
+    builder.add_node(fn.__name__, fn)
+builder.set_entry_point("observe")
+builder.add_edge("observe", "orient")
+builder.add_edge("orient", "decide")
+builder.add_edge("decide", "act")
+builder.add_conditional_edges("act", loop_or_stop)
+
+app = builder.compile()
+final = app.invoke({"mental_model": "", "cycles": 0, "goal_achieved": False,
+                    "environment_data": "", "decision": "", "action_result": ""})
+print(f"Completed in {final['cycles']} cycles: {final['action_result']}")</code></pre>
+
+    <div class="quiz" id="quiz-1">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">What was Boyd's primary insight about the OODA loop?</p>
+      <div class="quiz-options">
+        <button>Cycling faster than your opponent creates strategic advantage</button>
+        <button>Raw superior capability always determines the final outcome</button>
+        <button>Careful planning before all actions prevents most mistakes</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Draw the four-stage OODA cycle from memory, label each stage, and write one concrete example for each stage from a domain other than military &mdash; for example, product iteration or debugging a software bug. For each stage, name what specific input it receives and what specific output it produces in your chosen domain.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <span></span>
+      <a href="0002-loops-vs-single-pass.html" class="primary">Next &rarr;</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-1', 0, "Boyd's key insight was that tempo &mdash; cycling faster than your opponent &mdash; creates strategic advantage independent of raw capability. The speed of the observe-orient-decide-act cycle, not the capability of any single stage, is the decisive factor in adaptive, competitive, or uncertain environments.");</script>
+
+  </div>
+</body>
+</html>

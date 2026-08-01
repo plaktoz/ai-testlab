@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 8: Closing the Diagnose &rarr; Recommend &rarr; Reassess Loop &middot; AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* ─── Loop diagram ───────────────────────────────────── */
+    .loop-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      padding: 1.5rem 1.25rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .loop-step {
+      background: var(--accent);
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 0.55rem 1.1rem;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .loop-arrow {
+      font-size: 1.2rem;
+      color: var(--muted);
+      padding: 0 0.5rem;
+      line-height: 1;
+    }
+
+    .loop-repeat {
+      font-family: system-ui, sans-serif;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+      padding-left: 0.4rem;
+    }
+
+    figure {
+      margin: 1.5rem 0;
+    }
+
+    figcaption {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ─────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <div class="breadcrumb">
+      AI Tutoring Systems &rsaquo; Module 3: Personalization &rsaquo; Lesson 8 of 13
+    </div>
+    <h1>Closing the Diagnose &rarr; Recommend &rarr; Reassess Loop</h1>
+    <div class="lesson-meta">
+      <span>&#8987; ~14 min</span>
+      <span>Module 3 &mdash; Personalization and Student Modeling</span>
+    </div>
+  </header>
+
+  <!-- ─── Source card ─────────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>ALIGNAgent: Adaptive Learner Intelligence for Gap Identification and Next-step Guidance</strong>
+    <a href="https://arxiv.org/abs/2601.15551" target="_blank" rel="noopener">arxiv.org/abs/2601.15551</a>
+    &mdash; Tested on two undergraduate CS courses with GPT-4o. Precision 0.87&ndash;0.90, F1 0.84&ndash;0.87.
+    Validated against actual student exam performance.
+  </div>
+
+  <!-- ─── The Core Loop ───────────────────────────────────── -->
+  <h2>The core loop</h2>
+
+  <p>
+    Effective tutoring is not a one-shot event. It is a <strong>closed feedback loop</strong>: diagnose the student's current gaps, recommend matched resources or exercises, reassess after the student acts, then repeat. Any tutoring system that skips the reassess step is <em>open-loop</em> — it delivers interventions but receives no signal about whether they worked, and therefore cannot adapt.
+  </p>
+
+  <figure>
+    <div class="loop-diagram" role="img" aria-label="Three-step closed tutoring loop: Diagnose leads to Recommend, which leads to Reassess, which loops back to Diagnose">
+      <div class="loop-step">Diagnose</div>
+      <div class="loop-arrow">&rarr;</div>
+      <div class="loop-step">Recommend</div>
+      <div class="loop-arrow">&rarr;</div>
+      <div class="loop-step">Reassess</div>
+      <div class="loop-arrow">&rarr;</div>
+      <div class="loop-repeat">(repeat)</div>
+    </div>
+    <figcaption>The ALIGNAgent closed feedback loop — each complete pass tightens the student model.</figcaption>
+  </figure>
+
+  <div class="callout key">
+    <div class="callout-title">Open-loop vs closed-loop tutoring</div>
+    A closed-loop tutor completes all three steps — diagnose, recommend, <em>and</em> reassess — before beginning the next cycle. An open-loop tutor stops at recommend. Without a reassess step, the system cannot distinguish a recommendation that closed the gap from one that missed entirely. The student model never updates from intervention outcomes, so calibration drifts.
+  </div>
+
+  <!-- ─── Two Specialized Agents ──────────────────────────── -->
+  <h2>ALIGNAgent's two specialized agents</h2>
+
+  <p>
+    ALIGNAgent implements the Diagnose and Recommend steps through two specialized agents with distinct responsibilities. The separation is deliberate: diagnosis and recommendation require different reasoning, and conflating them produces worse results on both.
+  </p>
+
+  <h3>Skill Gap Agent</h3>
+
+  <p>
+    The Skill Gap Agent analyzes quiz results and gradebook data to pinpoint specific misconceptions. This is a categorically different task from ordinary grading. A standard quiz grader produces a score: "student got question 3 wrong." The Skill Gap Agent produces a diagnosis: "student consistently confuses Big-O upper bounds with tight bounds &mdash; this is a specific misconception about asymptotic notation."
+  </p>
+
+  <p>
+    The distinction matters enormously downstream. A wrong-answer count tells the Recommender Agent only that <em>something</em> went wrong. A named misconception tells it exactly what kind of resource or exercise can address the gap. Imprecise diagnosis forces imprecise recommendation, and an imprecise recommendation wastes the student's time and erodes their confidence.
+  </p>
+
+  <h3>Recommender Agent</h3>
+
+  <p>
+    The Recommender Agent retrieves learning materials matched to the gap the Skill Gap Agent identified &mdash; and does so before the student advances to the next topic. The timing is load-bearing: recommending before the diagnosis is complete produces generic suggestions; recommending after the student has moved on produces materials they no longer have context to use.
+  </p>
+
+  <p>
+    The match must be precise. The Recommender Agent's task is not to find any resource on the general topic area &mdash; it is to find the specific resource that addresses the specific misconception the Skill Gap Agent named.
+  </p>
+
+  <!-- ─── Why Precision Matters ────────────────────────────── -->
+  <h2>Why precision matters</h2>
+
+  <p>
+    In the ALIGNAgent evaluation across two undergraduate CS courses, the system achieved precision 0.87&ndash;0.90 and F1 0.84&ndash;0.87. These numbers have a concrete practical interpretation: at precision 0.90, one recommendation in ten is off-target. At precision 0.87, roughly one in eight is.
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-title">Precision below 0.80 erodes student trust</div>
+    When precision falls below 0.80, more than one in five recommendations is off-target. A student who follows a recommendation and finds it does not address their actual gap learns to distrust the system's guidance &mdash; and may stop acting on recommendations entirely. Trust, once lost, is slow to rebuild even after the system improves.
+  </div>
+
+  <p>
+    The ALIGNAgent researchers also validated beyond accuracy metrics. They correlated the system's outputs against <strong>actual exam performance</strong> &mdash; not only internal precision and recall scores. This is the only validation method that proves the closed loop is producing learning rather than generating system activity. A system that scores well on internal benchmarks but fails to predict exam outcomes is measuring its own processes, not its effect on students.
+  </p>
+
+  <!-- ─── The Reassess Trigger ──────────────────────────────── -->
+  <h2>The reassess trigger</h2>
+
+  <p>
+    Every tutoring system that implements this architecture needs an explicit <strong>reassess trigger</strong>: a defined moment, after a recommendation is delivered and acted upon, where the system checks whether the gap closed.
+  </p>
+
+  <p>
+    Without the reassess trigger, the loop runs only two steps. The system diagnoses and recommends but never learns the outcome. It cannot tell whether the recommendation worked, whether the gap partly closed, or whether the student remains stuck on the same misconception. Each new cycle begins from the same stale student model. Over many iterations, a growing accumulation of unvalidated recommendations produces a student model that drifts further from reality.
+  </p>
+
+  <p>
+    The reassess step does not need to be a formal exam. A single targeted follow-up question, a brief exercise, or the original question re-posed in a slightly different form can all serve as a reassess trigger. What matters is that the system receives a signal &mdash; and updates its model of the student before the next cycle begins.
+  </p>
+
+  <!-- ─── Quiz ─────────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-8">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">ALIGNAgent's Skill Gap Agent differs from a standard quiz grader primarily because it:</p>
+    <ul class="quiz-options">
+      <li>
+        <button type="button">
+          A. Counts the total number of wrong answers and flags any student who scores below a threshold grade
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          B. Identifies the specific misconception underlying an error, and not just which particular answer the student got wrong
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          C. Retrieves targeted learning resources from a database to send directly to the student after each failed attempt
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Skill exercise ───────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise &mdash; Write a Skill Gap Agent Report</div>
+    <p>
+      A student consistently answers questions about SQL JOIN types correctly in isolation but fails questions that combine JOINs with WHERE clauses. Write a one-paragraph Skill Gap Agent report: what is the specific misconception, and what should the Recommender Agent retrieve?
+    </p>
+    <textarea placeholder="Write your Skill Gap Agent report here&hellip;" rows="6" aria-label="Skill Gap Agent report exercise response"></textarea>
+  </div>
+
+  <!-- ─── Lesson nav ────────────────────────────────────────── -->
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0007-tasa-student-model.html">&larr; Previous: TASA Student Model</a>
+    <a href="0009-pace-learning-styles.html" class="primary">Next: Pace and Learning Styles &rarr;</a>
+  </nav>
+
+  <!-- ─── Tutor prompt ─────────────────────────────────────── -->
+  <div class="tutor-prompt">
+    Want to test whether your reassess trigger is well-designed? Describe your loop to your AI tutor and ask it to identify the open-loop risk.
+  </div>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  // Quiz 8: correct answer is B (index 1, zero-based)
+  initQuiz(
+    'quiz-8',
+    1,
+    'The Skill Gap Agent pinpoints the specific misconception (e.g., "confuses Big-O upper bounds with tight bounds") — this diagnostic precision is what enables the Recommender Agent to retrieve a well-matched resource rather than generic review material.'
+  );
+</script>
+</body>
+</html>

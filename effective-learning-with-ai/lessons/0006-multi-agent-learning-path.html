@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 6 — Multi-Agent Learning Path Planning (MALPP) | AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ──────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <p class="breadcrumb">
+      <a href="../index.html">AI Tutoring Systems</a> ›
+      Module 2: Technical Architecture ›
+      Lesson 6 of 13
+    </p>
+    <h1>Multi-Agent Learning Path Planning (MALPP)</h1>
+    <div class="lesson-meta">
+      <span>Module 2 — Technical Architecture</span>
+      <span>Lesson 6 of 13</span>
+    </div>
+  </header>
+
+  <!-- ─── Source ──────────────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>Multi-Agent Learning Path Planning (MALPP)</strong>
+    <a href="https://arxiv.org/abs/2601.17346" target="_blank" rel="noopener">arxiv.org/abs/2601.17346</a>
+    — tested on the MOOCCubeX dataset across 7 LLMs; outperforms all baselines on path quality,
+    knowledge sequence consistency, and cognitive load alignment
+  </div>
+
+  <!-- ─── 1. Why One LLM Isn't Enough ─────────────────────── -->
+  <h2>Why One LLM Isn't Enough for Path Planning</h2>
+
+  <p>
+    Generating a learning path looks, on the surface, like a single task: given a student
+    and a target concept, produce an ordered sequence of topics. But path planning is
+    actually three distinct problems running one after another. First, the system must
+    <em>analyze the learner</em> — understanding their current knowledge state, performance
+    history, and learning patterns. Second, it must <em>sequence content</em> — deciding
+    which concepts to introduce and in what order, subject to pedagogical constraints.
+    Third, it must <em>reflect on the result</em> — evaluating whether the path it
+    generated is coherent, appropriately paced, and not cognitively overwhelming.
+  </p>
+
+  <p>
+    Bundling all three problems into a single prompt degrades each one. The diagnostics
+    needed for learner analysis compete with the sequencing constraints for path planning.
+    The generative posture required to produce a path conflicts with the self-critical
+    posture required to audit it. MALPP separates these concerns into three dedicated
+    agents — one per problem.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-title">Three problems, three agents</div>
+    <p style="margin:0">
+      Learning path generation decomposes into three distinct subproblems: analyzing the
+      learner, sequencing content, and critiquing the result. Each requires a different
+      cognitive stance. Assigning each to a dedicated agent outperforms bundling all
+      three into a single prompt.
+    </p>
+  </div>
+
+  <!-- ─── 2. The Three MALPP Agents ───────────────────────── -->
+  <h2>The Three MALPP Agents</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Agent</th>
+        <th>Input</th>
+        <th>Output</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Learner Analytics Agent</strong></td>
+        <td>Student's prior assessment performance, interaction history, and learning patterns</td>
+        <td>A structured learner profile describing current knowledge state and identified gaps</td>
+      </tr>
+      <tr>
+        <td><strong>Path Planning Agent</strong></td>
+        <td>Learner profile (from Analytics Agent) and the target concept to be mastered</td>
+        <td>A sequenced learning path respecting Cognitive Load Theory and ZPD constraints</td>
+      </tr>
+      <tr>
+        <td><strong>Reflection Agent</strong></td>
+        <td>The draft learning path (from Path Planning Agent)</td>
+        <td>A critique identifying coherence failures or cognitive overload, plus revision requests</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Learner Analytics Agent</h3>
+
+  <p>
+    The Learner Analytics Agent opens the pipeline. It receives the student's raw
+    history — prior assessment scores, the topics they have engaged with, where they
+    struggled, and how quickly they progressed — and converts this into a structured
+    learner profile. The profile is not a summary written for human readers. It is a
+    compact representation of the student's current knowledge state, designed to give
+    the Path Planning Agent exactly the input it needs to make sequencing decisions.
+  </p>
+
+  <h3>Path Planning Agent</h3>
+
+  <p>
+    The Path Planning Agent takes the learner profile and the target concept and
+    generates a sequenced path. Two constraints govern its sequencing decisions. The
+    first is <strong>Cognitive Load Theory</strong>: working memory is limited, and a
+    path that introduces multiple new concepts simultaneously will exceed cognitive
+    capacity before any of them can be consolidated. The agent must sequence one new
+    concept at a time, with interleaved practice before the next concept is introduced.
+    The second constraint is the <strong>Zone of Proximal Development</strong>: each
+    step must be calibrated to the student's current frontier — challenging enough to
+    require genuine effort, not so far beyond reach that the step causes overload.
+  </p>
+
+  <h3>Reflection Agent</h3>
+
+  <p>
+    The Reflection Agent receives the draft path and subjects it to critique. It checks
+    whether the path is <em>globally</em> coherent — not just whether each step follows
+    logically from the previous one, but whether the cumulative cognitive load across
+    the entire sequence stays within bounds. A path can be locally valid (each step is
+    a plausible next step) while being globally overwhelming (five new concepts
+    introduced in the first eight steps). When the Reflection Agent detects overload
+    or an incoherent jump, it requests revisions before the path is delivered.
+  </p>
+
+  <!-- ─── 3. Cognitive Load Theory ─────────────────────────── -->
+  <h2>Cognitive Load Theory as a Hard Constraint</h2>
+
+  <p>
+    Cognitive Load Theory holds that working memory has a fixed capacity. When a
+    learning task exceeds that capacity, the student cannot form the schemas needed
+    to consolidate new information into long-term memory. The result is not partial
+    learning — it is no durable learning at all.
+  </p>
+
+  <p>
+    For path planning, this means the number of genuinely new concepts introduced in a
+    single step is a hard constraint, not a stylistic preference. A path that introduces
+    HTTP, REST conventions, statelessness, authentication, and resource modeling
+    simultaneously will exceed working memory regardless of how clearly each concept
+    is explained. The Path Planning Agent enforces the constraint by sequencing one
+    new concept at a time and inserting practice before advancing to the next.
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-title">The cognitive load trap</div>
+    <p style="margin:0">
+      A learning path that looks reasonable on paper — topics arranged in logical
+      dependency order — can still be cognitively catastrophic if each step introduces
+      more than one new schema. Dependency order and cognitive load order are not the
+      same thing.
+    </p>
+  </div>
+
+  <!-- ─── 4. ZPD in Path Planning ──────────────────────────── -->
+  <h2>Zone of Proximal Development in Sequencing</h2>
+
+  <p>
+    The Path Planning Agent does not simply order topics by prerequisite dependency.
+    Dependency graphs tell you which concepts must precede which — they do not tell
+    you how far the student currently is from each concept, or which next step is most
+    within reach given the student's existing knowledge.
+  </p>
+
+  <p>
+    ZPD-aware sequencing targets each step to be at the student's learning frontier:
+    the zone where the student does not yet grasp the concept but can reach it with
+    effort. A step that falls below this frontier wastes time on material the student
+    already holds. A step that exceeds it by too much causes overload and leaves no
+    durable trace. The Path Planning Agent uses the structured learner profile from the
+    Analytics Agent to calibrate each step to this frontier — the path is ordered not
+    only by dependency but by reachability from where the student actually stands.
+  </p>
+
+  <!-- ─── 5. Ablation Study ─────────────────────────────────── -->
+  <h2>What the Ablation Study Showed</h2>
+
+  <p>
+    The MALPP authors removed each agent in turn from the full system and measured the
+    resulting drop in performance. Removing any single agent degraded path quality.
+    But the Reflection Agent's removal produced the largest degradation in cognitive
+    load alignment across all ablation conditions.
+  </p>
+
+  <p>
+    The finding makes structural sense. The Path Planning Agent operates step by step,
+    making locally reasonable sequencing decisions at each point. It has no mechanism
+    to audit the cumulative load across the full path it has just produced. The
+    Reflection Agent supplies that global view. Without it, paths were locally valid —
+    each step followed plausibly from the previous one — but globally overwhelming,
+    because no agent had checked whether the total number of new concepts introduced
+    across the full sequence exceeded what a student could handle.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-title">Ablation result</div>
+    <p style="margin:0">
+      The Reflection Agent contributed the most to cognitive load alignment of any
+      agent in the system. Its role is not optional polish — it supplies the global
+      audit that the step-by-step Path Planning Agent is structurally unable to perform
+      on its own.
+    </p>
+  </div>
+
+  <!-- ─── Quiz ─────────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-6">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      In MALPP, the Reflection Agent's primary job is to:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button>
+          A. Generate the initial learning path by sequencing concepts based on the learner's knowledge profile and dependencies
+        </button>
+      </li>
+      <li>
+        <button>
+          B. Critique the path for cognitive load issues and request revisions when too many concepts are introduced
+        </button>
+      </li>
+      <li>
+        <button>
+          C. Analyze the learner's prior performance data to build a structured profile of their current knowledge state
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Exercise ─────────────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise — Reflection Agent Role-Play</div>
+    <p>
+      You are the Reflection Agent. Here is a proposed learning path:
+    </p>
+    <p>
+      <strong>[1. HTTP &rarr; 2. REST APIs &rarr; 3. OAuth 2.0 &rarr; 4. JWT tokens
+      &rarr; 5. Rate limiting &rarr; 6. API versioning &rarr; 7. GraphQL
+      &rarr; 8. WebSockets]</strong>
+    </p>
+    <p>
+      Identify any step that introduces too many new concepts at once or jumps too far
+      from the previous step. Propose a concrete fix — either by splitting a step,
+      inserting an intermediate concept, or reordering. Explain which constraint you
+      are applying: Cognitive Load Theory, ZPD, or both.
+    </p>
+    <p style="font-size:0.88rem; color: var(--muted); margin-bottom:0.25rem;">
+      Type your analysis below — there is no auto-grade. The goal is to practice
+      the Reflection Agent's global audit perspective.
+    </p>
+    <textarea placeholder="Problematic step(s): &#10;Why it violates Cognitive Load Theory or ZPD: &#10;Proposed fix: "></textarea>
+  </div>
+
+  <!-- ─── Tutor Prompt ──────────────────────────────────────── -->
+  <div class="tutor-prompt">
+    <strong>Ask your tutor:</strong> "Walk me through what the Reflection Agent would
+    flag if the Path Planning Agent produced a path that jumped straight from HTTP
+    basics to OAuth 2.0 without any intermediate steps."
+  </div>
+
+  <!-- ─── Navigation ────────────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0005-rpkt-knowledge-tracing.html">&#8592; Lesson 5: RPKT Knowledge Tracing</a>
+    <a href="0007-tasa-student-model.html" class="primary">Lesson 7: TASA Student Model &#8594;</a>
+  </nav>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  // Correct answer is option B (index 1)
+  initQuiz('quiz-6', 1,
+    'The Reflection Agent reviews the path generated by the Path Planning Agent, checking ' +
+    'for cognitive overload (too many new concepts at once) and requesting revisions — ' +
+    'the ablation study showed it was the most critical agent for cognitive load alignment.'
+  );
+</script>
+</body>
+</html>

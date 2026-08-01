@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 3: The Learning-Performance Paradox — AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ─────────────────────────────────────── -->
+  <header class="lesson-header">
+    <div class="breadcrumb">
+      AI Tutoring Systems &rsaquo; Module 1: Learning Science &rsaquo; Lesson 3 of 13
+    </div>
+    <h1>The Learning-Performance Paradox</h1>
+    <div class="lesson-meta">
+      <span>~10 min</span>
+      <span>Module 1 &mdash; Learning Science Foundations</span>
+    </div>
+  </header>
+
+  <!-- ─── Source citation ─────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>"Building AI Companions that Prioritize Learning over Performance"</strong>
+    Preprint — <a href="https://arxiv.org/abs/2605.04816" target="_blank" rel="noopener">arxiv.org/abs/2605.04816</a>.
+    Five case studies across K-12, undergraduate, and graduate levels, examining how AI design choices
+    either support or undermine cognitive growth.
+  </div>
+
+  <!-- ─── Section 1: The Paradox ──────────────────────── -->
+  <h2>The Paradox</h2>
+
+  <p>Large language models are exceptionally good at helping students complete tasks. A student can ask
+  GPT-4 to explain any concept they find confusing and receive a clear, accurate answer in seconds. By
+  every short-term measure — homework completion, comprehension checks, time on task — this student
+  appears to be doing well.</p>
+
+  <p>The paradox identified in this paper is that <strong>the very ease that boosts today's performance
+  erodes tomorrow's learning.</strong> The student who asks the AI to explain every unfamiliar concept
+  is performing better in the moment but learning less than the student who struggles through the
+  confusion. That struggle — the effortful retrieval, the failed attempt, the slow click of
+  recognition — is not a bug in the learning process. It is the process.</p>
+
+  <p>LLMs optimise for the wrong signal. They reduce friction. Friction, in the right dose, is what
+  builds durable knowledge and the ability to transfer it to new problems. A system designed purely to
+  help students perform will systematically harvest that friction away, leaving nothing for long-term
+  retention to attach to.</p>
+
+  <!-- ─── Section 2: Three Foundations ───────────────── -->
+  <h2>Three Foundations of an AI Learning Companion</h2>
+
+  <p>The paper argues that an AI designed for learning — not just performance — must be built on three
+  foundations:</p>
+
+  <h3>1. How students learn with AI</h3>
+  <p>Interaction patterns matter. Collaborative exchanges that preserve the student's cognitive load
+  produce deeper encoding than exchanges that offload thinking entirely. The AI's role is to be a
+  thinking <em>partner</em>, not a thinking <em>replacement</em>. This means asking questions rather
+  than giving answers, prompting reflection rather than delivering summaries, and leaving productive
+  gaps the student must close themselves.</p>
+
+  <h3>2. How AI learns about students</h3>
+  <p>An effective companion builds and updates a model of the student: their current knowledge state,
+  active misconceptions, and learning style. This continuous modeling determines what the AI offers
+  next — a harder question, a different representation, a well-timed hint. Without this feedback loop,
+  the AI is essentially teaching blindly, calibrated to an average student who doesn't exist.</p>
+
+  <h3>3. Responsible design</h3>
+  <p>The paper identifies three pillars of responsible AI tutoring:</p>
+  <ul>
+    <li><strong>Transparency</strong> — the student should know what the AI knows about them and how
+    that knowledge shapes the interaction.</li>
+    <li><strong>Inclusion</strong> — the system must work across diverse learners: different
+    backgrounds, languages, accessibility needs, and prior knowledge levels.</li>
+    <li><strong>Security</strong> — student data collected for modeling purposes must be handled with
+    rigorous data ethics, not repurposed or exposed without consent.</li>
+  </ul>
+
+  <!-- ─── Section 3: The Design Fork ─────────────────── -->
+  <h2>The Design Fork</h2>
+
+  <p>The paper offers a concrete, binary way to evaluate any AI tutoring feature. Every design decision
+  produces one of two things:</p>
+
+  <ul>
+    <li>A <strong>thinking partner</strong> — a feature that forces student cognition: a Socratic
+    question, a hint that reveals process not answer, a prompt to predict before explaining.</li>
+    <li>A <strong>thinking replacement</strong> — a feature that steals student cognition: a direct
+    answer, an autocomplete that finishes the student's own reasoning, a summary that pre-digests
+    material the student should struggle with first.</li>
+  </ul>
+
+  <div class="callout key">
+    <div class="callout-title">Design Rule</div>
+    Before shipping any feature, ask: <em>"Does this make the student think harder, or less hard?"</em>
+    If the answer is "less hard," redesign the feature or cut it. The design fork is not a spectrum —
+    each interaction either demands cognition or bypasses it.
+  </div>
+
+  <p>The distinction matters most at the margins. A hint system that reveals the next step in a proof
+  is a thinking replacement; the same system that asks "what have you tried so far, and where did it
+  break?" is a thinking partner. The surface behavior looks similar. The cognitive outcome is
+  opposite.</p>
+
+  <p>The five case studies validated this framework across educational levels, finding that
+  thinking-partner interactions improved students' metacognitive awareness — their ability to monitor
+  their own understanding and regulate their effort accordingly.</p>
+
+  <div class="callout warning">
+    <div class="callout-title">Current Limitations</div>
+    The case studies also surfaced a structural constraint: current LLMs do not maintain persistent
+    student models by default. Each session starts blank. The theoretical framework for responsible
+    AI companions requires continuous modeling across sessions, but out-of-the-box LLM deployments
+    provide none of it. Building a genuine learning companion means engineering that memory layer
+    — it will not emerge from a prompt alone.
+  </div>
+
+  <!-- ─── Quiz ──────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-3">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      An AI tutor that instantly answers any student question with a clear, complete explanation
+      is best described as:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button type="button">
+          A thinking replacement that boosts performance while likely reducing long-term
+          knowledge transfer and retention
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          A thinking partner that helps students build metacognitive skills by modeling
+          expert reasoning clearly
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          A balanced tool that combines performance support and deep learning in a
+          single interaction
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Skill Exercise ───────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise</div>
+    <p>Take any AI tutoring feature you have seen or used — autocomplete, instant explanation, hint
+    on demand. Classify it: <strong>thinking partner</strong> or <strong>thinking replacement</strong>?
+    Then rewrite it as the opposite type in two sentences.</p>
+    <textarea placeholder="Name the feature, state your classification, and write your rewritten version here…"></textarea>
+  </div>
+
+  <!-- ─── Navigation ───────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0002-zone-of-proximal-development.html">&larr; Lesson 2: Zone of Proximal Development</a>
+    <a href="0004-kg-rag-architecture.html" class="primary">Lesson 4: KG-RAG Architecture &rarr;</a>
+  </nav>
+
+  <!-- ─── Tutor prompt ─────────────────────────────────── -->
+  <div class="tutor-prompt">
+    Ask your tutor: <em>"Can you give me an example of a thinking-replacement feature that looks like a
+    thinking-partner feature at first glance?"</em>
+  </div>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  initQuiz(
+    'quiz-3',
+    0,
+    'Instant complete answers remove the productive struggle that builds storage strength. This is a performance booster, not a learning companion — it steals the retrieval event.'
+  );
+</script>
+</body>
+</html>

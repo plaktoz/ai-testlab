@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 13 &mdash; Open-Source Adversarial Tooling: garak and PyRIT in Practice | Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a>
+        &rsaquo; Module 5 &mdash; Practical Implementation
+        &rsaquo; Lesson 13 of 14
+      </div>
+      <h1>Open-Source Adversarial Tooling &mdash; garak and PyRIT in Practice</h1>
+      <div class="lesson-meta">
+        <span class="lesson-time">&#128337; ~30 minutes</span>
+        <span class="lesson-module">Practical Implementation</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Sources</strong>
+      <ul>
+        <li>
+          <a href="https://github.com/NVIDIA/garak" target="_blank">NVIDIA garak</a> &mdash;
+          a CLI-based LLM vulnerability scanner covering hallucination, data leakage, prompt injection,
+          jailbreaks, DAN prompts, toxicity, and misinformation, with YAML-driven configuration and
+          support for OpenAI, Hugging Face, AWS Bedrock, Groq, Ollama, and Azure OpenAI providers.
+        </li>
+        <li>
+          <a href="https://github.com/Azure/PyRIT" target="_blank">Microsoft PyRIT &mdash; Python Risk Identification Tool for Generative AI</a> &mdash;
+          a Python framework for building custom adversarial testing pipelines composed of five
+          interoperable components (Targets, Attack Strategies, Scorers, Converters, Orchestrators)
+          designed for pre-deployment adversarial assessment of production generative AI systems.
+        </li>
+      </ul>
+    </div>
+
+    <!-- ==================== SECTION 1 ==================== -->
+    <h2>1. garak &mdash; The nmap for AI Systems</h2>
+    <p>
+      garak is a CLI-based LLM vulnerability scanner developed by NVIDIA. Its creators describe
+      it using a precise analogy: garak is to AI systems what nmap is to network security. In
+      network security, nmap is the standard tool for scanning a host&rsquo;s exposed services and
+      identifying potential vulnerabilities. An operator points nmap at a target, waits for the scan
+      to complete, and receives a structured report of findings. garak works in precisely the same
+      way, but the &ldquo;ports&rdquo; being probed are the behavioural failure modes of a language
+      model &mdash; its tendency to hallucinate facts, leak memorised training data, comply with
+      jailbreak instructions, or produce toxic output.
+    </p>
+    <p>
+      This design philosophy &mdash; automated, repeatable, and structured &mdash; makes garak well
+      suited for the pre-deployment stage of an LLM development cycle. Rather than relying on ad hoc
+      manual testing, an engineering team can run garak against a candidate model and receive a
+      per-probe pass/fail report with concrete examples of failures. Just as a network security team
+      would not ship a product with high-risk ports flagged by nmap, an AI team using garak can gate
+      deployment on probe-pass thresholds.
+    </p>
+    <p>
+      garak supports multiple providers out of the box: OpenAI, Hugging Face models, AWS Bedrock,
+      Groq, Ollama for local inference, and Azure OpenAI. This broad provider support means the same
+      scan configuration can be run against a commercial API or a locally-hosted model without code
+      changes, making it a versatile tool for comparative evaluation across model versions and
+      deployment environments.
+    </p>
+
+    <!-- ==================== SECTION 2 ==================== -->
+    <h2>2. garak Probe Categories &mdash; Seven Classes of LLM Failure</h2>
+    <p>
+      garak organises its test cases into seven broad probe categories, each targeting a distinct
+      class of LLM failure mode.
+    </p>
+    <p>
+      <strong>Hallucination</strong> probes test whether the model generates false factual claims
+      with apparent confidence &mdash; for instance, inventing plausible-sounding but nonexistent
+      package names. Hallucination is one of the most commercially significant failure modes, as it
+      can mislead users who treat model outputs as authoritative.
+    </p>
+    <p>
+      <strong>Data leakage</strong> probes test whether the model reproduces memorised content from
+      its training set. A model that regurgitates verbatim copyrighted text, personal data, or
+      confidential system prompts poses both privacy and legal risks.
+    </p>
+    <p>
+      <strong>Prompt injection</strong> probes test whether the model can be hijacked by adversarial
+      instructions embedded in its input. A successful injection overrides the legitimate operator&rsquo;s
+      system prompt, turning the model into a tool for the attacker.
+    </p>
+    <p>
+      <strong>Jailbreak</strong> probes test whether the model complies with requests it should refuse
+      when those requests are framed using known jailbreak patterns. Closely related are
+      <strong>DAN</strong> &mdash; &ldquo;Do Anything Now&rdquo; &mdash; probes, which target a
+      historically prominent family of jailbreak instructions designed to convince a model to operate
+      outside its safety constraints.
+    </p>
+    <p>
+      <strong>Toxicity generation</strong> probes test whether the model can be induced to produce
+      harmful, hateful, or harassing content. <strong>Misinformation generation</strong> probes test
+      whether the model will generate and present false claims as factual.
+    </p>
+
+    <!-- ==================== SECTION 3 ==================== -->
+    <h2>3. Attack Methods and YAML Configuration in garak</h2>
+    <p>
+      garak implements three types of attack methods that determine how probe strings are generated
+      and delivered to the target model. <strong>Static</strong> attacks use pre-written, fixed probe
+      strings assembled into a library: they are fast to execute and fully reproducible, but they
+      cover only known vulnerability patterns present in garak&rsquo;s probe library.
+      <strong>Dynamic</strong> attacks generate probe strings at runtime, typically using templates
+      or parametric variation, allowing coverage to scale beyond the static library without requiring
+      manual authorship of every variant. <strong>Adaptive</strong> attacks go further by evolving
+      probe content based on the model&rsquo;s own responses: if an initial probe fails to elicit a
+      policy violation, an adaptive strategy can modify the payload in reaction to what the model
+      actually said, mimicking the iterative refinement a human red-teamer would apply.
+    </p>
+    <p>
+      Configuration is driven by YAML files structured around three main blocks. The
+      <strong>generator</strong> block specifies the model provider, model name, and any endpoint
+      parameters required to reach the target &mdash; such as a local Ollama server running on port
+      11434. The <strong>probes</strong> block lists the probe classes to execute, referenced by their
+      garak class names, for example <code>promptinjection.DirectInjection</code> or
+      <code>hallucination.PackageHallucination</code>. An optional <strong>detectors</strong> block
+      allows operators to override default success-detection logic for individual probes: an operator
+      can specify a custom string that, if found anywhere in the model&rsquo;s output, should be
+      flagged as evidence of a successful attack.
+    </p>
+    <p>
+      The final output is a structured report listing per-probe pass/fail rates together with
+      examples of the specific model responses that triggered each failure &mdash; directly analogous
+      to a network vulnerability scan report, and interpretable by security teams already familiar
+      with that format.
+    </p>
+
+    <!-- ==================== SECTION 4 ==================== -->
+    <h2>4. Microsoft PyRIT &mdash; A Programmatic Adversarial Framework</h2>
+    <p>
+      Where garak provides a CLI-driven scanning experience, Microsoft&rsquo;s Python Risk
+      Identification Tool for Generative AI &mdash; PyRIT &mdash; takes a fundamentally different
+      approach: it is a Python <em>framework</em> rather than a standalone CLI tool, designed to give
+      security professionals and AI red-teamers full programmatic control over how adversarial
+      pipelines are constructed and executed.
+    </p>
+    <p>
+      PyRIT&rsquo;s primary use case is pre-deployment adversarial assessment for generative AI
+      systems in production. Unlike garak&rsquo;s fixed probe library, PyRIT allows practitioners to
+      build custom attack sequences tailored to the specific application under test &mdash; including
+      multi-turn conversation attacks where the adversarial strategy adapts across several exchanges.
+      This level of control is necessary when the attack surface is application-specific and cannot
+      be fully covered by a generic probe library.
+    </p>
+    <p>
+      PyRIT integrates natively with Azure AI services, reflecting its origin as a Microsoft internal
+      tool that was subsequently open-sourced. Teams building on the Azure AI stack can target Azure
+      OpenAI deployments directly using PyRIT&rsquo;s built-in integrations. However, the
+      framework&rsquo;s architecture is general enough to wrap any AI system that can be accessed
+      through a Python interface, making it usable beyond the Azure ecosystem.
+    </p>
+    <p>
+      In practice, garak and PyRIT serve complementary roles. garak excels at broad automated
+      scanning &mdash; running many known probes quickly to flag which vulnerability classes warrant
+      attention. PyRIT excels at deep, targeted assessment &mdash; building precisely controlled
+      attack sequences for the specific failure modes that matter for a given deployment context.
+    </p>
+
+    <!-- ==================== SECTION 5 ==================== -->
+    <h2>5. PyRIT&rsquo;s Five Core Components</h2>
+    <p>
+      PyRIT&rsquo;s architecture is built around five interoperable core components that together
+      implement a complete adversarial testing pipeline.
+    </p>
+    <p>
+      <strong>Targets</strong> represent the AI system under test. A target wraps the interface to
+      the model being assessed &mdash; whether an Azure OpenAI deployment, a local model endpoint,
+      or any other generative AI service &mdash; and exposes a uniform interface that the rest of the
+      pipeline can use regardless of the underlying provider.
+    </p>
+    <p>
+      <strong>Attack strategies</strong> define how adversarial inputs are constructed. These include
+      single-turn prompt templates and multi-turn conversation patterns that guide an orchestrator
+      through a sequence of exchanges designed to progressively weaken the target model&rsquo;s safety
+      constraints.
+    </p>
+    <p>
+      <strong>Scorers</strong> determine whether an attack succeeded. PyRIT supports string-match
+      scorers &mdash; which flag outputs containing specific strings as successes or failures &mdash;
+      and LLM-judge scorers, which use a separate language model to evaluate whether the
+      target&rsquo;s output violates a specified policy. LLM-judge scorers are more flexible and can
+      detect nuanced policy violations that string matching would miss.
+    </p>
+    <p>
+      <strong>Converters</strong> transform attack payloads before delivery. Examples include
+      translating a prompt to another language, encoding it in Base64, or introducing surface noise.
+      Converters test whether a target&rsquo;s safety measures are robust to superficial payload
+      transformations.
+    </p>
+    <p>
+      <strong>Orchestrators</strong> coordinate the entire multi-turn attack sequence &mdash; feeding
+      converted payloads to the target through the chosen attack strategy, passing responses to
+      scorers, and deciding how to proceed based on each score. The orchestrator is the control
+      loop that transforms individual components into a coherent end-to-end red-team pipeline.
+    </p>
+
+    <!-- ==================== CALLOUT: KEY INSIGHT ==================== -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> garak and PyRIT represent two distinct philosophies for
+      adversarial LLM testing that address different stages of the same problem. garak offers
+      breadth &mdash; a fixed, auditable probe library that any team can run in minutes to detect
+      known vulnerability classes. PyRIT offers depth &mdash; a programmable framework for
+      constructing exactly the multi-turn adversarial harness that a specific production application
+      requires. The sharpest red-team programmes use both: garak as a fast gate on every model
+      checkpoint, and PyRIT for the deeper, application-specific assessment that shipping to
+      production demands.
+    </div>
+
+    <!-- ==================== CALLOUT: WARNING ==================== -->
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Running garak&rsquo;s full probe suite and receiving
+      high pass rates is not equivalent to a comprehensive safety evaluation. garak&rsquo;s probes
+      target <em>known</em> vulnerability patterns; a model that passes every built-in probe may
+      still be susceptible to novel attack vectors not yet represented in the library. Similarly,
+      PyRIT&rsquo;s string-match scorers can produce both false positives (flagging benign outputs
+      that happen to match the pattern) and false negatives (missing subtle policy violations that
+      do not match the pattern). Neither tool replaces the human judgment required to design
+      application-appropriate attack strategies and interpret results in context.
+    </div>
+
+    <!-- ==================== QUIZ ==================== -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        What primary analogy do garak&rsquo;s creators use to describe the tool&rsquo;s purpose?
+      </p>
+      <div class="quiz-options">
+        <button onclick="submitAnswer('quiz-1', 0)">
+          An nmap-style vulnerability scanner built for AI models
+        </button>
+        <button onclick="submitAnswer('quiz-1', 1)">
+          A defensive perimeter firewall blocking all harmful prompts
+        </button>
+        <button onclick="submitAnswer('quiz-1', 2)">
+          A random fuzzer generating malformed test input strings
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ==================== EXERCISE ==================== -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Write a complete garak configuration YAML file targeting a local Ollama model. Your file
+        must include three sections with YAML comments explaining each one. (1) A
+        <code>generator</code> block specifying the Ollama provider, the model name
+        <code>llama3</code>, and the required endpoint configuration for the default local Ollama
+        server. (2) A <code>probes</code> block listing three probe classes: prompt injection,
+        hallucination, and DAN jailbreak &mdash; using garak&rsquo;s dotted class-name notation.
+        (3) A <code>detectors</code> override for the prompt-injection probe that specifies a custom
+        output string which, if found in the model&rsquo;s response, should be flagged as evidence
+        of a successful attack. Comment each major block to explain its role in the scan pipeline.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ==================== TUTOR PROMPT ==================== -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <nav class="lesson-nav">
+      <a href="0012-calibrating-safety-training.html">&larr; Previous</a>
+      <a class="primary" href="0014-end-to-end-redteam-pipeline.html">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'The source material explicitly states that garak\'s creators describe it as "nmap for network security but for AI systems" &mdash; a CLI-based vulnerability scanner that you point at a target and receive a structured pass/fail report. Option B (defensive firewall) is incorrect because a firewall is a defensive, input-blocking tool; garak is an offensive scanning tool that probes a model for weaknesses rather than blocking inputs from reaching it. Option C (random fuzzer) is incorrect because garak uses structured probe classes &mdash; static, dynamic, and adaptive &mdash; not random malformed inputs; its probes target specific, categorised failure modes such as hallucination and jailbreaks, not arbitrary edge cases.'
+    );
+  </script>
+</body>
+</html>

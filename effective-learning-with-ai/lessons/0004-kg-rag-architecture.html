@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4: Knowledge Graph-Enhanced RAG (KG-RAG) — AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ─────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <div class="breadcrumb">
+      AI Tutoring Systems &rsaquo;
+      Module 2: Technical Architecture &rsaquo;
+      Lesson 4 of 13
+    </div>
+    <h1>Knowledge Graph-Enhanced RAG (KG-RAG)</h1>
+    <div class="lesson-meta">
+      <span>Module 2 — Technical Architecture</span>
+      <span>Lesson 4 of 13</span>
+      <span>Source: arxiv.org/abs/2311.17696</span>
+    </div>
+  </header>
+
+  <!-- ─── Source card ───────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>"How to Build an Adaptive AI Tutor for Any Course Using KG-RAG"</strong>
+    ICEIT 2025 &mdash; <a href="https://arxiv.org/abs/2311.17696" target="_blank" rel="noopener">arxiv.org/abs/2311.17696</a><br>
+    n&nbsp;=&nbsp;76 students &middot; KG-RAG group scored <strong>+35%</strong> higher on assessments (p&nbsp;&lt;&nbsp;0.001)
+  </div>
+
+  <!-- ─── Section 1: The problem with standard RAG ────────── -->
+  <h2>The Problem with Standard RAG</h2>
+
+  <p>
+    Retrieval-Augmented Generation (RAG) improves factual grounding by pulling relevant passages
+    from a document store before the LLM generates its response. In most settings this works
+    well — but tutoring exposes a structural flaw.
+  </p>
+
+  <p>
+    Standard RAG ranks candidates by <strong>semantic similarity</strong>: the retrieved passage
+    is whatever sits closest to the query in embedding space. That is fine when the goal is
+    information lookup. It is not fine when the goal is teaching, because conceptual proximity
+    and pedagogical prerequisite order are not the same thing.
+  </p>
+
+  <div class="callout warning">
+    <div class="callout-title">The silent failure mode</div>
+    A student asking about <em>gradient descent</em> might receive a passage about
+    <em>neural networks</em> — semantically close, but pedagogically wrong. What they actually
+    need is a prerequisite explanation of <em>derivatives</em>. Standard RAG has no way to
+    know this, because it does not represent the dependency structure of the domain.
+  </div>
+
+  <p>
+    The retriever finds text that is <em>near</em> the query. It does not ask: <em>what does
+    a student need to understand before this concept makes sense?</em> Without that question,
+    an AI tutor can confidently explain things in the wrong order — each sentence individually
+    correct, yet the sequence pedagogically incoherent.
+  </p>
+
+  <!-- ─── Section 2: What a knowledge graph adds ──────────── -->
+  <h2>What a Knowledge Graph Adds</h2>
+
+  <p>
+    A knowledge graph (KG) encodes the <strong>explicit conceptual relationships</strong> that a
+    curriculum designer would draw on a whiteboard. Rather than a flat bag of documents, the KG
+    is a structured network of concept nodes connected by typed edges:
+  </p>
+
+  <ul>
+    <li><em>gradient descent</em> <strong>requires</strong> <em>derivatives</em></li>
+    <li><em>backpropagation</em> <strong>uses</strong> <em>chain rule</em></li>
+    <li><em>chain rule</em> <strong>requires</strong> <em>partial derivatives</em></li>
+    <li><em>neural networks</em> <strong>relates to</strong> <em>optimization</em></li>
+  </ul>
+
+  <div class="callout key">
+    <div class="callout-title">Key insight — the KG as conceptual anchor</div>
+    The knowledge graph anchors retrieval to the domain&rsquo;s dependency structure. It does not
+    replace the LLM&rsquo;s generative ability — it constrains <em>what</em> gets retrieved so
+    that explanations are logically sequenced before they reach the model. The graph is the
+    curriculum made machine-readable.
+  </div>
+
+  <p>
+    Without this anchor, retrieved context is determined by surface similarity alone.
+    The KG makes the prerequisite chain visible to the retrieval step, so the system can
+    surface foundational concepts even when the student&rsquo;s query does not mention them.
+  </p>
+
+  <!-- ─── Section 3: KG-RAG pipeline ──────────────────────── -->
+  <h2>The KG-RAG Pipeline</h2>
+
+  <p>At its core, KG-RAG adds a graph traversal step between the student&rsquo;s query and
+  the LLM&rsquo;s response. The simplified pipeline has four stages:</p>
+
+  <pre><code>
+  Student question
+        │
+        ▼
+  ┌─────────────────────────────────────────┐
+  │  1. CONCEPT MATCHING                    │
+  │     Query → matched concept node in KG  │
+  └──────────────────┬──────────────────────┘
+                     │
+                     ▼
+  ┌─────────────────────────────────────────┐
+  │  2. GRAPH TRAVERSAL                     │
+  │     Walk neighbor nodes:                │
+  │     • prerequisite concepts             │
+  │     • related concepts                  │
+  └──────────────────┬──────────────────────┘
+                     │
+                     ▼
+  ┌─────────────────────────────────────────┐
+  │  3. DOCUMENT RETRIEVAL                  │
+  │     Fetch source passages attached      │
+  │     to each node in the traversal set   │
+  └──────────────────┬──────────────────────┘
+                     │
+                     ▼
+  ┌─────────────────────────────────────────┐
+  │  4. GROUNDED GENERATION                 │
+  │     LLM generates an answer using the   │
+  │     retrieved context + student model   │
+  └─────────────────────────────────────────┘
+        │
+        ▼
+  Response to student
+  </code></pre>
+
+  <p>
+    The key difference from standard RAG is step&nbsp;2. The graph traversal means the retrieval
+    set is not just <em>what is closest to the query</em> but <em>what the curriculum says the
+    student needs to understand this concept</em>. Prerequisites travel with the target — the
+    LLM sees the full conceptual context, not just the nearest embedding neighbors.
+  </p>
+
+  <h3>What the LLM receives</h3>
+
+  <p>
+    By the time the language model generates a response, it has been given:
+  </p>
+
+  <ol>
+    <li>The student&rsquo;s original question.</li>
+    <li>Passages covering the target concept.</li>
+    <li>Passages covering prerequisite concepts (surfaced by graph traversal).</li>
+    <li>Awareness — through the student model — of what the student should already know.</li>
+  </ol>
+
+  <p>
+    This allows the model to pitch its explanation at the right level and in the right order,
+    rather than guessing from the query alone.
+  </p>
+
+  <!-- ─── Section 4: The experiment ──────────────────────── -->
+  <h2>The Evidence: n = 76, +35%</h2>
+
+  <p>
+    The ICEIT 2025 paper ran a controlled comparison between two groups of 76 students:
+    one tutored by a standard LLM system, one tutored by a KG-RAG system drawing on the
+    same underlying course material.
+  </p>
+
+  <p>
+    The KG-RAG group scored <strong>35% higher on assessments</strong> (p&nbsp;&lt;&nbsp;0.001).
+    The researchers attributed the gain to two properties of the KG-RAG design:
+  </p>
+
+  <ul>
+    <li>
+      <strong>Factual drift prevention.</strong> The graph constrains what the model can say about
+      a topic. Explanations stay anchored to the course&rsquo;s conceptual structure rather than
+      drifting toward plausible-sounding but off-curriculum content.
+    </li>
+    <li>
+      <strong>Logical sequencing.</strong> Because prerequisites are retrieved alongside the target
+      concept, the model&rsquo;s explanations build on each other in the correct order rather than
+      presenting advanced ideas before foundational ones are established.
+    </li>
+  </ul>
+
+  <!-- ─── Section 5: Architectural significance ───────────── -->
+  <h2>Why This Matters Architecturally</h2>
+
+  <p>
+    KG-RAG is the bridge between raw LLM generation and a principled tutoring system. The diagram
+    below shows where it sits in the broader architecture:
+  </p>
+
+  <pre><code>
+  Raw LLM              KG-RAG               Full ITS
+  ─────────────        ──────────────────   ──────────────────────────
+  Query → LLM    →     Query → KG → LLM →  Query → Student Model
+  (no retrieval)       (structured               → KG traversal
+                        retrieval)               → Prerequisite retrieval
+                                                 → Adaptive generation
+                                                 → Reassessment loop
+  </code></pre>
+
+  <p>
+    Without the KG layer, the system sits at the left — fluent but structurally blind. The KG
+    adds domain structure. Subsequent components (student modeling, knowledge tracing, adaptive
+    path planning) layer on top of this foundation. You cannot sequence explanations correctly
+    before you have made the prerequisite relationships machine-readable.
+  </p>
+
+  <p>
+    This is also why KG-RAG is taught before knowledge tracing (Lesson&nbsp;5) and multi-agent
+    planning (Lesson&nbsp;6): the KG is the shared data structure that those later components
+    query. Get the graph wrong and everything downstream degrades.
+  </p>
+
+  <!-- ─── Quiz ──────────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-4">
+    <div class="quiz-title">Check your understanding</div>
+    <p class="quiz-question">
+      A student asks: "How does backpropagation work?" Standard RAG retrieves a passage
+      about neural networks. KG-RAG does what differently?
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button type="button">
+          It retrieves the same passage but rewrites it using simpler language suited to the student's level
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          It traverses the concept neighbors to also retrieve key prerequisites like chain rule and partial derivatives
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          It generates a new explanation from scratch using the LLM without relying on any retrieved passages
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Skill exercise ────────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise</div>
+    <p>
+      Sketch a 5-node knowledge graph for one small topic you know well. Label at least
+      3 <em>requires</em> edges and 1 <em>relates to</em> edge. Then describe what KG-RAG
+      would retrieve for a student who asks about the top-level node — which prerequisite
+      nodes would be traversed, and what passages would reach the LLM?
+    </p>
+    <textarea
+      placeholder="Example: Topic — 'compound interest'&#10;Nodes: compound interest, simple interest, percentage, multiplication, exponentiation&#10;Edges: compound interest requires exponentiation, compound interest requires percentage, exponentiation requires multiplication, compound interest relates to simple interest&#10;&#10;KG-RAG would retrieve: passages on exponentiation and percentage as prerequisites, alongside the compound interest passage itself..."
+      rows="8"
+      aria-label="Skill exercise response"
+    ></textarea>
+  </div>
+
+  <!-- ─── Ask your tutor ─────────────────────────────────────── -->
+  <div class="tutor-prompt">
+    Want to go deeper? Ask your tutor: <em>"Can you walk me through building a KG-RAG pipeline
+    for a topic I&rsquo;m currently studying?"</em>
+  </div>
+
+  <!-- ─── Navigation ────────────────────────────────────────── -->
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0003-learning-performance-paradox.html">&larr; Lesson 3: The Learning-Performance Paradox</a>
+    <a href="0005-rpkt-knowledge-tracing.html" class="primary">Lesson 5: Dynamic Knowledge Tracing &rarr;</a>
+  </nav>
+
+</div><!-- /.container -->
+
+<!-- ─── Scripts ───────────────────────────────────────────── -->
+<script src="../assets/quiz.js"></script>
+<script>
+  initQuiz(
+    'quiz-4',
+    1,
+    'KG-RAG traverses the knowledge graph to surface prerequisite nodes (chain rule, derivatives) alongside the target concept, ensuring the explanation is sequenced correctly.'
+  );
+</script>
+</body>
+</html>

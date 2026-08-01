@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 9: AgentDojo — Benchmarking Attacks and Defenses in Tool-Use Settings</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &gt; Multi-Agent Architectures &gt; Lesson 9 of 14
+      </div>
+      <h1>AgentDojo — Benchmarking Attacks and Defenses in Tool-Use Settings</h1>
+      <div class="lesson-meta">
+        <span>Estimated reading time: ~25 minutes</span>
+        <span>Module: Multi-Agent Architectures</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Source:</strong> Debenedetti et al. (2024),
+      <em>AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents</em>.
+      <a href="https://arxiv.org/abs/2406.13352" target="_blank">arXiv:2406.13352</a>.
+      Key result: current defenses against prompt injection in agentic tool-use settings remain insufficient,
+      and attempting to reduce attack success rates consistently and simultaneously degrades legitimate task utility.
+    </div>
+
+    <!-- ============================================================
+         SECTION 1 — Why Agentic Prompt Injection Demands a New Benchmark
+         ============================================================ -->
+    <h2>Why Agentic Prompt Injection Demands a New Benchmark</h2>
+    <p>
+      Before AgentDojo, most prompt injection research addressed what is known as direct injection — scenarios
+      in which an attacker directly controls or manipulates the user's prompt before it reaches the model.
+      This threat model is real, but it misses a far broader attack surface that emerges when LLMs are deployed
+      as autonomous agents: injections carried in external content that the agent retrieves during normal task
+      execution.
+    </p>
+    <p>
+      When an LLM agent browses the web, reads emails, queries calendars, or calls external APIs, it consumes
+      text from sources it does not control. Any of those sources can carry adversarial instructions. An attacker
+      who cannot reach the system prompt or the user's message can instead plant instructions inside a webpage
+      the agent will read, an email it will summarize, or a search result it will process. This is called indirect
+      or environmental prompt injection.
+    </p>
+    <p>
+      The practical stakes are large. Deployed agents that assist with email management, travel booking, banking
+      operations, or calendar scheduling are continuously fetching external content. Each fetch is an opportunity
+      for any party that controls that content — a website owner, an email sender, an API provider — to inject
+      instructions that hijack the agent's behavior without the user ever knowing. AgentDojo was designed
+      specifically to benchmark this threat. By embedding injections inside tool outputs rather than the
+      user prompt, it captures the realistic attack surface that direct-injection benchmarks systematically miss,
+      producing a more honest picture of how vulnerable deployed agents actually are.
+    </p>
+
+    <!-- ============================================================
+         SECTION 2 — Benchmark Design: 97 Tasks and 629 Security Test Cases
+         ============================================================ -->
+    <h2>Benchmark Design: 97 Tasks and 629 Security Test Cases</h2>
+    <p>
+      AgentDojo spans five application domains chosen to represent common real-world agentic deployments:
+      email management, travel booking, Slack messaging, banking operations, and calendar scheduling. Within
+      these domains the benchmark defines 97 realistic agentic tasks — concrete actions a user might plausibly
+      ask an LLM agent to perform, such as booking a flight, forwarding an email thread, initiating a bank
+      transfer, or scheduling a recurring meeting.
+    </p>
+    <p>
+      For each legitimate task, the benchmark constructs security test cases by pairing that task with an
+      injected adversarial goal. The adversary's goal is to make the agent perform a harmful or unauthorized
+      action — such as transferring funds to a different account, leaking private information, or sending
+      unauthorized messages — in addition to or instead of completing the user's original task. In total,
+      AgentDojo provides 629 such paired test cases.
+    </p>
+    <p>
+      What distinguishes the benchmark is where injections appear. Adversarial payloads are placed inside
+      tool outputs: the body of an email the agent reads, a result returned by a search engine, the description
+      field of a calendar event, or the content of an API response. The agent encounters these payloads as
+      part of its normal workflow. It is not being attacked through the user prompt; it is being attacked
+      through content it autonomously retrieves while doing its job. This design reflects how sophisticated
+      real-world attacks on deployed agents are likely to operate: an attacker plants instructions in
+      accessible external content and then simply waits for the agent to fetch it.
+    </p>
+
+    <!-- ============================================================
+         SECTION 3 — Two Evaluation Metrics: Utility and Attack Success
+         ============================================================ -->
+    <h2>Two Evaluation Metrics: Utility and Attack Success</h2>
+    <p>
+      AgentDojo evaluates each test case on two independent metrics, which together provide a complete picture
+      of an agent's performance under adversarial conditions.
+    </p>
+    <p>
+      The first metric is <strong>task utility</strong>: does the agent successfully complete the user's
+      legitimate task? This measures whether the agent remains functional and useful to the person it is
+      serving. A defense that prevents all injections but also prevents the agent from accomplishing
+      any real work is not a viable defense.
+    </p>
+    <p>
+      The second metric is <strong>attack success rate</strong>: does the agent also execute the injected
+      malicious goal? This measures how often the adversary achieves their objective. An agent that completes
+      the user's task but simultaneously leaks a password or initiates an unauthorized transfer has been
+      successfully exploited, regardless of how useful it was for the user's stated purpose.
+    </p>
+    <p>
+      Measuring these two metrics independently is essential because they are structurally in tension. A
+      maximally cautious agent might refuse to act whenever it encounters any ambiguous or potentially
+      injected content in tool outputs — driving attack success rate toward zero, but also failing to
+      complete most legitimate tasks. A maximally capable agent executes every instruction it encounters,
+      completing legitimate tasks reliably but also executing injected ones.
+    </p>
+    <p>
+      The benchmark also revealed a baseline capability gap: leading LLMs including GPT-4 and Claude failed
+      to complete a non-trivial fraction of the 97 agentic tasks even with no attack present. This matters
+      for interpreting defense results — a reduction in attack success rate that coincides with a reduction
+      in task utility might simply reflect the model becoming less capable overall, not genuinely resistant
+      to injection.
+    </p>
+
+    <!-- ============================================================
+         SECTION 4 — The Multi-Agent Testing Architecture
+         ============================================================ -->
+    <h2>The Multi-Agent Testing Architecture</h2>
+    <p>
+      To generate and evaluate test cases at scale, AgentDojo uses a three-role multi-agent architecture.
+      Each test case involves three distinct actors: an attacker agent, a victim agent, and an evaluator.
+    </p>
+    <p>
+      The <strong>attacker agent</strong> is responsible for injecting adversarial content into the
+      environment before it reaches the victim. Rather than modifying the user's prompt — which the victim
+      agent receives directly — the attacker intercepts or pre-populates tool outputs. For example, the
+      attacker might insert a paragraph of adversarial instructions into the body of an email the victim is
+      about to read, or embed a payload in the description field of a calendar event the victim will
+      retrieve through its scheduling tool. The payload appears to the victim as ordinary content returned
+      by a legitimate tool call.
+    </p>
+    <p>
+      The <strong>victim agent</strong> is the LLM under evaluation. It receives the user's legitimate
+      task and begins executing it autonomously, calling tools and processing their outputs. The victim is
+      unaware that certain tool outputs contain injected content. Its behavior is entirely determined by its
+      own reasoning and whatever defenses have been applied to it.
+    </p>
+    <p>
+      The <strong>evaluator</strong> measures the outcome independently on both metrics. It checks whether
+      the user's legitimate task was completed successfully and whether the attacker's injected goal was
+      also executed. Because the two assessments are independent, the evaluator can distinguish all four
+      possible outcomes: task success only, attack success only, both, or neither. This architecture also
+      makes it straightforward to swap in different victim models and different defenses without redesigning
+      the underlying test cases, enabling systematic comparison across a range of configurations.
+    </p>
+
+    <!-- ============================================================
+         SECTION 5 — Key Findings: The Attack-Defense Gap
+         ============================================================ -->
+    <h2>Key Findings: The Attack-Defense Gap</h2>
+    <p>
+      AgentDojo's empirical results produced findings that have shaped subsequent research on agentic
+      security and the limits of currently available defenses.
+    </p>
+    <p>
+      The benchmark tested two widely proposed defense approaches: prompt-level input filtering, which
+      attempts to detect and strip injected content before it reaches the agent's context window, and output
+      monitoring, which inspects the agent's planned actions before they are executed. Both approaches
+      reduced attack success rates compared to undefended baselines. Neither eliminated attacks. Attack
+      success rates remained high even when both defenses were active, meaning that current techniques
+      provide partial protection at best.
+    </p>
+    <p>
+      The most consequential finding was the inherent trade-off. Defenses that reduced attack success rates
+      also reduced task utility. Agents became more cautious about acting on tool output content — which is
+      exactly the posture defenses are designed to induce — but that same caution caused them to be hesitant
+      about legitimate instructions embedded in complex or unusual tool responses. There was no tested
+      configuration that simultaneously achieved high task utility and low attack success rate.
+    </p>
+    <p>
+      This rules out easy fixes. Adding a filter or a monitor improves security at the cost of usefulness,
+      or improves usefulness at the cost of security. The tension appears structural: the cognitive posture
+      that makes an agent appropriately skeptical of injected instructions also makes it skeptical of
+      legitimate tool outputs containing imperative language. For practitioners, the implication is that
+      deploying LLM agents in environments where they autonomously fetch untrusted external content requires
+      accepting either meaningful residual attack risk or meaningful degradation in task completion rates —
+      a trade-off no published defense has yet resolved.
+    </p>
+
+    <!-- ============================================================
+         CALLOUTS
+         ============================================================ -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> The attack-defense gap in AgentDojo is not a gap that more engineering
+      can easily close. Any defense that makes an agent more skeptical of external content — which is the
+      correct adversarial response — simultaneously makes it more skeptical of legitimate tool outputs.
+      There is no configuration that simultaneously achieves both high task utility and low attack success
+      rate. This trade-off is structural, not incidental.
+    </div>
+
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Many practitioners assume that prompt injection only matters
+      if an attacker can control or manipulate the user's prompt. AgentDojo directly refutes this. In
+      real-world agentic deployments, the injection surface is every piece of external content the agent
+      autonomously retrieves — email bodies, web pages, API responses, calendar entries. An attacker
+      who has no access to the user's prompt at all can still exploit an agent simply by controlling
+      content the agent is likely to fetch. Direct-injection defenses that ignore tool outputs provide
+      a false sense of security.
+    </div>
+
+    <!-- ============================================================
+         QUIZ
+         ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        According to AgentDojo's empirical findings, what tension do current prompt injection defenses expose?
+      </p>
+      <div class="quiz-options">
+        <button>Defenses that cut attack rates also cut task utility, since agents become overly cautious about tool use.</button>
+        <button>Stronger defenses always improve task utility by blocking noise, meaning security and performance naturally reinforce each other.</button>
+        <button>Defenses only fail when attackers have access to the system prompt, leaving indirect injection attacks fully unaddressed.</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         EXERCISE
+         ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Design three adversarial test cases for a hypothetical calendar-scheduling agent using AgentDojo's
+        framework. For each test case, specify all five required elements:
+      </p>
+      <ol>
+        <li><strong>The legitimate user task</strong> — what the user has asked the agent to do.</li>
+        <li><strong>The injection location</strong> — which specific tool output contains the adversarial payload and how the agent encounters it during normal execution.</li>
+        <li><strong>The injected payload text verbatim</strong> — the exact text of the malicious instruction as it would appear in the tool output.</li>
+        <li><strong>The intended malicious outcome</strong> — what the attacker wants the agent to do if the injection succeeds.</li>
+        <li><strong>The measurement method</strong> — how you would determine, after the agent finishes, whether attack success occurred versus normal task completion only.</li>
+      </ol>
+      <p>
+        Aim for test cases that cover different injection locations (e.g., a calendar event description,
+        a contact record, a meeting invite response body) to explore the breadth of the attack surface.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ============================================================
+         TUTOR PROMPT
+         ============================================================ -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ============================================================
+         LESSON NAV
+         ============================================================ -->
+    <nav class="lesson-nav">
+      <a href="0008-constitutional-ai.html">&larr; Previous</a>
+      <a class="primary" href="0010-sleeper-agents.html">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'AgentDojo found that defenses against prompt injection reduce attack success rates but simultaneously reduce task utility — agents become overly cautious about all tool output content, including legitimate instructions. Option B is wrong because AgentDojo found the opposite relationship: stronger defenses hurt task utility rather than improve it. Option C is wrong because AgentDojo specifically addresses indirect injection through tool outputs and shows it remains effective regardless of whether the attacker controls the system prompt.'
+    );
+  </script>
+
+</body>
+</html>

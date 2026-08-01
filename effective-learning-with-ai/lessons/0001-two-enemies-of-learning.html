@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 — The Two Enemies of Learning</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="container">
+
+  <header class="lesson-header">
+    <div class="breadcrumb">
+      <a href="../lessons.md">AI Tutoring Systems</a> › Module 1: Learning Science › Lesson 1 of 13
+    </div>
+    <h1>The Two Enemies of Learning</h1>
+    <div class="lesson-meta">
+      <span>~10 min</span>
+      <span>Module 1 — Learning Science Foundations</span>
+    </div>
+  </header>
+
+  <!-- ─── Section 1: The Core Distinction ─────────────────────────── -->
+
+  <h2>Two kinds of memory strength</h2>
+
+  <p>Every memory has two independent properties. The first is <strong>fluency strength</strong>: how easily the material comes to mind right now. The second is <strong>storage strength</strong>: how durably it is anchored in long-term memory. These move independently — and that independence is the source of most studying failures.</p>
+
+  <p>High fluency feels like mastery. Re-read your notes twice and the ideas arrive effortlessly on the third pass. That ease is real — but it is measuring the wrong thing. Fluency reflects recent exposure, not long-term retention. Storage strength is built by a different mechanism entirely.</p>
+
+  <div class="callout key">
+    <div class="callout-title">Core distinction</div>
+    <p style="margin:0"><strong>Fluency strength</strong> — the speed of retrieval in this moment — fades within days without reinforcement. <strong>Storage strength</strong> — the durability of the memory trace — is built slowly through effortful recall, not through repeated exposure.</p>
+  </div>
+
+  <!-- ─── Section 2: The Illusion of Knowing ──────────────────────── -->
+
+  <h2>Why fluency is the enemy</h2>
+
+  <p>The mechanism that makes fluency dangerous is metacognitive: students use ease of processing as a proxy for degree of learning. When a passage feels familiar, the brain reports <em>I know this</em>. When it feels hard, the brain reports <em>I haven't studied enough</em>. Both signals are unreliable predictors of how well material will be recalled days later on an actual exam.</p>
+
+  <p>This is the <strong>illusion of knowing</strong>. A student who re-reads their notes three times before an exam has built up substantial fluency — the material feels transparent, frictionless, known. But fluency built through re-reading does not transfer to a blank page under test conditions. Storage strength was never engaged.</p>
+
+  <div class="callout warning">
+    <div class="callout-title">The trap</div>
+    <p style="margin:0">The very feeling of confidence that re-reading produces is evidence that fluency has displaced the harder work of building storage. The easier studying feels, the less likely it is to be working.</p>
+  </div>
+
+  <!-- ─── Section 3: The Two Remedies ────────────────────────────── -->
+
+  <h2>The two scientifically validated remedies</h2>
+
+  <p>Learning science has established two interventions that build storage strength rather than fluency illusion.</p>
+
+  <p><strong>Retrieval practice</strong> means testing yourself before you are confident you know the answer. The act of attempting to retrieve — even incompletely, even unsuccessfully — strengthens the memory trace in a way that passive review cannot. The difficulty is not a sign that studying is going badly. The difficulty is the mechanism.</p>
+
+  <p><strong>Spaced repetition</strong> means returning to material after a delay — long enough that retrieval requires genuine effort, short enough that the trace has not fully faded. Spacing exploits the same mechanism: the greater the effort required to retrieve, the stronger the storage trace left by successful retrieval.</p>
+
+  <div class="callout key">
+    <div class="callout-title">The two remedies</div>
+    <ul style="margin:0">
+      <li><strong>Retrieval practice</strong> — attempt recall before you feel ready; difficulty strengthens the trace</li>
+      <li><strong>Spaced repetition</strong> — return to material after a delay calibrated to predicted forgetting</li>
+    </ul>
+  </div>
+
+  <!-- ─── Section 4: The Study ─────────────────────────────────────── -->
+
+  <h2>How an AI system operationalized both</h2>
+
+  <p>A 2023 study put these principles directly into an AI tutoring system and measured the outcome against a parallel control course with the same content.</p>
+
+  <div class="source-card">
+    <div class="source-label">Primary source</div>
+    <strong>Spaced Repetition and Active Recall in AI-Augmented Learning (arXiv 2309.13060)</strong>
+    51 psychology students. GPT-3 + neural student model. Compared against parallel control course on same material.
+    <br>Result: <strong>+15 percentile points on final exams</strong> vs the control group.
+  </div>
+
+  <p>The system had three moving parts. First, GPT-3 generated <em>microlearning questions</em> targeted at each individual student's current weak spots — not generic review questions, but questions probing the specific gaps the system had diagnosed. Second, a <em>neural-network student model</em> tracked each student's mastery state per topic in real time, updating after every response. Third, questions were spaced based on <em>predicted forgetting curves</em>: the system scheduled each topic to reappear at the point where retrieval would require effort but remain achievable.</p>
+
+  <p>The combination produced a 15-percentile-point advantage on the final exam versus students in the parallel course. The system worked not by delivering better explanations — it worked by engineering the right retrieval conditions at the right moment.</p>
+
+  <!-- ─── Section 5: Implication for AI Design ─────────────────────── -->
+
+  <h2>The design implication: AI as interrogator, not oracle</h2>
+
+  <p>The 2309.13060 result carries a sharp warning for AI tutor design. Every time a student asks "explain X" and the AI answers fully, the AI has stolen the retrieval event. The student's brain was about to attempt recall — precisely the act that builds storage strength — and the AI pre-empted it with a fluency boost.</p>
+
+  <p>A well-designed AI tutor answers "explain X" with a question: <em>What do you already think you know about X? Start there.</em> The explanation, if needed, comes after the retrieval attempt, not before.</p>
+
+  <div class="callout key">
+    <div class="callout-title">The core design principle</div>
+    <p style="margin:0">The AI's job is to generate retrieval challenges, not to deliver explanations on demand. Explanations given before retrieval is attempted convert a storage-building event into a fluency-building one — and fluency fades.</p>
+  </div>
+
+  <!-- ─── Quiz ──────────────────────────────────────────────────────── -->
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz-1">
+    <div class="quiz-title">Quick check — 1 question</div>
+    <p class="quiz-question">A student re-reads their notes three times and feels ready for the exam. What does learning science predict?</p>
+    <ul class="quiz-options">
+      <li><button>A. Fluency has built up but storage strength has not, so recall will likely fail later</button></li>
+      <li><button>B. Both fluency and storage strength are high because the student engaged with familiar material effectively</button></li>
+      <li><button>C. Storage strength was built because the student actively engaged with the material three separate times</button></li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Skill Exercise ────────────────────────────────────────────── -->
+
+  <h2>Skill exercise</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Apply it — open response</div>
+    <p><strong>Design a two-sentence tutoring prompt that triggers retrieval practice rather than explanation.</strong> Your prompt should force the student to reconstruct knowledge, not recognize it. A student who reads your prompt should have no choice but to generate an answer from memory.</p>
+    <p style="font-size:0.88rem; color: var(--muted); margin-bottom:0.25rem;">Type your response below — there is no auto-grade. The goal is to commit your thinking to words.</p>
+    <textarea placeholder="Write your two-sentence tutoring prompt here…" aria-label="Skill exercise response"></textarea>
+  </div>
+
+  <!-- ─── Nav ───────────────────────────────────────────────────────── -->
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <span></span>
+    <a href="0002-zone-of-proximal-development.html" class="primary">
+      Next: Zone of Proximal Development &rarr;
+    </a>
+  </nav>
+
+  <!-- ─── Tutor prompt ─────────────────────────────────────────────── -->
+
+  <div class="tutor-prompt">
+    Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+  </div>
+
+</div>
+
+<script src="../assets/quiz.js"></script>
+<script>
+  initQuiz(
+    'quiz-1',
+    0,
+    'Re-reading builds fluency — the material feels familiar — but without retrieval practice, storage strength stays low and recall fails on delayed tests.'
+  );
+</script>
+</body>
+</html>

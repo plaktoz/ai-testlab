@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6: Attack Taxonomy at Scale — Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &rsaquo; Module 2 &mdash; Attack Techniques &rsaquo; Lesson 6 of 14
+      </div>
+      <h1>Attack Taxonomy at Scale &mdash; What 600,000 Adversarial Prompts Reveal</h1>
+      <div class="lesson-meta">
+        <span>~20 minutes</span>
+        <span>Attack Techniques</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary source:</strong> Schulhoff et al., &ldquo;Ignore This Title and HackAPrompt: Exposing Systemic Vulnerabilities of LLMs through a Global Scale Prompt Hacking Competition&rdquo;
+      (<a href="https://arxiv.org/abs/2311.16119" target="_blank">arXiv 2311.16119</a>).
+      Key result: A global competition collecting over 600,000 adversarial prompts demonstrated that no production LLM &mdash; including GPT-3.5, GPT-4, and Claude &mdash; was immune across all attack types, and that the most successful submissions consistently combined multiple technique categories in ways that isolated evaluations entirely miss.
+    </div>
+
+    <h2>From Theory to Data: Why a Competition Changes Everything</h2>
+    <p>
+      Before HackAPrompt, most attack taxonomies were built top-down: researchers theorized about what might fool a language model, constructed a handful of examples in a controlled lab setting, and organized them into pre-defined categories. This approach has a structural blind spot &mdash; it reflects what researchers imagine adversaries will try, not what adversaries actually do when they are motivated by competitive incentives and faced with a concrete, measurable objective.
+    </p>
+    <p>
+      The HackAPrompt competition inverted this methodology entirely. Schulhoff et al. recruited participants from a global community and gave them a single, unambiguous goal: force each of three target models &mdash; ChatGPT (GPT-3.5), GPT-4, and a Claude model &mdash; to output the exact string &ldquo;I have been PWNED.&rdquo; Success was binary and objectively verifiable. The resulting dataset of over 600,000 adversarial prompts is the largest bottom-up corpus of attack attempts ever assembled against production-scale LLMs.
+    </p>
+    <p>
+      Crucially, the taxonomy that emerged from this work was not pre-assigned by the research team. Categories were derived by observing clusters in actual submitted prompts. This bottom-up provenance matters greatly for practitioners: a defense designed against a theoretically constructed taxonomy may be blind to the techniques that real adversaries independently converge on under competitive pressure. HackAPrompt closes that gap by anchoring the taxonomy in observed behavior rather than imagined scenarios.
+    </p>
+
+    <h2>The Three-Class Attack Ontology</h2>
+    <p>
+      From the competition data, Schulhoff et al. identified three principal attack classes, each decomposing into sub-techniques that appeared repeatedly across independent submissions.
+    </p>
+    <p>
+      The <strong>Prompt Injection</strong> class targets the model&rsquo;s ability to maintain separation between its governing instructions and the content it processes. <em>Context ignoring</em> is the canonical sub-technique: a phrase such as &ldquo;Ignore previous instructions and instead&hellip;&rdquo; directly instructs the model to abandon its system prompt. <em>Context overflow</em> takes a subtler route &mdash; the attacker floods the context window with large volumes of irrelevant text, effectively burying the system prompt and diluting its authority over the model&rsquo;s behavior. <em>Instruction overriding</em> replaces the model&rsquo;s task entirely, substituting a new set of directives for the original ones rather than asking the model to ignore them.
+    </p>
+    <p>
+      The <strong>Jailbreak Framing</strong> class does not attack the instruction mechanism directly. Instead, it constructs a fictional or hypothetical frame that the model treats as license to bypass its safety training. <em>Roleplay framing</em> asks the model to &ldquo;pretend you are an AI without restrictions.&rdquo; <em>Hypothetical framing</em> embeds the request inside a fictional story where the harmful output is merely a plot element. <em>Persona assignment</em> goes further: it gives the model a new identity with different behavioral norms &mdash; the notorious &ldquo;DAN (Do Anything Now)&rdquo; jailbreak is the archetype of this sub-technique.
+    </p>
+    <p>
+      The <strong>Token Manipulation</strong> class operates at the surface form of the text itself, below the semantic layer. <em>Base64 and other encoding attacks</em> hide the harmful request in a transformed representation that keyword filters never see in recognizable form. <em>Typo and leetspeak substitution</em> replaces characters to evade pattern-matching defenses while remaining interpretable to the model. <em>Token smuggling</em> exploits unusual Unicode characters or embedded whitespace to fragment trigger words so that classifiers fail to match them.
+    </p>
+
+    <h2>Token Manipulation: Attacking Below the Semantic Layer</h2>
+    <p>
+      Token manipulation attacks are particularly instructive because they expose a fundamental tension in LLM safety design. Models process text at the token level, and the relationship between token sequences and human-legible meaning is indirect. A word like &ldquo;bomb&rdquo; and the string &ldquo;b0mb&rdquo; map to different token sequences and therefore different internal representations &mdash; yet a human reader and a sufficiently capable language model can both interpret them with equal ease.
+    </p>
+    <p>
+      Base64 encoding exploits this gap most starkly. An attacker encodes a harmful request as a base64 string and instructs the model to decode and respond to it. Many keyword-based content filters operate on raw text before it reaches the model, so they never see the harmful payload in recognizable form. The model, however, has learned base64 decoding from training data and can reconstruct and act on the original request without difficulty.
+    </p>
+    <p>
+      Typo and leetspeak substitutions &mdash; replacing vowels with numbers, inserting hyphens between syllables, splitting words with zero-width spaces &mdash; similarly exploit the gap between filter-level pattern matching and model-level semantic understanding. The HackAPrompt competition confirmed that these low-sophistication techniques remain effective against production systems. Safety infrastructure often cannot afford the computational overhead of normalizing all possible surface variations before applying content policy checks, so these transformations continue to find gaps. The competition data provides an empirically grounded record of which specific transformations succeeded against which models.
+    </p>
+
+    <h2>Compound Attacks and the Isolation Problem</h2>
+    <p>
+      The most consequential empirical finding from HackAPrompt is what the authors identify as the <em>isolation problem</em>. Prior research evaluated individual attacks and individual defenses in isolation: does technique A work? Does defense B stop technique A? These clean pairwise evaluations systematically underestimate real-world risk because they do not capture how adversaries combine techniques into compound attack chains.
+    </p>
+    <p>
+      The competition data showed that the most successful submissions routinely combined two or more attack categories. A representative compound attack might begin with roleplay framing (jailbreak framing class) to establish a fictional context that relaxes safety constraints, then embed a base64-encoded payload (token manipulation class) within that fictional frame, and finally use an instruction override (prompt injection class) to redirect the model&rsquo;s output format to produce the target string. Each individual layer might be caught by a single-layer defense; the combination defeats defenses that were never designed to handle all three techniques in sequence.
+    </p>
+    <p>
+      This finding has direct implications for how adversarial evaluations should be designed. Evaluating an LLM against a fixed menu of individually documented attack types systematically understates the model&rsquo;s actual vulnerability surface. A rigorous red-team evaluation must include compound attack paths drawn from multiple categories &mdash; and must account for the fact that novel combinations are discoverable by any sufficiently motivated adversary who has access to the model&rsquo;s outputs and sufficient time to iterate.
+    </p>
+
+    <h2>Empirical Findings: No Model Was Immune</h2>
+    <p>
+      The HackAPrompt competition targeted three of the most safety-invested production LLMs available at the time: ChatGPT (GPT-3.5), GPT-4, and a Claude model. The outcome was unambiguous &mdash; no model was immune across all attack types. GPT-4, despite representing a substantial advance in both capability and safety training relative to GPT-3.5, was also successfully attacked. Claude was attacked as well. The taxonomic coverage of successful attacks was broad: submissions from all three principal attack classes achieved success against at least one target model.
+    </p>
+    <p>
+      The competition format is important to interpret correctly. Participants were not required to use the same technique against all three models; a submission was scored per-model per-level. The dataset therefore captures differential vulnerability across models &mdash; some attack categories were more effective against specific architectures and training configurations, while some models resisted certain classes while remaining exploitable through others. This per-model breakdown provides a map of the vulnerability landscape as it existed at the time of the competition and a methodology for remapping that landscape as models evolve and new safety measures are introduced.
+    </p>
+    <p>
+      The scale of the dataset &mdash; over 600,000 adversarial prompts &mdash; enables statistical analyses that single-researcher studies cannot support. Frequency distributions across attack categories, success rates conditioned on prompt length and complexity, and the proportion of compound versus single-technique attacks all become measurable at this scale. The result is an empirically grounded baseline against which future defenses can be benchmarked: a safety system that does not address the categories documented in the HackAPrompt taxonomy has a known and characterizable gap in its coverage.
+    </p>
+
+    <div class="callout key">
+      <strong>Key insight:</strong> The HackAPrompt taxonomy is bottom-up, not top-down &mdash; it was derived from observing what over 600,000 real adversarial prompts actually do under competitive pressure, not from theorizing about what attackers might try. Any safety evaluation that does not test for the attack categories this competition surfaced has a known empirical gap, because those categories represent techniques that independent adversaries converge on naturally when given a concrete objective.
+    </div>
+
+    <div class="callout warning">
+      <strong>Common misconception:</strong> It is tempting to treat the three attack classes as mutually exclusive and to build separate, specialized defenses for each one. The HackAPrompt competition data directly refutes this approach. The most effective attacks in the dataset combine classes. A defense that blocks prompt injection but does not handle token manipulation, or that catches simple roleplay frames but not compound attacks that layer framing on top of encoded payloads, provides only partial coverage and can be bypassed by any attacker who has learned to chain techniques &mdash; a skill the competition demonstrates is widespread.
+    </div>
+
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">What did the HackAPrompt competition reveal about the most effective attack submissions?</p>
+      <div class="quiz-options">
+        <button>Most successful attacks combined two or more technique categories together</button>
+        <button>Single category attacks were consistently the most effective approach used</button>
+        <button>Context ignoring was the only technique that worked reliably well</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Create a three-column table mapping the eight attack techniques below to Weng&rsquo;s three attack categories from Lesson 1 (token manipulation / jailbreak prompting / model-based red-teaming). The third column should indicate whether each technique appeared in the HackAPrompt competition data (Yes or No). Include all eight techniques: role-play framing, context overflow, base64 encoding, instruction overriding, typo/leetspeak substitution, indirect injection via retrieved content, RLHF-guided red-teaming, GCG adversarial suffix. Below the completed table, write exactly two sentences explaining why compound attacks &mdash; those that combine two or more categories &mdash; are harder to defend against than single-category attacks.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+    </div>
+
+    <nav class="lesson-nav">
+      <a href="0005-indirect-prompt-injection.html">&larr; Previous</a>
+      <a class="primary" href="0007-multiagent-debate.html">Next &rarr;</a>
+    </nav>
+
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'The HackAPrompt competition found that the most successful submissions combined two or more attack categories — for example, pairing roleplay framing with a base64-encoded payload and an instruction override in a single prompt. Single-category attacks (option B) were less effective because individual defense layers were more likely to catch them. Context ignoring (option C) was one of the most common individual techniques, but it was not the only technique that worked; successful attacks were distributed across all three attack classes and especially across compound combinations that layered multiple classes together.'
+    );
+  </script>
+</body>
+</html>

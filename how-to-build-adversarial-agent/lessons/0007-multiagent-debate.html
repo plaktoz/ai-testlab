@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 7: Multi-Agent Debate — Emergent Attacker-Defender Dynamics | Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &rsaquo; Multi-Agent Architectures &rsaquo; Lesson 7 of 14
+      </div>
+      <h1>Multi-Agent Debate &mdash; Emergent Attacker-Defender Dynamics</h1>
+      <div class="lesson-meta">
+        <span>Estimated reading time: ~25 minutes</span>
+        <span>Module: Multi-Agent Architectures</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary source:</strong> Du, Yilun et al. (2023), &ldquo;Improving Factuality and Reasoning in Language Models through Multiagent Debate,&rdquo;
+      <a href="https://arxiv.org/abs/2305.14325" target="_blank" rel="noopener">arXiv 2305.14325</a> &mdash;
+      multiple independent LLM instances debating their answers over iterative rounds achieves roughly 14% improvement on arithmetic benchmarks and measurably reduced hallucination, with no additional model training required.
+    </div>
+
+    <h2>What Is Multi-Agent Debate?</h2>
+    <p>
+      The core idea in Du et al. 2023 is disarmingly simple: take several independent copies of the same language model, present each one with an identical question, collect all their answers, and then let them argue. In each subsequent round, every agent reads the full set of responses produced by every other agent and updates its own answer. This continues for a fixed number of rounds, or until the agents converge on a shared answer.
+    </p>
+    <p>
+      Nothing in this setup requires different models, different weights, or different training data. All instances are identical at initialization. The only structural difference is that each agent operates in a shared information environment where competing answers are visible. That visibility is the entire mechanism.
+    </p>
+    <p>
+      Each round, an agent does not simply restate its prior answer. It is expected to produce a response that both restates its current best answer and summarizes the state of the debate as it understands it. This summary obligation forces each agent to engage with the reasoning of its peers rather than ignore it. The protocol can be run with as few as two agents; the Du et al. paper tests configurations of two, three, and more participants.
+    </p>
+    <p>
+      Termination is either time-bounded (a fixed number of rounds) or condition-bounded (all agents output the same answer in the same round). In practice, the paper finds that convergence often happens before the round limit is reached, especially on factual questions with unambiguous answers.
+    </p>
+
+    <h2>Why Adversarial Pressure Improves Outcomes</h2>
+    <p>
+      The improvement in factuality is not a statistical averaging effect. It is a consequence of adversarial pressure. When an agent reads a competing response that contradicts its own, it faces a choice: defend its position by articulating explicit reasoning, or revise its view in the light of the challenger&rsquo;s argument. Both options are better than the counterfactual, which is a model left to reflect on its own output with no external challenge.
+    </p>
+    <p>
+      Single-model self-reflection has a well-known failure mode: the model tends to rationalize its own errors rather than identify them. Asked to check its own work, the model retraces the same reasoning path that produced the error, and arrives at the same wrong answer with slightly more confidence. Adversarial debate breaks this loop by externalizing the critique. The challenge comes from outside the agent&rsquo;s own reasoning process, and therefore it cannot be rationalized away simply by repeating the original argument.
+    </p>
+    <p>
+      The paper describes this as surfacing errors that single-model self-reflection misses. The key word is &ldquo;surfacing&rdquo;: the error was always present, but the agent had no structural incentive to expose it. Debate creates that incentive. An agent whose position is challenged in round two must either justify its answer more rigorously or abandon it. This dynamic is not invented; it is the same dynamic that makes peer review, cross-examination, and competitive debate effective in human epistemic practice.
+    </p>
+
+    <h2>Architecture Details and Empirical Results</h2>
+    <p>
+      The Du et al. architecture is straightforward to implement. At round zero, each of <em>N</em> agents independently generates a response to the same prompt. At every subsequent round, each agent is given a context window that contains: the original question, its own previous answer, and all other agents&rsquo; previous answers. It then produces a new answer that takes that full context into account.
+    </p>
+    <p>
+      On GSM8K, the standard grade-school arithmetic benchmark, multiagent debate achieves approximately 14% improvement over single-model inference. On chess move validity tasks, the improvement is also significant. On factual question-answering tasks, the hallucination rate is measurably reduced. These numbers are not trivial: they represent gains comparable to those achieved by fine-tuning, achieved purely through interaction structure.
+    </p>
+    <p>
+      Critically, no retraining is required. The improvement is entirely emergent from the protocol. The weights of the underlying model are unchanged between the single-agent baseline and the multiagent debate condition. This means the gains are free in the sense that they require only additional inference compute, not supervised data collection, fine-tuning runs, or access to model internals. The implication for practitioners is that multi-agent debate is a wrapper pattern: it can be applied to any capable model without modification.
+    </p>
+    <p>
+      The paper tests configurations with two, three, and more agents. Performance improvements generally increase with agent count up to a point, though the incremental gain per additional agent diminishes. Two agents already capture most of the benefit on most tasks.
+    </p>
+
+    <h2>Mapping Debate to Attacker-Defender Systems</h2>
+    <p>
+      The debate architecture maps naturally and directly onto the attacker-defender framing that runs throughout this course. In the Du et al. setup, every agent plays both roles simultaneously: it proposes an answer (attacker mode) and challenges all other answers (defender mode). But the architecture can be specialized. An &ldquo;attacker&rdquo; agent is assigned the role of proposing claims or completions; a &ldquo;defender&rdquo; agent is assigned the role of challenging those claims, looking for logical gaps, factual errors, or unsupported assumptions.
+    </p>
+    <p>
+      This specialization makes the adversarial pressure asymmetric and directional, which is exactly what security and alignment applications require. The attacker agent is trying to get a claim accepted; the defender agent is trying to find any reason to reject it. The claims that survive this pressure are more likely to be robust. The defenses that fail to sustain their reasoning under pressure expose exactly the weaknesses a real adversary would exploit.
+    </p>
+    <p>
+      From a system design perspective, a two-agent debate with a fixed proposer and a fixed challenger is a minimal viable adversarial pipeline. It does not require anything beyond two inference calls per round and a context window large enough to hold both agents&rsquo; prior outputs. The debate terminates when the challenger explicitly concedes, when a fixed number of rounds is exhausted, or when both agents converge on the same answer. Each of these conditions encodes a different theory of when adversarial pressure has done its work.
+    </p>
+
+    <div class="callout key">
+      <strong>Key insight:</strong> The factuality improvement in multiagent debate requires no retraining whatsoever. It is fully emergent from the interaction structure: identical models, identical weights, but a shared information environment in which competing answers are visible. The gain is purchased entirely with inference compute. This means debate is a zero-cost architectural upgrade for any system that can afford multiple inference calls per query.
+    </div>
+
+    <div class="callout warning">
+      <strong>Common misconception:</strong> Multi-agent debate is not ensemble voting or majority selection. In majority voting, each model produces one answer independently and the plurality wins. In debate, agents actively update their answers in response to each other&rsquo;s reasoning across multiple rounds. The mechanism is argumentation under adversarial pressure, not statistical aggregation. A system that simply polls three models and picks the most common answer is doing something fundamentally different from debate, and will not produce the same gains.
+    </div>
+
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        According to Du et al., why does adversarial pressure in multi-agent debate improve factuality compared to single-model self-reflection?
+      </p>
+      <div class="quiz-options">
+        <button>External challenge forces agents to defend positions with reasoning, surfacing errors self-reflection cannot detect</button>
+        <button>Multiple agents each have different training data that gives them diverse factual knowledge bases</button>
+        <button>The framework requires each agent to perform additional retrieval steps, reducing hallucinations through verification</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Design a 2-agent debate schema in JSON. Your schema must specify: an Agent A (proposer) with a specific factual claim about AI safety to assert &mdash; write the actual claim as a string (for example: &ldquo;RLHF makes models reliably safer as they scale&rdquo;); an Agent B (adversarial challenger) with its assigned role and its debate strategy; 3 debate rounds, each specifying what Agent A receives as input, what Agent A produces as output, what Agent B receives as input, and what Agent B produces as output; and a termination condition that covers at least two cases (e.g., challenger explicitly concedes, or 3 rounds complete, or both agents output the same answer). Use the AI safety claim as the concrete debate target throughout all three rounds. The claim should be one that a well-informed challenger could genuinely contest.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+    </div>
+
+    <nav class="lesson-nav">
+      <a href="0006-hackaprompt-taxonomy.html">&larr; Previous</a>
+      <a class="primary" href="0008-constitutional-ai.html">Next &rarr;</a>
+    </nav>
+
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'Correct. According to Du et al., the mechanism is that when an agent reads a competing response that contradicts its own, it must either defend its position with explicit reasoning or revise its view. This externalizes the critique that single-model self-reflection misses: a model reflecting on its own output tends to rationalize errors rather than identify them, because it retraces the same reasoning path with no external challenge. Option B is wrong because all agents in the debate use the same underlying model with the same weights — there is no diverse training data. Option C is wrong because the paper describes no retrieval augmentation; the improvement comes entirely from the iterative argumentation structure, not from accessing external information sources.'
+    );
+  </script>
+
+</body>
+</html>

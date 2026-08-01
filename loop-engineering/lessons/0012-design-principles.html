@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 12 — Design Principles + The Meta-Loop</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb">
+        <a href="../lessons.md">Loop Engineering</a> › Module 4 — Failure Modes and Robust Design › Lesson 12 of 12
+      </p>
+      <h1>Design Principles + The Meta-Loop</h1>
+      <div class="lesson-meta">
+        <span>~25 min</span>
+        <span>Module 4 — Failure Modes and Robust Design</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <div class="source-card-label">Primary Source</div>
+      <p><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank">Anthropic — Building Effective Agents</a></p>
+      <p>Anthropic identifies three principles for robust agentic loop design — simplicity, transparency, and tool investment — and recommends adding complexity only when simpler designs demonstrably fail. The companion LangChain analysis shows how saving loop trajectories closes a second-order meta-loop, turning every accepted task run into fine-tuning data for the next generation of the system.</p>
+    </div>
+
+    <h2>Three Principles for Robust Loop Design</h2>
+    <p>Anthropic distills loop design into three principles that apply regardless of which architecture — reflection, planning, or orchestration — you choose.</p>
+
+    <p><strong>Simplicity</strong> is the first and most important principle. Prefer the least complex design that meets requirements: single LLM calls handle most tasks. The practical heuristic is that complexity should be added only when simpler designs demonstrably fail, not preemptively. Agents are described as "just LLMs using tools based on environmental feedback in a loop" — the sophistication comes from composition, not from any single exotic component.</p>
+
+    <p><strong>Transparency</strong> means making planning steps explicit and visible so failures are diagnosable. When a loop fails silently — producing a wrong answer without any visible reasoning trace — there is no signal to iterate on. Exposing each step as a logged record makes the difference between a black box and an auditable system.</p>
+
+    <p><strong>Tool investment</strong> means treating tool documentation like production code. Agent reliability is bounded by tool reliability: if a tool's description is ambiguous or incomplete, the model will call it incorrectly no matter how sophisticated the planner. Investing in tool quality yields returns at every loop iteration, not just once.</p>
+
+    <h2>Transparency in Practice: Making the Loop Auditable</h2>
+    <p>The transparency principle has a direct implementation consequence: every step the agent takes should be written to an audit trail, not just the final output. Each LLM call can append a structured record — node name, input, output — to a <code>steps</code> list in state. This serves two purposes simultaneously: it makes failures diagnosable during development, and it accumulates the raw material for the meta-loop.</p>
+
+    <p>An explicit audit trail also satisfies human oversight requirements at low cost. Rather than inserting a blocking human gate at every step, the <code>steps</code> log can be surfaced after a run for asynchronous review. Runs that pass review are labeled as accepted; runs that fail are labeled as rejected. That label becomes the training signal for the outer improvement loop.</p>
+
+    <h2>Trajectory Storage: Every Run Builds the Dataset</h2>
+    <p>Saving loop trajectories — the full sequence of actions, observations, and critiques — enables two improvement paths. The first is in-context learning: past trajectories can be retrieved and prepended as few-shot examples when the agent faces a similar task. The second is fine-tuning: trajectories from accepted runs become supervised training examples that directly improve the underlying model.</p>
+
+    <p>Both paths require the same infrastructure: a log that captures input, each intermediate step, and a label indicating whether the run was accepted. The label can come from automated evaluation (unit tests passing, score above threshold) or from human review. In either case, the agent produces its own training data as a byproduct of doing its job.</p>
+
+    <h2>The Meta-Loop: Loops That Improve Loops</h2>
+    <p>The meta-loop is a second-order loop around the primary task loop. Where the inner loop runs a task and produces an output, the outer loop collects those outputs, labels them, and feeds accepted trajectories back into the system as fine-tuning data. The system that runs tasks also generates the data that makes future task runs better.</p>
+
+    <p>LATS (Language Agent Tree Search) illustrates the pattern concretely. In addition to finding the best response to a single task, LATS accumulates trajectory scores across many runs. Those scores can be used for model distillation — training a smaller, faster model to replicate the behavior of the full search process. The meta-loop is the highest-leverage pattern in loop engineering and the mechanism behind most successful LLM agent quality improvements.</p>
+
+    <p>Closing the meta-loop requires three elements: a way to capture trajectories (a <code>log_trajectory</code> node), a labeling mechanism (human review or automated scoring), and a fine-tuning pipeline that consumes the labeled examples. Once all three are in place, every production run contributes to the next model iteration.</p>
+
+    <div class="callout key">
+      <div class="callout-label">Key Insight</div>
+      <p>The meta-loop — storing task trajectories as fine-tuning data — is the highest-leverage pattern in loop engineering. Every accepted run becomes a positive training example, so the system that runs tasks also generates the data that makes future runs better. The outer loop costs almost nothing to build once the inner loop already logs its steps.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out</div>
+      <p>Complexity should be added only when simpler designs demonstrably fail, not preemptively. Adding orchestration, reflection, or planning before you have evidence they are needed creates maintenance costs without guaranteed quality gains. The Anthropic principle of simplicity means single LLM calls handle most tasks — reach for a more complex pattern only when you have a measurable failure to fix.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>The code below demonstrates all three design principles in a single graph: a minimal one-node agent (simplicity), an explicit step-logging node that writes a structured audit trail to a JSONL file (transparency), and a well-documented tool (tool investment). The <code>build_training_example</code> function converts accepted trajectories into supervised fine-tuning examples, closing the meta-loop around the primary task loop.</p>
+
+    <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langchain_anthropic import ChatAnthropic
+from langchain_core.tools import tool
+from langchain_core.messages import HumanMessage, BaseMessage
+from langgraph.prebuilt import ToolNode
+from typing import TypedDict, Annotated
+import operator, json
+from pathlib import Path
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+TRAJECTORY_LOG = Path("trajectories.jsonl")
+
+# ── Principle 1: Simplicity — one node, no premature orchestration ────────────
+# Add complexity (reflection, planning) only when you have evidence it's needed.
+
+# ── Principle 2: Transparency — log every step explicitly ────────────────────
+class AgentState(TypedDict):
+    task: str
+    messages: Annotated[list[BaseMessage], operator.add]
+    steps: list[dict]   # audit trail
+    accepted: bool      # human labels this after reviewing the output
+
+def call_llm(state: AgentState) -> dict:
+    response = llm.invoke(state["messages"])
+    step = {"node": "call_llm", "input": state["messages"][-1].content, "output": response.content}
+    return {"messages": [response], "steps": state["steps"] + [step]}
+
+def log_trajectory(state: AgentState) -> dict:
+    # Append the full trajectory — this is the raw material for the meta-loop
+    entry = {"task": state["task"], "steps": state["steps"], "accepted": state["accepted"]}
+    with open(TRAJECTORY_LOG, "a") as f:
+        f.write(json.dumps(entry) + "\n")
+    return {}
+
+# ── Principle 3: Tool investment — document tools so the model plans correctly
+@tool
+def lookup_kb(query: str) -> str:
+    """Search the internal knowledge base. Use before answering any factual question.
+    Returns up to 5 relevant excerpts from stored notes."""
+    return f"[KB results for '{query}']"
+
+# ── Meta-loop: convert logged trajectories into fine-tuning examples ──────────
+def build_training_example(trajectory: dict) -> dict | None:
+    """Convert an accepted trajectory into a supervised fine-tuning example."""
+    if not trajectory.get("accepted"):
+        return None   # only learn from accepted runs
+    last_step = trajectory["steps"][-1]
+    return {
+        "messages": [
+            {"role": "user",      "content": trajectory["task"]},
+            {"role": "assistant", "content": last_step["output"]},
+        ],
+        "label": "positive",
+    }
+
+builder = StateGraph(AgentState)
+builder.add_node("call_llm", call_llm)
+builder.add_node("log_trajectory", log_trajectory)
+builder.set_entry_point("call_llm")
+builder.add_edge("call_llm", "log_trajectory")
+builder.add_edge("log_trajectory", END)
+
+app = builder.compile()
+result = app.invoke({
+    "task": "Summarise key ideas in transformer architectures.",
+    "messages": [HumanMessage("Summarise key ideas in transformer architectures.")],
+    "steps": [],
+    "accepted": False,   # set to True after human review to include in fine-tuning
+})
+# After labelling: replay trajectories.jsonl through build_training_example()
+# and submit the positive examples to your fine-tuning pipeline.
+</code></pre>
+
+    <div class="quiz" id="quiz-12">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">What is the meta-loop in loop engineering?</p>
+      <div class="quiz-options">
+        <button>A second-order loop where trajectories improve the underlying model</button>
+        <button>A nested subgraph that re-runs any failed steps automatically</button>
+        <button>A human checkpoint inserted before each irreversible agent action</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Audit a hypothetical agent system description against the three Anthropic principles (simplicity, transparency, tool investment); then describe how you would close the meta-loop — what trajectory data you would capture, how you would label it, and what improvement signal it would provide.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <div class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</div>
+
+    <nav class="lesson-nav">
+      <a href="0011-hard-problems.html">&#8592; Previous</a>
+      <a href="../lessons.md">Back to Curriculum</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-12', 0, 'The meta-loop is a second-order loop around the primary task loop — the system that runs tasks also generates the data that makes future task runs better, by saving accepted trajectories as fine-tuning data. Options B and C describe inner-loop patterns (error recovery and human oversight), not the meta-loop.');</script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3 — Anatomy of an Agentic Loop — Planning, Memory, Tool Use</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 1 — Foundations › Lesson 3 of 12</p>
+      <h1>Anatomy of an Agentic Loop — Planning, Memory, Tool Use</h1>
+      <div class="lesson-meta">
+        <span>~25 min</span>
+        <span>Module 1 — Foundations</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <div class="source-card-label">Primary Source</div>
+      <p><a href="https://lilianweng.github.io/posts/2023-06-23-agent/">Lilian Weng — LLM Powered Autonomous Agents (2023)</a></p>
+      <p>The seminal survey establishing that any LLM agent system is defined by three components — Planning, Memory, and Tool Use — and introducing ReAct as the canonical loop that wires all three together as a repeating Thought → Action → Observation cycle.</p>
+    </div>
+
+    <h2>Three Core Components of an Agent System</h2>
+    <p>Lilian Weng's 2023 survey establishes that any LLM-powered agent system is defined by three structural components: Planning, Memory, and Tool Use. These are not optional features to be added incrementally — they are the requirements of any system that can pursue a goal over multiple steps. An agent without planning has no way to sequence actions toward a goal. An agent without memory cannot carry context from one action to the next. An agent without tools cannot affect the world outside the model's context window.</p>
+    <p>The ReAct cycle — Thought → Action → Observation — is the concrete loop that weaves all three components together. Each Thought draws on Memory and applies Planning to decide the next move; each Action invokes a Tool; each Observation feeds the result back into Memory and triggers the next Thought. The loop continues until the model produces a final answer without invoking a tool.</p>
+
+    <h2>Planning: Chain-of-Thought and Tree of Thoughts</h2>
+    <p>Planning is the component that determines how an agent sequences its actions toward a goal. Chain-of-Thought (CoT) prompting is the foundational planning mechanism: by asking the model to reason step by step, CoT elicits an explicit reasoning trace before each action. Tree of Thoughts (ToT) extends CoT by expanding multiple candidate reasoning paths simultaneously and evaluating which branch is most promising to continue.</p>
+    <p>PDDL (Planning Domain Definition Language) sits at the formal end of the spectrum, where problems and actions are expressed in a structured language that allows classical planning algorithms to reason over them. In practice, planning methods span from lightweight (a single CoT prompt) to heavyweight (full PDDL problem specification), and the appropriate choice depends on how much of the task structure can be known in advance. Weng notes that planning is one of the places where LLMs struggle when errors compound — an early wrong reasoning step can send the agent down an irreversible path.</p>
+
+    <h2>Memory Tiers: Sensory, Short-Term, and Long-Term</h2>
+    <p>Weng maps the three memory tiers to concrete storage mechanisms in LLM systems. Sensory memory — the raw perceptual input — maps to raw embeddings, the initial encoding of an input before any processing. Short-term memory maps to the in-context window: the working memory available within a single inference call, bounded by the context length limit. Long-term memory maps to an external vector store: information persisted across calls and retrieved on demand via similarity search.</p>
+    <p>This mapping has direct architectural consequences. The in-context window imposes a hard ceiling on short-term memory. Anything that must survive beyond that ceiling must be explicitly written to a vector store or summarized into a compressed representation. Weng identifies finite context limits as one of the three hard structural problems in loop design: in long-running loops, early context is displaced by newer observations, and the agent loses access to information that may still be relevant.</p>
+
+    <h2>Tool Use: MRKL, Toolformer, and API-Bank</h2>
+    <p>Tool use is the component that allows an agent to act on the world beyond text generation. Weng surveys three paradigms. MRKL (Modular Reasoning, Knowledge, and Language) routes queries to specialized expert modules — neural or symbolic — depending on the query type, allowing the model to delegate computation to domain-specific systems. Toolformer trains the model itself to invoke external APIs by inserting API call tokens directly into the generation stream, so tool use emerges from training rather than prompt engineering. API-Bank provides a standardized benchmark and interface for evaluating how accurately models invoke real-world APIs.</p>
+    <p>What these paradigms share is the insight that language models in agentic loops function as coordinators, not isolated reasoners. The model's value is in deciding which tool to call, with which arguments, and in what sequence. This means the overall loop quality is bounded by tool documentation quality: an agent can only invoke tools whose purpose and interface it can correctly describe in its reasoning trace.</p>
+
+    <h2>The ReAct Cycle: Thought, Action, Observation</h2>
+    <p>ReAct implements the agentic loop as a repeating sequence. In the Thought step, the model reasons about what to do next, drawing on memory and its planning capability. In the Action step, the model invokes a tool or produces output. In the Observation step, the tool result is fed back into the context, and the model begins a new Thought step. The cycle continues until the model produces a final answer with no further tool calls.</p>
+    <p>Reflexion extends ReAct with dynamic memory: after each completed trajectory, the agent evaluates whether it achieved the goal and stores the assessment. A key signal Reflexion uses is repeated identical actions followed by identical observations — a pattern indicating the agent is stuck in a local loop producing no new information. On detecting this, the agent can restart from the beginning with the failure trajectory in memory, enabling it to avoid the same mistake in the next attempt. Weng identifies this as a direct architectural response to the challenge of LLMs struggling to adapt mid-plan when unexpected errors arise.</p>
+
+    <div class="callout key">
+      <div class="callout-label">Key Insight</div>
+      <p>Planning, Memory, and Tool Use are the three structural requirements of any agent capable of pursuing a goal over multiple steps — not features to be added later. The ReAct cycle is the loop that wires all three together: Thought applies Planning and reads from Memory, Action invokes a Tool, and Observation writes back to Memory to drive the next Thought.</p>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out</div>
+      <p>More memory tiers and more tools do not automatically improve an agent. Weng identifies finite context limits and natural language interface fragility as hard structural challenges that adding capabilities does not solve. Adding tools without investing in their documentation, or adding memory tiers without actively managing context overflow, typically makes failures harder to diagnose rather than less frequent.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>The code below implements the canonical LangGraph ReAct pattern: the <code>agent</code> node handles Thought and Action (the LLM reasons and emits a tool call or a final answer), <code>ToolNode</code> handles Observation (executing the tool call and returning the result), and the conditional edge on <code>agent</code> routes back to <code>tools</code> when there are pending tool calls, and to <code>END</code> when the model produces a final answer with none.</p>
+
+<pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolNode
+from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import HumanMessage, BaseMessage
+from langchain_core.tools import tool
+from typing import TypedDict, Annotated, Literal
+import operator
+
+@tool
+def search_web(query: str) -> str:
+    """Search the web for up-to-date information."""
+    return f"[search results for '{query}']"   # replace with real search call
+
+@tool
+def read_file(path: str) -> str:
+    """Read a local file and return its contents."""
+    try:
+        return open(path).read()
+    except FileNotFoundError:
+        return f"File not found: {path}"
+
+tools = [search_web, read_file]
+llm = ChatAnthropic(model="claude-sonnet-5").bind_tools(tools)
+
+class AgentState(TypedDict):
+    messages: Annotated[list[BaseMessage], operator.add]
+
+def agent(state: AgentState) -> dict:
+    # Thought + Action: model reasons and emits a tool_call or a final answer
+    return {"messages": [llm.invoke(state["messages"])]}
+
+def route(state: AgentState) -> Literal["tools", "__end__"]:
+    last = state["messages"][-1]
+    return "tools" if getattr(last, "tool_calls", None) else END
+
+tool_node = ToolNode(tools)   # Observation: execute the tool call, return result
+
+builder = StateGraph(AgentState)
+builder.add_node("agent", agent)
+builder.add_node("tools", tool_node)
+builder.set_entry_point("agent")
+builder.add_conditional_edges("agent", route)
+builder.add_edge("tools", "agent")        # Observation feeds back into the next Thought
+
+app = builder.compile()
+result = app.invoke({"messages": [HumanMessage("Search for recent LLM benchmark results.")]})
+print(result["messages"][-1].content)</code></pre>
+
+    <div class="quiz" id="quiz-3">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">Which memory tier maps to the agent's in-context window?</p>
+      <div class="quiz-options">
+        <button>Short-term memory in context window</button>
+        <button>Long-term memory in vector store</button>
+        <button>Sensory memory in raw inputs</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>For the task "research a company and write a summary": identify which memory tier each piece of information belongs to (for example, the company name you were given, a news article retrieved mid-loop, a fact stored from a prior search session), which tools are needed, and sketch the ReAct loop as a sequence of Thought/Action/Observation steps for the first two iterations.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0002-loops-vs-single-pass.html">← Previous</a>
+      <a href="0004-hitl-spectrum.html" class="primary">Next →</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-3', 0, 'Correct. Short-term memory maps to the in-context window — the working memory available within a single inference call. Sensory memory maps to raw embeddings and long-term memory maps to an external vector store.');</script>
+  </div>
+</body>
+</html>

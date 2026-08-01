@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 1 — Adversarial Agent Taxonomy | Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a>
+        &rsaquo; Module 1 &mdash; Foundations
+        &rsaquo; Lesson 1 of 14
+      </div>
+      <h1>Adversarial Agent Taxonomy &mdash; Types, Roles, and the Threat Landscape</h1>
+      <div class="lesson-meta">
+        <span class="lesson-time">&#128337; ~20 minutes</span>
+        <span class="lesson-module">Foundations</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Sources</strong>
+      <ul>
+        <li>
+          Weng (2023), <em>Adversarial Attacks on LLMs</em> &mdash; a comprehensive survey cataloguing five attack categories (token manipulation, gradient-based, jailbreak prompting, human red-teaming, and model-based red-teaming) together with corresponding defenses.
+        </li>
+        <li>
+          <a href="https://arxiv.org/abs/2312.02003" target="_blank">arxiv 2312.02003</a> &mdash; LLM Security and Privacy Survey that organises the field into &ldquo;The Good,&rdquo; &ldquo;The Bad,&rdquo; and &ldquo;The Ugly,&rdquo; noting model extraction and safe instruction tuning as underdeveloped areas.
+        </li>
+        <li>
+          <a href="https://arxiv.org/abs/2309.07864" target="_blank">arxiv 2309.07864</a> &mdash; LLM Agents Survey proposing a unified brain-perception-action framework that covers single-agent tasks, multi-agent collaboration, and emergent agent-society behaviours.
+        </li>
+      </ul>
+    </div>
+
+    <!-- ==================== SECTION 1 ==================== -->
+    <h2>1. What Is an Adversarial Agent?</h2>
+    <p>
+      The term <em>adversarial agent</em> sits at the intersection of two converging research threads: adversarial machine learning, which studies how systems can be deliberately misled, and autonomous LLM-based agents, which studies how language models can plan and act over extended horizons. When these threads meet, the result is a system that uses a language model&rsquo;s reasoning and action capabilities not to assist users, but to probe, deceive, or attack other systems or models.
+    </p>
+    <p>
+      A key property of LLMs that makes this dual-use tension unavoidable is that the same capability that allows a model to generate persuasive text for a marketing campaign also allows it to generate convincing social-engineering scripts. The same capacity for code generation that accelerates legitimate development can be turned toward writing exploit code. Security researchers consistently observe this dual-use property: a sufficiently capable LLM is simultaneously a potential defender and a potential attacker, depending entirely on how it is directed.
+    </p>
+    <p>
+      Understanding adversarial agents therefore requires holding two questions in mind at once. First: what can an attacker do <em>to</em> an LLM (poisoning it, jailbreaking it, extracting its weights)? Second: what can an attacker do <em>with</em> an LLM (generating phishing content, automating prompt injection, orchestrating multi-step exploits)? The taxonomy introduced in this lesson spans both directions.
+    </p>
+
+    <!-- ==================== SECTION 2 ==================== -->
+    <h2>2. Five Attack Categories: Weng&rsquo;s Taxonomy</h2>
+    <p>
+      Weng&rsquo;s 2023 survey organises attacks on LLMs into five categories that remain the most widely cited starting point in the field.
+    </p>
+    <p>
+      <strong>Token manipulation</strong> alters input tokens to confuse the model&rsquo;s internal representations. Substituting synonyms, introducing typos, or appending invisible characters are all token-level interventions that can shift a model&rsquo;s output while leaving the semantic content of the input largely intact to a human reader.
+    </p>
+    <p>
+      <strong>Gradient-based attacks</strong> are white-box techniques that exploit the attacker&rsquo;s access to the model&rsquo;s internal gradient signals. Because the attacker can compute how the loss changes with respect to each input token, they can optimise adversarial suffixes or prefixes that reliably steer the model toward a target output. This is the most technically demanding category and requires full or partial access to model parameters.
+    </p>
+    <p>
+      <strong>Jailbreak prompting</strong> bypasses a model&rsquo;s safety objectives through clever framing rather than mathematical optimisation. Role-play scenarios, hypothetical framings, and multi-turn manipulation are all jailbreak strategies. Crucially, jailbreaking requires no model access; it operates entirely in the prompt space, making it accessible to any user with API access.
+    </p>
+    <p>
+      <strong>Human red-teaming</strong> involves human annotators manually probing a deployed model for failure modes. It is slow and expensive but produces diverse, high-quality failure cases that automated methods often miss. Many of the safety improvements in modern aligned models trace back to human red-teaming data.
+    </p>
+    <p>
+      <strong>Model-based red-teaming</strong> replaces human annotators with a separate language model that generates attack prompts automatically. This is the category most directly relevant to &ldquo;building adversarial agents&rdquo; and will be explored in depth across Lessons 2 through 6.
+    </p>
+
+    <!-- ==================== SECTION 3 ==================== -->
+    <h2>3. The Good, the Bad, and the Ugly: A Security Taxonomy</h2>
+    <p>
+      The LLM Security and Privacy Survey (arxiv 2312.02003) introduces an alternative three-category framing that emphasises intent and use-case rather than technique.
+    </p>
+    <p>
+      <strong>The Good</strong> covers beneficial security uses of LLMs. Code vulnerability detection is the canonical example: a model fine-tuned on labelled vulnerability data can scan codebases faster than human reviewers and flag patterns that match known exploit classes. Other examples include malware analysis, log anomaly detection, and automated patch generation. These applications treat the LLM as a defensive tool deployed by a security team.
+    </p>
+    <p>
+      <strong>The Bad</strong> covers offensive attack uses. Social engineering is the most salient example: LLMs can generate highly personalised phishing emails at scale, dramatically lowering the cost of spear-phishing campaigns. Adversarial prompt construction&mdash;crafting inputs designed to manipulate downstream models&mdash;also falls here, as does automated generation of disinformation.
+    </p>
+    <p>
+      <strong>The Ugly</strong> covers inherent model vulnerabilities that exist regardless of intent. These are properties of the model itself: susceptibility to prompt injection, sensitivity to paraphrased queries, and the possibility of model extraction (recovering approximate model weights through black-box queries). The survey explicitly flags model extraction and safe instruction tuning as underdeveloped areas where the research community lacks robust defences. This is notable because it means that even organisations deploying models defensively cannot yet fully protect their model assets.
+    </p>
+    <p>
+      The three-category framing is useful for policy and risk discussions, while Weng&rsquo;s five-category technical taxonomy is more useful for engineering. Both framings will recur throughout this course.
+    </p>
+
+    <!-- ==================== SECTION 4 ==================== -->
+    <h2>4. The Brain-Perception-Action Framework for LLM Agents</h2>
+    <p>
+      To reason precisely about adversarial agents, it helps to have a clear model of what an LLM-based agent actually is. The LLM Agents Survey (arxiv 2309.07864) proposes a unified <em>brain-perception-action</em> framework that applies to any LLM-based agent, whether benign or adversarial.
+    </p>
+    <p>
+      The <strong>brain</strong> is the reasoning and planning core. It decides what goal to pursue, how to decompose that goal into sub-tasks, and which tools or actions to invoke. In a well-aligned agent this module is guided by the operator&rsquo;s objectives; in an adversarial agent it may be guided by attack objectives such as maximising information leakage or finding a jailbreak path.
+    </p>
+    <p>
+      The <strong>perception</strong> module handles multimodal input processing. Modern LLM agents can receive text, images, audio, and structured data. For an adversarial agent, perception is the attack surface on the <em>input</em> side: injecting malicious content into any modality the agent perceives can influence its brain&rsquo;s subsequent reasoning.
+    </p>
+    <p>
+      The <strong>action</strong> module covers tool use and communication: calling APIs, writing files, sending messages, or spawning sub-agents. For an adversarial agent this is the <em>effector</em> side: the mechanism through which attack consequences propagate into the real world. Multi-agent systems introduce additional surface because agents communicate with each other, meaning a compromised agent can propagate malicious instructions downstream through its action outputs.
+    </p>
+    <p>
+      The survey also covers emergent behaviours in agent societies, including personality drift and social dynamics that arise from agent-to-agent interaction. These emergent properties matter for adversarial settings: a single compromised agent in a multi-agent network may be able to influence the behaviour of neighbouring agents beyond what its direct capabilities would suggest.
+    </p>
+
+    <!-- ==================== SECTION 5 ==================== -->
+    <h2>5. Access Models, Roles, and the Attacker-Defender Divide</h2>
+    <p>
+      A consistent axis running through every attack taxonomy is <em>access level</em>: how much does the attacker know about the target model?
+    </p>
+    <p>
+      In a <strong>white-box</strong> setting the attacker has full access to model weights, architecture, and gradients. Gradient-based attacks live entirely in this quadrant. White-box access is realistic in scenarios involving open-weight models (Llama, Mistral, and similar releases), internal red-team exercises where the security team has full model access, or attacks on fine-tuned derivatives of open models.
+    </p>
+    <p>
+      In a <strong>black-box</strong> setting the attacker can only observe outputs given inputs, with no visibility into internals. Jailbreak prompting, model-based red-teaming, and most real-world attacks on commercial APIs operate in this regime. Black-box attacks are generally less technically demanding to mount but harder to defend against systematically, because the defender cannot easily enumerate the input space.
+    </p>
+    <p>
+      A third regime&mdash;<strong>grey-box</strong>&mdash;assumes partial knowledge: perhaps the attacker knows the model family or training procedure but not the exact weights. Transfer attacks exploit this: an adversarial example crafted against an open-weight model sometimes transfers to a closed model from the same family.
+    </p>
+    <p>
+      The attacker-defender divide also plays out at the <em>system</em> level. Defenses identified in the literature include adversarial training (exposing the model to attack samples during fine-tuning), perplexity filtering (flagging inputs with unusually high token perplexity as potential attacks), and input paraphrasing (transforming inputs before they reach the model to break token-level exploits). Each defence has corresponding circumvention strategies, establishing the adversarial dynamics that this course will explore in detail.
+    </p>
+
+    <!-- ==================== CALLOUT: KEY INSIGHT ==================== -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> The same five attack categories that apply to attacking an LLM (token manipulation, gradient-based, jailbreak, human red-teaming, model-based red-teaming) also define the <em>toolbox</em> available to an adversarial agent acting against other systems. Understanding the attack surface from the defender&rsquo;s perspective and the attacker&rsquo;s perspective simultaneously is what separates a capable security engineer from someone who only knows one side of the field.
+    </div>
+
+    <!-- ==================== CALLOUT: WARNING ==================== -->
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Many learners assume that aligning a model with RLHF or instruction tuning eliminates adversarial vulnerabilities. It does not. The &ldquo;The Ugly&rdquo; category in arxiv 2312.02003 specifically identifies model extraction and safe instruction tuning as <em>underdeveloped</em> areas. Alignment reduces the probability of certain harmful outputs under normal conditions but does not close the attack surface for a determined adversary with white-box or persistent black-box access.
+    </div>
+
+    <!-- ==================== QUIZ ==================== -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        Which attack type requires white-box access to the target model&rsquo;s internal parameters?
+      </p>
+      <div class="quiz-options">
+        <button onclick="submitAnswer('quiz-1', 0)">
+          Gradient-based attacks that exploit internal gradient signals to craft adversarial inputs
+        </button>
+        <button onclick="submitAnswer('quiz-1', 1)">
+          Jailbreak prompting attacks that use clever framing to bypass safety objectives
+        </button>
+        <button onclick="submitAnswer('quiz-1', 2)">
+          Human red-teaming attacks that rely on annotators manually probing model failures
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ==================== EXERCISE ==================== -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Draw a taxonomy diagram mapping at least five adversarial agent types &mdash; gradient attacker, jailbreak agent, red-team LM, prompt injector, and sleeper agent &mdash; to their primary attack vectors and target surfaces. For each type, note whether it requires white-box or black-box access to the target model. Consider: which types can be fully automated, which require human oversight, and which can operate inside a multi-agent pipeline without detection?
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ==================== TUTOR PROMPT ==================== -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <nav class="lesson-nav">
+      <span class="lesson-nav-prev"></span>
+      <a class="primary" href="0002-lm-as-red-teamer.html">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'Gradient-based attacks are the only type among the three options that require white-box access: they work by computing how the model\'s loss changes with respect to each input token, which demands direct access to internal gradient signals and model parameters. Jailbreak prompting operates entirely at the prompt level and requires no model access at all &mdash; any user with API access can attempt it. Human red-teaming is also a black-box process in which annotators interact with the model from the outside, observing only its outputs.'
+    );
+  </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 11 — Evaluating AI Tutors with TutorGym | AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ──────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <p class="breadcrumb">
+      <a href="../index.html">AI Tutoring Systems</a> ›
+      Module 4: Evaluation &amp; State of the Art ›
+      Lesson 11 of 13
+    </p>
+    <h1>Evaluating AI Tutors with TutorGym</h1>
+    <div class="lesson-meta">
+      <span>Module 4 — Evaluation &amp; State of the Art</span>
+      <span>Lesson 11 of 13</span>
+    </div>
+  </header>
+
+  <!-- ─── Source ──────────────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>TutorGym: A Testbed for Evaluating AI Agents as Tutors and Students</strong>
+    <a href="https://arxiv.org/abs/2505.01563" target="_blank" rel="noopener">arxiv.org/abs/2505.01563</a>
+    — 223 ITS domains (Cognitive Tutors, Apprentice Tutors, OATutors)
+  </div>
+
+  <!-- ─── 1. The Evaluation Problem ───────────────────────── -->
+  <h2>The Evaluation Problem</h2>
+
+  <p>
+    How do you know whether an AI tutoring system is actually good at tutoring?
+    The most obvious answer — measure whether students get the right answers — turns
+    out to be deeply misleading.
+  </p>
+
+  <p>
+    Consider a tutoring system evaluated on a math problem set. A system that simply
+    <em>tells the student the answer</em> will score 100% on final-answer accuracy.
+    By that metric it looks perfect. But it has done nothing to build understanding,
+    scaffold reasoning, or help the student develop the skill independently. It is,
+    in any meaningful sense, a terrible tutor.
+  </p>
+
+  <p>
+    This is the core evaluation problem: <strong>final-answer benchmarks cannot distinguish
+    between a system that teaches and a system that answers</strong>. Tutoring quality is
+    inherently interactive and sequential — it lives in the moment-by-moment decisions
+    a tutor makes as a student works through a problem, not in whether the final answer
+    is correct.
+  </p>
+
+  <p>
+    To evaluate tutoring properly you need to observe what the AI does at each step:
+    does it give a hint that nudges without revealing? Does it correctly identify when
+    a student action is wrong? Does it pace feedback in a way that promotes learning
+    rather than dependency? None of this shows up in a final-answer score.
+  </p>
+
+  <!-- ─── 2. TutorGym's Approach ──────────────────────────── -->
+  <h2>TutorGym's Approach: Evaluation Inside Real ITS Domains</h2>
+
+  <p>
+    TutorGym solves the evaluation problem by embedding AI agents directly inside
+    223 existing Intelligent Tutoring System (ITS) domains — including Cognitive Tutors,
+    Apprentice Tutors, and OATutors. The domains span subjects across mathematics,
+    science, and skills-based learning.
+  </p>
+
+  <p>
+    Rather than asking "did the AI get the right final answer?", TutorGym asks "did
+    the AI make the right tutoring move at each step?" The agent must operate within
+    the ITS environment in real time: providing hints when prompted, labeling student
+    actions as correct or incorrect, and deciding when and how to give feedback. Each
+    of these moves is scored against the behavior the ITS expects from a competent tutor.
+  </p>
+
+  <p>
+    Because the 223 ITS domains already contain structured problem spaces, scripted
+    student models, and well-defined correct tutoring behaviors, TutorGym can run
+    fully automated evaluations without recruiting human students or running
+    longitudinal studies. The evaluation infrastructure already exists — TutorGym
+    just provides the harness to run AI agents through it.
+  </p>
+
+  <!-- ─── 3. Two Evaluation Modes ─────────────────────────── -->
+  <h2>Two Evaluation Modes</h2>
+
+  <p>
+    TutorGym supports two distinct evaluation modes depending on which role the
+    AI occupies: tutor or student. The two modes probe completely different
+    capabilities and reveal different failure patterns.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>What the AI does</th>
+        <th>What is measured</th>
+        <th>Key finding</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tutor mode</strong></td>
+        <td>Acts as the tutor; a scripted student works through the ITS problem</td>
+        <td>Hint quality, correctness of feedback labels, appropriateness of step sequencing</td>
+        <td>LLMs performed poorly — none did better than chance at labeling incorrect student actions; hint generation is the hardest unsolved problem</td>
+      </tr>
+      <tr>
+        <td><strong>Student mode</strong></td>
+        <td>Acts as the student; a real ITS tutors it through the problem</td>
+        <td>Whether the AI produces human-like learning curves — incremental improvement, characteristic errors, realistic plateau behavior</td>
+        <td>LLMs produced remarkably human-like learning curves, closely matching the pattern of real student data</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    The two modes are complementary. Tutor mode reveals whether the AI can produce
+    high-quality instructional moves. Student mode reveals whether the AI behaves
+    like a realistic learner — a property that turns out to have significant
+    implications for how the system can be used (see below).
+  </p>
+
+  <!-- ─── 4. Key Findings ──────────────────────────────────── -->
+  <h2>Key Findings</h2>
+
+  <h3>As tutors: LLMs struggled</h3>
+
+  <div class="callout warning">
+    <div class="callout-title">Sobering Result</div>
+    <p>
+      When acting as tutors, none of the tested LLMs did better than chance at
+      labeling incorrect student actions. Identifying what a student did <em>wrong</em>
+      — and why — proved far harder than generating fluent text responses. Hint
+      generation was identified as the hardest unsolved problem: producing a hint
+      that guides without revealing requires precise knowledge of what the student
+      knows, what the correct approach is, and exactly how much information to
+      withhold. Current LLMs consistently over-hinted or mislabeled errors.
+    </p>
+  </div>
+
+  <p>
+    This finding matters for builders. An LLM that can explain a concept clearly
+    in a standalone conversation may still fail badly when embedded in a structured
+    tutoring loop where it must make precise, constrained moves at each step.
+    Conversational fluency and step-level tutoring competence are not the same thing.
+  </p>
+
+  <h3>As students: LLMs were surprisingly realistic</h3>
+
+  <p>
+    The student-mode results were strikingly different. LLMs produced learning curves
+    that closely resembled those of real human students — showing incremental
+    improvement over sessions, making the kinds of errors that human learners make,
+    and exhibiting realistic plateau behavior when concepts were difficult. This
+    was not expected given how different LLM processing is from human cognition.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-title">Key Implication</div>
+    <p>
+      Because LLMs produce human-like learning curves in student mode, they can serve
+      as <strong>synthetic students</strong> for evaluating and stress-testing tutoring
+      systems — without needing to recruit and run studies with real learners. This
+      insight directly enables the synthetic student simulation approach covered in
+      Lesson 13. It is one of the most practically significant findings in recent ITS
+      research.
+    </p>
+  </div>
+
+  <!-- ─── 5. Practical Use for Builders ───────────────────── -->
+  <h2>Practical Use for Builders</h2>
+
+  <p>
+    For anyone building a tutoring system, TutorGym provides a principled evaluation
+    path that avoids the two most common traps:
+  </p>
+
+  <ul>
+    <li><strong>Avoid final-answer benchmarks.</strong> They reward systems that answer
+    rather than teach. A system that gives hints and guides gets penalized compared to
+    a system that just states the answer — the opposite of what you want.</li>
+    <li><strong>Avoid waiting for longitudinal human studies.</strong> Collecting real
+    student learning-curve data requires months, institutional access, and significant
+    ethical overhead. TutorGym's ITS domains let you run equivalent evaluations
+    immediately against scripted student models.</li>
+  </ul>
+
+  <p>
+    The most actionable entry point for a new builder is <strong>student mode</strong>.
+    Run your system inside one of TutorGym's ITS domains and check whether it produces
+    realistic learning curves. If it does, you have evidence that its behavior is
+    human-like in a meaningful sense. If it doesn't — if it flatlines immediately or
+    shows implausible step-level behavior — that is a signal worth investigating before
+    any human study.
+  </p>
+
+  <p>
+    Tutor mode is the harder bar. Use it to surface specific failure patterns in your
+    hint generation and feedback labeling logic. The finding that LLMs struggle at
+    step-level labeling suggests this is where careful prompt engineering, retrieval
+    augmentation, or specialized fine-tuning will be most valuable.
+  </p>
+
+  <!-- ─── Quiz ─────────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-11">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      TutorGym's key insight over traditional benchmarks is that it evaluates tutoring quality by:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button>
+          A. Measuring the final accuracy of student answers on standardized tests after a full tutoring session
+        </button>
+      </li>
+      <li>
+        <button>
+          B. Embedding agents inside interactive ITS domains and scoring real-time tutoring moves step by step
+        </button>
+      </li>
+      <li>
+        <button>
+          C. Comparing tutor explanations against a gold-standard answer key written by domain expert educators
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback">
+      TutorGym embeds the AI inside real ITS environments and scores each tutoring move (hint quality, step labeling) interactively — this catches failures that final-answer benchmarks completely miss.
+    </div>
+  </div>
+
+  <!-- ─── Exercise ─────────────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise</div>
+    <p>
+      Design a minimal TutorGym-style evaluation for a tutoring system you might build.
+      Specify:
+    </p>
+    <ol>
+      <li>The domain your tutoring system covers.</li>
+      <li>What a "good tutoring move" looks like in that domain — be concrete about what the tutor should do at a specific student step.</li>
+      <li>One way the system could score 100% on a naive metric while still being a bad tutor.</li>
+    </ol>
+    <textarea placeholder="1. Domain: &#10;&#10;2. A good tutoring move looks like: &#10;&#10;3. A system that scores 100% on a naive metric while being a bad tutor could: "></textarea>
+  </div>
+
+  <!-- ─── Tutor Prompt ──────────────────────────────────────── -->
+  <div class="tutor-prompt">
+    <strong>Ask your tutor:</strong> "Walk me through why a system that scores perfectly on final-answer benchmarks can still be a bad tutor, using a concrete tutoring scenario as an example."
+  </div>
+
+  <!-- ─── Navigation ────────────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0010-llm-tutoring-limits.html">&#8592; Lesson 10: LLM Tutoring Limits</a>
+    <a href="0012-graphmasal-architecture.html" class="primary">Lesson 12: GraphMASAL Architecture &#8594;</a>
+  </nav>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  // Correct answer is option B (index 1)
+  initQuiz('quiz-11', 1,
+    'TutorGym embeds the AI inside real ITS environments and scores each tutoring move ' +
+    '(hint quality, step labeling) interactively — this catches failures that ' +
+    'final-answer benchmarks completely miss.'
+  );
+</script>
+</body>
+</html>

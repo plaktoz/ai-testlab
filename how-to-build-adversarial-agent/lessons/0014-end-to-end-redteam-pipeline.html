@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 14: Designing an End-to-End Red-Teaming Pipeline — Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &gt; Practical Implementation &gt; Lesson 14 of 14
+      </div>
+      <h1>Designing an End-to-End Red-Teaming Pipeline</h1>
+      <div class="lesson-meta">
+        <span>Estimated reading time: ~35 minutes</span>
+        <span>Module: Practical Implementation</span>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         SOURCE CARD
+         ============================================================ -->
+    <div class="source-card">
+      <strong>Primary Sources:</strong>
+      <ul>
+        <li>
+          Deng, Y. et al. (2024). <em>JailbreakRadar</em>.
+          <a href="https://arxiv.org/abs/2402.05668" target="_blank">arXiv:2402.05668</a>.
+          Key result: Evaluating 17 attack techniques across 9 models and 8 defenses revealed that
+          attacks and defenses cannot be validly assessed in isolation — an attack with 90% success
+          against an undefended model may drop to 10% once a simple defense is applied, a fact
+          that siloed studies entirely miss.
+        </li>
+        <li>
+          Bhardwaj, R. and Poria, S. (2023). <em>RED-EVAL and RED-INSTRUCT</em>.
+          <a href="https://arxiv.org/abs/2308.09662" target="_blank">arXiv:2308.09662</a>.
+          Key result: The Chain of Utterances (CoU) multi-turn jailbreaking technique achieved
+          65&ndash;73% manipulation success on GPT-4 and ChatGPT, and over 86% on open-source
+          models; the adversarial conversations were then recycled as safety alignment training
+          data to produce the STARLING model, demonstrating a complete attack-to-defense
+          development cycle.
+        </li>
+        <li>
+          Microsoft Azure AI.
+          <em>Planning Red Teaming for Large Language Models and Their Applications</em>.
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/red-teaming" target="_blank">Azure AI Red-Teaming Guide</a>.
+          Key result: Effective red teams require four distinct role types and must separately
+          scope base model testing from application-level testing to avoid drawing invalid
+          cross-level conclusions.
+        </li>
+      </ul>
+    </div>
+
+    <!-- ============================================================
+         SECTION 1 — Why a Pipeline, Not a Point-in-Time Test
+         ============================================================ -->
+    <h2>Why a Pipeline, Not a Point-in-Time Test</h2>
+    <p>
+      The most important insight driving this lesson comes from JailbreakRadar: evaluating attacks
+      and defenses in isolation produces dangerously misleading results. Prior research had studied
+      attack techniques in one paper and defensive measures in another, treating them as independent
+      research questions. JailbreakRadar revealed that this methodology misses the critical
+      interaction between the two entirely. An attack that achieves a 90% success rate against an
+      undefended model might drop to 10% when a simple defense is applied. Siloed research would
+      report a 90% attack success rate and a working defense — but never tell you that those two
+      facts are connected and that together they make the attack largely irrelevant in practice.
+    </p>
+    <p>
+      This is not a subtle methodological nuance. It means that a team relying on isolated
+      benchmark results might believe their model faces a severe threat from a particular attack
+      technique, invest engineering effort in a complex countermeasure, and never learn that the
+      existing, simpler defensive measure already handled the problem adequately. Conversely, a
+      team that only measures defenses might declare their model protected without ever testing
+      whether the defenses actually degrade attack success rates against the specific attack
+      techniques deployed in the wild.
+    </p>
+    <p>
+      The pipeline framing is the solution. A pipeline forces you to stage attack generation,
+      model testing, defense application, and outcome measurement in deliberate sequence, feeding
+      results from each phase into the next. Building that sequence is not a bureaucratic
+      formality — it is the minimum structure required to produce valid, actionable findings
+      about the real-world vulnerability of a deployed system.
+    </p>
+
+    <!-- ============================================================
+         SECTION 2 — The JailbreakRadar Benchmark Architecture
+         ============================================================ -->
+    <h2>The JailbreakRadar Benchmark Architecture</h2>
+    <p>
+      JailbreakRadar provides a concrete reference architecture that pipeline designers can adopt
+      directly. The benchmark organizes its evaluation along four independent axes. The first axis
+      is an <strong>attack taxonomy</strong> covering 17 representative jailbreak techniques,
+      giving you a standardized vocabulary for naming and tracking techniques across test runs and
+      across teams. The second axis is a <strong>model matrix</strong> spanning 9 aligned LLMs,
+      enabling apples-to-apples comparison of vulnerability across different systems. The third
+      axis is a <strong>violation-category taxonomy</strong> built from 160 forbidden questions
+      spanning 16 harm categories, including weapons, illegal activities, hate speech, and privacy
+      violations, among others. The fourth axis is a <strong>defense evaluation matrix</strong>
+      covering 8 defensive measures.
+    </p>
+    <p>
+      This four-axis design is deliberately modular. The violation-category taxonomy is especially
+      important because it replaces ad hoc prompt selection with systematic coverage. Rather than
+      choosing harmful prompts based on what testers happen to think of, you draw from defined
+      categories to ensure no major harm type goes untested. The defense evaluation matrix
+      transforms the core evaluation question from "does this attack work?" to "does this attack
+      work against this defense, on this model, for this violation type?" — a substantially richer
+      and more actionable question.
+    </p>
+    <p>
+      The practical takeaway from this architecture is: structure first. Before you run a single
+      prompt, define your taxonomy of attacks, your taxonomy of harm categories, your target model
+      set, and your candidate defenses. These four definitions form the scaffold from which the
+      entire pipeline is built. Without this scaffold, results will be neither reproducible nor
+      comparable to other teams' findings — and the interaction effects that matter most will
+      remain invisible.
+    </p>
+
+    <!-- ============================================================
+         SECTION 3 — The RED-EVAL / RED-INSTRUCT Development Cycle
+         ============================================================ -->
+    <h2>The RED-EVAL / RED-INSTRUCT Development Cycle</h2>
+    <p>
+      The RED-EVAL and RED-INSTRUCT work demonstrates something more ambitious than a benchmark:
+      a complete, closed-loop adversarial development cycle. The pipeline moves through four
+      distinct phases. First, <strong>attack generation</strong>: RED-EVAL employs the Chain of
+      Utterances (CoU) technique, a multi-turn jailbreaking approach where each conversation turn
+      nudges the model incrementally closer to a harmful response, rather than attempting a single
+      large jailbreak in one shot. This technique achieved 65&ndash;73% manipulation success on
+      GPT-4 and ChatGPT, and over 86% success on open-source models. Second,
+      <strong>vulnerability benchmarking</strong>: the CoU attacks are systematically run against
+      target models and all outcomes are recorded.
+    </p>
+    <p>
+      Third, <strong>training data collection</strong>: the harmful conversations produced during
+      red-teaming are paired with human-written safe rewrites to create alignment training data.
+      This step is the hinge of the entire cycle. Rather than discarding adversarial outputs as
+      waste, the pipeline treats them as raw material. Fourth, <strong>fine-tuning for
+      defense</strong>: training on this data produced the STARLING model, demonstrating that
+      adversarial outputs can be converted directly into defensive training signal.
+    </p>
+    <p>
+      The organizational implication of this cycle is significant. Red-teaming and safety training
+      are not separate activities belonging to different departments — they are two phases of a
+      single feedback loop. The attacks you generate during red-teaming are valuable assets:
+      curated, labeled, and ready to become training data for the next generation of safer models.
+      Pipeline designers should build their data collection systems with this downstream reuse in
+      mind from the very beginning, not as an afterthought once the red-team exercise is already
+      complete.
+    </p>
+
+    <!-- ============================================================
+         SECTION 4 — Team Composition and Scope Definition
+         ============================================================ -->
+    <h2>Team Composition and Scope Definition</h2>
+    <p>
+      The Azure AI red-teaming guide addresses the human side of pipeline design. Effective red
+      teams are deliberately heterogeneous. The guide recommends four distinct role types:
+      <strong>domain experts</strong>, who understand what harmful outputs look like in the
+      specific application context; <strong>security engineers</strong>, who bring knowledge of
+      attack vectors from traditional software security; <strong>AI safety specialists</strong>,
+      who understand model behavior patterns; and <strong>testers without domain expertise</strong>,
+      who provide perspectives unconstrained by professional assumptions. The fourth role is
+      counterintuitive but important: domain experts sometimes cannot see attack paths that are
+      obvious to a naive user, precisely because their expertise filters out what appears to be
+      nonsense at first glance.
+    </p>
+    <p>
+      Scope definition is equally critical and often conflated. The guide draws a clear distinction
+      between two fundamentally different testing targets. <strong>Base model testing</strong>
+      examines the model in isolation, before any system prompt or tool integration is applied.
+      <strong>Application testing</strong> examines the model with its production system prompt,
+      tool access, and retrieval systems in place. These two scopes answer different questions:
+      base model testing reveals inherent model vulnerabilities independent of deployment context,
+      while application testing reveals vulnerabilities that emerge specifically from the way the
+      model has been deployed. Both are necessary; neither alone is sufficient. Conflating them
+      — testing the application and drawing conclusions about the base model, or vice versa — is
+      a common and consequential methodological error that leads teams to misattribute the source
+      of a vulnerability.
+    </p>
+
+    <!-- ============================================================
+         SECTION 5 — Data Collection, Testing Modes, and Iteration
+         ============================================================ -->
+    <h2>Data Collection, Testing Modes, and Iteration</h2>
+    <p>
+      A red-teaming pipeline is only as good as its data collection discipline. The Azure AI guide
+      recommends structured templates for recording each attack attempt: the attack input used, the
+      model's response, the attack type, a severity rating, and a recommended mitigation. Severity
+      ratings are not optional polish — without them it is impossible to prioritize which
+      vulnerabilities to remediate first when engineering resources are constrained. Recommended
+      mitigations ensure that each finding becomes a step toward a safer system rather than an
+      isolated data point.
+    </p>
+    <p>
+      The guide also distinguishes two testing modes that serve different purposes in the pipeline.
+      <strong>Open-ended exploration</strong> gives red-teamers the freedom to choose their own
+      strategies and follow unexpected paths; this mode excels at discovery, surfacing attack types
+      that structured testing would miss entirely because no one thought to define them in advance.
+      <strong>Guided targeted testing</strong> assigns specific harm categories to specific testers,
+      ensuring systematic coverage across the full violation-category taxonomy before sign-off. A
+      mature pipeline uses both modes in sequence: open-ended exploration early in a test cycle to
+      identify novel attack paths, followed by guided targeted testing to close coverage gaps.
+    </p>
+    <p>
+      Orchestrating the full pipeline means sequencing these phases deliberately: scope definition
+      and team assembly first; then open-ended exploration; then guided targeted testing against the
+      full violation-category taxonomy; then defense measurement against the candidate defensive
+      measures; then synthesis and reporting. Each phase feeds the next. The attack outputs from
+      red-teaming inform defense selection; defense measurement results feed back into the attack
+      taxonomy and training data for the next cycle. The pipeline is not a straight line — it is a
+      loop, and its value compounds with each iteration.
+    </p>
+
+    <!-- ============================================================
+         KEY CALLOUT
+         ============================================================ -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> JailbreakRadar demonstrated that evaluating attacks and
+      defenses in separate studies is a structural flaw, not merely a methodological preference.
+      An attack achieving 90% success against an undefended model may drop to 10% against a
+      simple defense — an interaction that siloed research is constitutionally unable to reveal.
+      The most important thing a red-teaming pipeline must do is measure attacks and defenses
+      together, not separately.
+    </div>
+
+    <!-- ============================================================
+         WARNING CALLOUT
+         ============================================================ -->
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Many practitioners treat base model testing and
+      application testing as interchangeable or assume that a clean base model result implies a
+      safe deployed application. They are distinct scopes that answer different questions. A base
+      model that shows low vulnerability in isolation can become highly exploitable once a
+      production system prompt, tool access, or retrieval system is layered on top of it — and
+      vice versa. Always specify which scope you are testing before drawing any conclusions.
+    </div>
+
+    <!-- ============================================================
+         QUIZ
+         ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        According to JailbreakRadar, what was the key flaw in prior adversarial research on LLMs?
+      </p>
+      <div class="quiz-options">
+        <button onclick="handleQuizAnswer('quiz-1', 0)">
+          Attacks and defenses were studied in isolation from each other
+        </button>
+        <button onclick="handleQuizAnswer('quiz-1', 1)">
+          Models were benchmarked using too few questions and violation types
+        </button>
+        <button onclick="handleQuizAnswer('quiz-1', 2)">
+          Safety alignment training was not included in any attack study
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         SKILL EXERCISE
+         ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Write a structured red-team plan for a hypothetical customer service chatbot. Your plan
+        must contain five labeled sections: <strong>(1) Scope</strong> — define what is in scope
+        (the chatbot with its system prompt and tool access) and what is explicitly out of scope
+        (the underlying foundation model); <strong>(2) Attack types</strong> — list 5 specific
+        attack types to test, selecting from the techniques covered across this course;
+        <strong>(3) Success metrics</strong> — for each of the 5 attack types, specify a
+        measurable criterion for attack success; <strong>(4) Team roles</strong> — define at
+        least 3 distinct roles with their specific responsibilities during the red-team exercise;
+        <strong>(5) Data collection template</strong> — show one example row with columns for:
+        attack input, model response, attack type, success Y/N, severity rating 1&ndash;5, and
+        recommended mitigation.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ============================================================
+         TUTOR PROMPT
+         ============================================================ -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ============================================================
+         LESSON NAV
+         ============================================================ -->
+    <nav class="lesson-nav">
+      <a href="0013-garak-pyrit-tooling.html">&larr; Previous</a>
+      <a class="primary" href="../lessons.md">Back to Curriculum</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'Correct. JailbreakRadar\'s central finding was that prior research evaluated attacks and defenses in separate, siloed studies, completely missing their interaction. An attack achieving 90% success against an undefended model may drop to 10% when a simple defense is applied — a fact invisible to isolated studies. Option B (too few test questions) is not what JailbreakRadar identified as the central flaw; the benchmark itself used 160 questions across 16 categories to address coverage. Option C (no safety alignment training) describes a different gap and was not JailbreakRadar\'s finding at all — that gap was addressed by the RED-INSTRUCT work.'
+    );
+  </script>
+</body>
+</html>

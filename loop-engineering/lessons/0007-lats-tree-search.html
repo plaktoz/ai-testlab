@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 7 — Advanced Reflection — LATS and Tree Search</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <header class="lesson-header">
+    <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 3 — Agentic Loop Patterns › Lesson 7 of 12</p>
+    <h1>Advanced Reflection — LATS and Tree Search</h1>
+    <div class="lesson-meta">
+      <span>~25 min</span>
+      <span>Module 3 — Agentic Loop Patterns</span>
+    </div>
+  </header>
+
+  <div class="source-card">
+    <p class="source-card-label">Primary Source</p>
+    <p><a href="https://www.langchain.com/blog/reflection-agents">LangChain — Reflection Agents (LATS section)</a></p>
+    <p>LATS (Language Agent Tree Search) unifies Reflexion, Tree of Thoughts, and plan-and-execute via Monte Carlo Tree Search — the cycle is select, expand, reflect, and backpropagate — and the core trade-off across all reflection architectures is latency for quality, with saved trajectories becoming fine-tuning data.</p>
+  </div>
+
+  <h2>What Is LATS?</h2>
+  <p>LATS stands for Language Agent Tree Search. The LangChain blog describes it as a unification of three earlier architectures: Reflexion, Tree of Thoughts, and plan-and-execute, all brought together under a Monte Carlo Tree Search (MCTS) framework.</p>
+  <p>Where Reflexion runs a single linear thread of draft → execute tools → revise, LATS adds a branching dimension borrowed from MCTS. Instead of committing to one candidate and revising it, LATS expands multiple candidate responses in parallel at each step, scores them, and selects the most promising branch to continue. This makes search, not iteration, the core mechanism.</p>
+  <p>The LangChain source positions LATS as the most sophisticated of three reflection architectures: basic reflection (two chained LLMs, fixed iterations), Reflexion (grounded critique via tool execution), and LATS (tree-structured search with scoring). Each adds capability at the cost of additional LLM calls per task.</p>
+
+  <h2>The Four Phases: Select, Expand, Reflect, Backpropagate</h2>
+  <p>MCTS operates on a tree of possible responses. LATS maps four MCTS phases onto LLM operations:</p>
+  <ul>
+    <li><strong>Select:</strong> Choose the most promising node in the current tree to expand next — typically the highest-scoring candidate from the previous round.</li>
+    <li><strong>Expand:</strong> Generate N distinct candidate responses in parallel from the selected node. In the LangGraph implementation, this is the branching factor <code>N_CANDIDATES</code>. Each candidate represents a different continuation of the search.</li>
+    <li><strong>Reflect:</strong> Score each candidate. The LangChain source describes this as the reflection step — the system evaluates trajectory quality, producing a numeric score for every expanded candidate. In implementation, this can be an LLM judge, a reward model, or an automated test harness.</li>
+    <li><strong>Backpropagate:</strong> Propagate the best score up to the root to update the search path. The highest-scoring candidate becomes the new best response, and its score informs which branch to expand at the next depth level. This is the mechanism that makes LATS a directed search rather than random sampling.</li>
+  </ul>
+  <p>The LangChain source summarizes the cycle as: "select best candidate, expand parallel actions, reflect and score, backpropagate scores to root."</p>
+
+  <h2>The Latency–Quality Trade-off</h2>
+  <p>The LangChain source states explicitly that the trade-off across all three reflection architectures — basic reflection, Reflexion, and LATS — is latency for quality. LATS amplifies this trade-off because it pays the cost at every tree level.</p>
+  <p>For each expansion step, LATS requires at minimum N LLM calls to generate candidates and N additional calls to score them — meaning 2N calls per depth level, before any overhead from tool execution. A branching factor of 3 at depth 2 could require 12 or more LLM calls to complete a single task that basic reflection would handle in 3–6.</p>
+  <p>The practical implication: LATS is best reserved for tasks where output quality matters more than response time — code generation, complex reasoning, or tasks where the cost of a wrong answer is high. For latency-sensitive pipelines, basic reflection or Reflexion typically offer a better cost-quality point.</p>
+
+  <h2>Trajectories as Improvement Data</h2>
+  <p>The LangChain source notes that saved trajectories — the full sequences of actions, observations, and scores — enable two improvement paths beyond the immediate task. First, trajectories can be used as in-context memory for future loops. Second, and more significantly, they can serve as fine-tuning data to improve the underlying model.</p>
+  <p>LATS in particular accumulates trajectory scores that can be used for model distillation. Because every expansion step produces a scored comparison of N candidates, the corpus of trajectories contains implicit preference data: the system has already labeled which responses are better at each node. This is the raw material needed to train a smaller, faster model that mimics the search behavior without needing to run the full tree at inference time.</p>
+  <p>The LangChain source describes this as closing "a second-order loop around the primary task loop — the system that runs tasks also generates the data that makes future task runs better." This meta-loop is what connects LATS to the broader principle of loops improving loops.</p>
+
+  <div class="callout key">
+    <p class="callout-label">Key Insight</p>
+    <p>LATS transforms reflection from a linear critique-revise cycle into a search problem. By expanding multiple candidate branches at every depth level and scoring them, it can find solutions that a single generate-critique-revise path would never reach — and the scored trajectories it generates along the way are exactly the preference data needed to distill a faster model, closing a second-order improvement loop.</p>
+  </div>
+
+  <div class="callout warning">
+    <p class="callout-label">Watch Out</p>
+    <p>LATS is expensive by design. With a branching factor of N and a depth limit of D, the number of LLM calls scales as 2N per level — generating candidates plus scoring each one. The LangChain source notes that the latency-for-quality trade-off is inherent to all reflection architectures; in LATS this trade-off is multiplied by the branching factor. Do not apply LATS to latency-sensitive pipelines or tasks where basic reflection already meets quality requirements.</p>
+  </div>
+
+  <h2>LangGraph Implementation</h2>
+  <p>The code below implements the LATS cycle as a single <code>expand</code> node in a LangGraph <code>StateGraph</code>. Each call to <code>expand</code> performs all four MCTS phases in sequence — generating N candidates (expand), scoring each one with an LLM judge (reflect), selecting the highest-scoring branch (backpropagate) — and the conditional edge on <code>route</code> determines whether to search deeper or exit (select / termination).</p>
+  <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langchain_anthropic import ChatAnthropic
+from typing import TypedDict, Literal
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+N_CANDIDATES = 3   # branching factor
+
+class LATSState(TypedDict):
+    task: str
+    depth: int
+    max_depth: int
+    best_response: str
+    best_score: float
+
+def expand(state: LATSState) -> dict:
+    # Tree expansion: generate N distinct candidates
+    candidates = [
+        llm.invoke(f"Task: {state['task']}\nAttempt {i + 1} — be thorough and distinct:").content
+        for i in range(N_CANDIDATES)
+    ]
+    # Reflection: score each candidate
+    scored: list[tuple[float, str]] = []
+    for candidate in candidates:
+        raw = llm.invoke(
+            f"Rate this response quality 0.0–1.0 (reply with a number only).\n"
+            f"Task: {state['task']}\nResponse: {candidate}"
+        ).content.strip()
+        try:
+            scored.append((float(raw), candidate))
+        except ValueError:
+            scored.append((0.5, candidate))
+    # Backpropagation: select the best-scoring branch
+    best_score, best_response = max(scored)
+    return {"best_response": best_response, "best_score": best_score, "depth": state["depth"] + 1}
+
+def route(state: LATSState) -> Literal["expand", "__end__"]:
+    # Stop when quality is sufficient or search budget is exhausted
+    return END if state["best_score"] >= 0.9 or state["depth"] >= state["max_depth"] else "expand"
+
+builder = StateGraph(LATSState)
+builder.add_node("expand", expand)
+builder.set_entry_point("expand")
+builder.add_conditional_edges("expand", route)
+
+app = builder.compile()
+result = app.invoke({
+    "task": "Explain what a transformer is to a backend software engineer.",
+    "depth": 0, "max_depth": 2, "best_score": 0.0, "best_response": "",
+})
+print(f"Best (score={result['best_score']:.2f}, depth={result['depth']}):\n{result['best_response'][:300]}")</code></pre>
+
+  <div class="quiz" id="quiz-7">
+    <h3>Check Your Understanding</h3>
+    <p class="quiz-question">What does the backpropagation phase accomplish in LATS?</p>
+    <div class="quiz-options">
+      <button>It propagates the best score upward to guide future branch selection</button>
+      <button>It generates multiple candidate responses by calling the model in parallel</button>
+      <button>It runs a critique pass comparing all candidates against the task</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="exercise">
+    <h3>Skill Exercise</h3>
+    <p>Trace through a two-level LATS expansion by hand: given a root node (an initial response to a task of your choosing), sketch two candidate children, assign each a score between 0.0 and 1.0, and write what backpropagating those scores would tell the system about which branch to continue searching. Be explicit about why the lower-scoring branch is not discarded immediately.</p>
+    <textarea placeholder="Write your response here..."></textarea>
+  </div>
+
+  <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+  <nav class="lesson-nav">
+    <a href="0006-reflection-loops.html">← Previous</a>
+    <a href="0008-planning-loops.html" class="primary">Next →</a>
+  </nav>
+
+  <script src="../assets/quiz.js"></script>
+  <script>initQuiz('quiz-7', 0, 'Backpropagation in LATS selects the highest-scoring candidate and propagates its score up the search tree, informing the system which branch to expand at the next depth level — mirroring how Monte Carlo Tree Search updates node values after a simulation. Generating candidates is the expand phase; scoring them is the reflect phase.');</script>
+
+</div>
+</body>
+</html>

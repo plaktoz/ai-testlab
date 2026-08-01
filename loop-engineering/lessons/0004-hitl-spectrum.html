@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4 — The Human-in-the-Loop Spectrum</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 2 — Human Oversight › Lesson 4 of 12</p>
+      <h1>The Human-in-the-Loop Spectrum</h1>
+      <div class="lesson-meta">
+        <span>~20 min</span>
+        <span>Module 2 — Human Oversight</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <p class="source-card-label">Primary Source</p>
+      <p><a href="https://cloud.google.com/discover/human-in-the-loop" target="_blank" rel="noopener">Google Cloud — Human-in-the-Loop: Full Spectrum</a></p>
+      <p>The Google Cloud spectrum defines three oversight models — Human-in-the-loop, Human-on-the-loop, and Human-out-of-the-loop — with concrete placement criteria based on decision stakes, model confidence, novelty of inputs, and regulatory requirements.</p>
+    </div>
+
+    <h2>The Three-Tier Oversight Model</h2>
+    <p>AI systems do not sit at a single fixed point on an autonomy scale — they can be positioned anywhere along a spectrum from full human control to full automation. Google Cloud's framework names three distinct tiers that cover the practical range.</p>
+    <p><strong>Human-in-the-loop (HITL)</strong> means the human actively participates in each decision cycle. Every action or classification passes through a human before it takes effect. The system produces a candidate output; the human reviews, approves, or corrects it; only then does the loop continue. This is the highest-oversight position on the spectrum.</p>
+    <p><strong>Human-on-the-loop (HOTL)</strong> means the system runs autonomously while a human monitors it and retains the ability to intervene. The loop proceeds without waiting for human approval on every step, but the human can pause or override if something looks wrong. This is the middle position — automation with a safety net.</p>
+    <p><strong>Human-out-of-the-loop (HOOTL)</strong> is full automation. The system observes, decides, and acts without any human in the path. This is the lowest-oversight position and is only appropriate when confidence and conditions reliably meet a defined threshold.</p>
+
+    <h2>Criteria for Placing a System on the Spectrum</h2>
+    <p>The Google Cloud framework provides concrete criteria for deciding where to position a system. The criteria are not arbitrary — each maps to a specific risk or reliability property of the task.</p>
+    <p><strong>Move toward Human-in-the-loop when:</strong></p>
+    <ul>
+      <li>The decision is high-stakes and errors carry serious consequences.</li>
+      <li>The model's confidence score is low, indicating genuine uncertainty.</li>
+      <li>The input is a novel edge case the model has not reliably handled before.</li>
+      <li>Regulatory requirements mandate human sign-off on the output.</li>
+    </ul>
+    <p><strong>Move toward Human-out-of-the-loop when:</strong></p>
+    <ul>
+      <li>The task is high-volume and repetitive, making per-item human review impractical.</li>
+      <li>The model demonstrates consistently high confidence across a wide range of inputs.</li>
+      <li>The cost of a missed detection or error is low and correctable.</li>
+    </ul>
+    <p>Human-on-the-loop occupies the middle ground: it is appropriate when volume or speed makes full HITL impractical but the stakes are high enough that a human should remain able to intervene.</p>
+
+    <h2>Oversight per Action, Not per System</h2>
+    <p>Chip Huyen's analysis of agentic systems adds a critical refinement to the spectrum: oversight level should be defined per action type, not per system as a whole. An agent that is classified as "supervised" does not mean every one of its actions requires supervision — it means that some actions do and others do not, based on their individual properties.</p>
+    <p>The severity-based rule Huyen introduces is direct: "just as you shouldn't give an intern the authority to delete your production database, you shouldn't allow an unreliable AI to initiate bank transfers." The intern analogy captures exactly what the spectrum is for — not restricting every action the agent takes, but calibrating the level of trust granted to each category of action based on the stakes involved.</p>
+    <p>Huyen identifies two properties that drive the calibration: <strong>reversibility</strong> (can the action be undone?) and <strong>consequence severity</strong> (how bad is it if the action is wrong?). Low-reversibility, high-severity actions — deleting records, sending emails, initiating payments — warrant human-in-the-loop handling even inside an otherwise autonomous system. High-reversibility, low-severity actions — reading files, querying APIs — can safely run without human involvement.</p>
+    <p>The practical implication is that the same agentic system may simultaneously be human-in-the-loop for one class of action and human-out-of-the-loop for another. Treating oversight as a per-system binary misses this granularity and either over-restricts the system (slowing it down unnecessarily) or under-restricts it (leaving high-severity actions unguarded).</p>
+
+    <h2>Where to Insert Human Checkpoints in the Loop</h2>
+    <p>Anthropic's guidance on building agentic systems operationalizes the spectrum at the architecture level: human checkpoints belong at natural pause points within the loop, particularly before irreversible actions and when the agent encounters ambiguity it cannot resolve on its own.</p>
+    <p>The key framing is that checkpoints are a design choice in the loop's stopping conditions, not an external add-on bolted onto an otherwise fully-automated system. Designing checkpoints in from the start means the loop's control flow explicitly accommodates human input — the graph suspends, hands off to the human, and resumes once a decision is made. Designing them in after the fact typically means awkward interruptions that break the loop's state rather than pausing it cleanly.</p>
+    <p>The practical guidance distills to a two-step process: first, identify which steps in the loop are irreversible; second, place human-in-the-loop gates before those steps. Steps that are fully reversible and low-consequence do not need a gate. Steps that are irreversible or high-consequence should always have one.</p>
+
+    <div class="callout key">
+      <p class="callout-label">Key Insight</p>
+      <p>Oversight level should be defined per action type, not per system. The same agent can operate human-out-of-the-loop for reading files and human-in-the-loop for deleting records — the spectrum is applied action by action based on reversibility and consequence severity, not as a single system-wide setting.</p>
+    </div>
+
+    <div class="callout warning">
+      <p class="callout-label">Watch Out</p>
+      <p>It is tempting to classify an entire application as "automated" or "supervised" and apply that label uniformly. This flattens the spectrum in a way that is almost always wrong: every real system contains some actions that are safe to automate and others that are not. Applying a single oversight level system-wide either blocks low-risk operations unnecessarily or leaves high-risk operations unguarded.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>The following code demonstrates all three oversight tiers in a single LangGraph graph. A <code>route_oversight</code> conditional edge reads the <code>oversight</code> field from state and dispatches to <code>full_gate</code> (always suspends), <code>supervised_gate</code> (suspends only when confidence falls below 0.75), or <code>execute</code> (runs without interruption). LangGraph's <code>interrupt()</code> suspends execution and hands control back to the caller; <code>MemorySaver</code> persists state across the suspension so the graph resumes from the exact same node after the human responds via <code>Command(resume=...)</code>.</p>
+    <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.types import interrupt, Command
+from typing import TypedDict, Literal
+
+class ReviewState(TypedDict):
+    action: str
+    confidence: float   # 0.0 – 1.0 model confidence
+    oversight: str      # "full" | "supervised" | "autonomous"
+    result: str
+
+def route_oversight(state: ReviewState) -> Literal["full_gate", "supervised_gate", "execute"]:
+    return {"full": "full_gate", "supervised": "supervised_gate", "autonomous": "execute"}[state["oversight"]]
+
+def full_gate(state: ReviewState) -> dict:
+    # Human-in-the-loop: always pause, regardless of confidence
+    answer = interrupt({"message": f"Approve '{state['action']}'?"})
+    return {"result": "rejected"} if answer != "yes" else {}
+
+def supervised_gate(state: ReviewState) -> dict:
+    # Human-on-the-loop: pause only when model is uncertain
+    if state["confidence"] &lt; 0.75:
+        answer = interrupt({"message": f"Confidence {state['confidence']:.0%} — approve '{state['action']}'?"})
+        return {"result": "rejected"} if answer != "yes" else {}
+    return {}
+
+def execute(state: ReviewState) -> dict:
+    if state.get("result") == "rejected":
+        return {}
+    return {"result": f"executed: {state['action']}"}
+
+checkpointer = MemorySaver()
+builder = StateGraph(ReviewState)
+builder.add_node("router", lambda s: s)
+builder.add_node("full_gate", full_gate)
+builder.add_node("supervised_gate", supervised_gate)
+builder.add_node("execute", execute)
+builder.set_entry_point("router")
+builder.add_conditional_edges("router", route_oversight)
+builder.add_edge("full_gate", "execute")
+builder.add_edge("supervised_gate", "execute")
+builder.add_edge("execute", END)
+
+app = builder.compile(checkpointer=checkpointer)
+config = {"configurable": {"thread_id": "review-1"}}
+
+# First invoke pauses at interrupt; resume with:
+# app.invoke(Command(resume="yes"), config=config)
+app.invoke({"action": "delete_user_data", "confidence": 0.95, "oversight": "full", "result": ""}, config=config)</code></pre>
+
+    <div class="quiz" id="quiz-4">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">According to the Google Cloud spectrum, when should a system keep a human actively in the loop on every decision?</p>
+      <div class="quiz-options">
+        <button>High-stakes decisions with low confidence and regulatory requirements</button>
+        <button>High-volume tasks where the model scores high confidence consistently</button>
+        <button>Any automated task that processes structured data at scale</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Take three real AI system scenarios — a spam filter, a medical diagnosis assistant, and an automated pull request reviewer — and classify each on the HITL spectrum. For each one, justify your placement using the four criteria from the source: confidence, reversibility, regulatory requirements, and volume.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0003-anatomy-agentic-loop.html">← Previous</a>
+      <a href="0005-action-level-oversight.html" class="primary">Next →</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-4', 0, 'The Google Cloud spectrum identifies high-stakes decisions, low model confidence, novel edge cases, and regulatory requirements as the criteria for keeping a human fully in the loop. High-volume tasks with consistently high confidence are the criteria for moving to Human-out-of-the-loop, not in-the-loop.');</script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 9: Personalization via Learning Styles and Socratic Dialogue — AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ─────────────────────────────────────── -->
+  <header class="lesson-header">
+    <div class="breadcrumb">
+      AI Tutoring Systems &rsaquo; Module 3: Personalization &rsaquo; Lesson 9 of 13
+    </div>
+    <h1>Personalization via Learning Styles and Socratic Dialogue</h1>
+    <div class="lesson-meta">
+      <span>~12 min</span>
+      <span>Module 3 &mdash; Personalization and Student Modeling</span>
+    </div>
+  </header>
+
+  <!-- ─── Source citation ─────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>"PACE: A Personalized Conversational Tutoring Agent using Felder-Silverman Learning Style Model and Socratic Method"</strong>
+    Preprint — <a href="https://arxiv.org/abs/2502.12633" target="_blank" rel="noopener">arxiv.org/abs/2502.12633</a>.
+    Introduces a conversational tutoring agent that encodes student personas from the Felder-Silverman
+    model and applies Socratic questioning. Outperforms baselines on personalization, learner motivation,
+    and overall learning outcomes.
+  </div>
+
+  <!-- ─── Section 1: The Felder-Silverman Model ───────── -->
+  <h2>The Felder-Silverman Learning Style Model</h2>
+
+  <p>PACE grounds its personalization approach in the Felder-Silverman Learning Style Model (FSLSM), a
+  framework that classifies learners along four independent dimensions. Each dimension is a continuum
+  between two poles — a learner may sit anywhere between the extremes, not strictly at one end.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>One pole</th>
+        <th>Other pole</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Active / Reflective</strong></td>
+        <td><strong>Active</strong> — learn best by doing, discussing, or trying things out; prefer to work through material actively rather than sit with it.</td>
+        <td><strong>Reflective</strong> — learn best by thinking first; prefer to process information internally before engaging with it or applying it.</td>
+      </tr>
+      <tr>
+        <td><strong>Sensing / Intuitive</strong></td>
+        <td><strong>Sensing</strong> — prefer concrete facts, worked examples, and established procedures; comfortable with memorization and practical application.</td>
+        <td><strong>Intuitive</strong> — prefer abstract concepts, theories, and novel connections; may find repetitive detail tedious but welcome conceptual leaps.</td>
+      </tr>
+      <tr>
+        <td><strong>Visual / Verbal</strong></td>
+        <td><strong>Visual</strong> — learn best from diagrams, charts, timelines, and spatial representations; pictures tend to stick more than words.</td>
+        <td><strong>Verbal</strong> — learn best from written or spoken explanations; text-based descriptions and discussion are the primary channel.</td>
+      </tr>
+      <tr>
+        <td><strong>Sequential / Global</strong></td>
+        <td><strong>Sequential</strong> — learn in linear steps; build understanding incrementally and need each step to make sense before moving on.</td>
+        <td><strong>Global</strong> — need the big picture first; may struggle with isolated steps but click quickly once the whole system is visible.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <div class="callout-title">Contested Ground</div>
+    Learning style models, including FSLSM, are disputed in the educational psychology literature.
+    The evidence that learners have fixed styles requiring matched instruction is weak. PACE does not
+    rely on that claim. Its value here is as a <strong>persona simulation tool</strong>: by generating
+    training examples tailored to each profile, PACE produces a tutor that adapts its explanation style
+    to stated preferences — without asserting that the preferences are innate or fixed. Treat the four
+    dimensions as a useful vocabulary for describing variety in how people approach material, not as a
+    theory of fixed cognitive categories.
+  </div>
+
+  <!-- ─── Section 2: Persona Simulation ──────────────── -->
+  <h2>Persona Simulation in Practice</h2>
+
+  <p>PACE translates the four FSLSM dimensions into a <strong>student persona</strong> — a structured
+  description of how a particular learner prefers to engage with material. This persona is used at
+  training time to generate dialogue examples calibrated to that profile. A sensing-sequential learner
+  receives explanations that lead with concrete steps. An intuitive-global learner receives an
+  orientation to the whole concept before the details arrive.</p>
+
+  <p>The practical effect is that the tutor's explanation style adapts to each learner's stated
+  preferences rather than defaulting to a single pedagogical register. Personalization here is not
+  about the difficulty level of the content — that is handled by the knowledge-tracing and
+  zone-of-proximal-development mechanisms covered in earlier lessons — but about the
+  <em>shape</em> of the explanation: where it starts, how it sequences, and which representations it
+  prefers.</p>
+
+  <!-- ─── Section 3: Socratic Method ─────────────────── -->
+  <h2>The Socratic Teaching Method</h2>
+
+  <p>In parallel with persona-based personalization, PACE adopts a Socratic teaching mode. Instead of
+  answering student questions directly, the tutor responds with guiding questions that prompt the
+  student to reconstruct the answer themselves.</p>
+
+  <blockquote>
+    Direct: "When a variable goes out of scope in C++, its destructor is called automatically."<br />
+    Socratic: "What do you think happens to a variable's memory when the function it lives in
+    returns?"
+  </blockquote>
+
+  <p>The mechanism is the same retrieval event identified in Lesson 1. A direct answer transfers
+  information; a guiding question forces the student to attempt retrieval before receiving
+  confirmation. The attempt — even an incorrect one — activates prior knowledge, surfaces
+  misconceptions, and creates a stronger encoding event than passive receipt of the correct answer.</p>
+
+  <p>Socratic dialogue also builds <strong>metacognition</strong>: the student's awareness of what
+  they know and do not know. When a tutor asks "what would you expect here?" the student is forced to
+  inspect their own understanding before the external answer arrives. This self-assessment habit is
+  itself a transferable skill, independent of any specific content.</p>
+
+  <div class="callout key">
+    <div class="callout-title">The Socratic Constraint</div>
+    PACE's Socratic mode is not questions to infinity. The tutor scaffolds via guiding questions
+    until the student reaches the answer — then confirms clearly. If the student is stuck after
+    genuine effort, the tutor provides the explanation rather than letting them flounder. The goal is
+    to make the student <em>think</em>, not to frustrate them. Questions scaffold the retrieval
+    event; once it has occurred, explanation follows.
+  </div>
+
+  <!-- ─── Section 4: Evaluation Results ──────────────── -->
+  <h2>Evaluation Results</h2>
+
+  <p>PACE was evaluated against baseline tutoring systems across three dimensions: personalization,
+  learner motivation, and overall learning outcomes. It outperformed baselines on all three.</p>
+
+  <p>The motivation result is the most instructive. Accuracy improvements from better-calibrated
+  explanations are expected when personalization works — harder to improve is whether students
+  <em>want</em> to keep engaging. PACE's Socratic approach is the primary driver of the motivation
+  gain: students who are asked guiding questions report feeling engaged rather than lectured.
+  Receiving answers passively creates an implicit message that the tutor does not expect the student
+  to figure things out. Receiving guiding questions creates the opposite expectation — and that
+  expectation itself changes how a student approaches the material.</p>
+
+  <p>Taken together, the results support a design principle consistent with the rest of this course:
+  the tutor's job is not to minimize the distance between ignorance and correct answer, but to make
+  the student traverse that distance themselves, with scaffolding rather than shortcuts.</p>
+
+  <!-- ─── Quiz ──────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-9">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      The Socratic teaching method, as used in PACE, achieves better outcomes than direct
+      explanation primarily because:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button type="button">
+          It delivers cleaner and more accurate information by breaking complex topics
+          down into guided question sequences
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          It forces the student to retrieve and reconstruct knowledge rather than
+          passively receiving a given answer
+        </button>
+      </li>
+      <li>
+        <button type="button">
+          It reduces the time spent on each concept by cutting unnecessary background
+          context from the explanation
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Skill Exercise ───────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise</div>
+    <p>Rewrite this direct-answer response as a Socratic exchange (3&ndash;5 turns):</p>
+    <blockquote>
+      Q: Why is a hash table O(1) for lookup?<br />
+      A: Because it uses a hash function to compute the array index directly, avoiding a search.
+    </blockquote>
+    <p>Your version should guide the student to reconstruct the answer, not receive it. Write the
+    full back-and-forth, including both tutor turns and imagined student responses.</p>
+    <textarea style="min-height: 160px;" placeholder="Tutor: [opening guiding question]&#10;Student: [attempt]&#10;Tutor: [follow-up question or confirmation]&#10;…"></textarea>
+  </div>
+
+  <!-- ─── Navigation ───────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0008-diagnose-recommend-reassess.html">&larr; Lesson 8: Diagnose, Recommend, Reassess</a>
+    <a href="0010-llm-tutoring-limits.html" class="primary">Lesson 10: LLM Tutoring Limits &rarr;</a>
+  </nav>
+
+  <!-- ─── Tutor prompt ─────────────────────────────────── -->
+  <div class="tutor-prompt">
+    Ask your tutor: <em>"Can you use the Socratic method to help me understand why retrieval
+    practice produces stronger memory than re-reading the same material?"</em>
+  </div>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  initQuiz(
+    'quiz-9',
+    1,
+    'Socratic questioning forces the student to attempt retrieval before receiving confirmation — this is the retrieval practice mechanism from Lesson 1, now embedded in the dialogue itself rather than in a separate quiz.'
+  );
+</script>
+</body>
+</html>

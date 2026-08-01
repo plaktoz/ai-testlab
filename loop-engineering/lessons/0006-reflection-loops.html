@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 6 — Reflection Loops — Generate, Critique, Revise</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <header class="lesson-header">
+    <p class="breadcrumb">
+      <a href="../lessons.md">Loop Engineering</a> &rsaquo;
+      Module 3 &mdash; Agentic Loop Patterns &rsaquo;
+      Lesson 6 of 12
+    </p>
+    <h1>Reflection Loops &mdash; Generate, Critique, Revise</h1>
+    <div class="lesson-meta">
+      <span>~25 min</span>
+      <span>Module 3 &mdash; Agentic Loop Patterns</span>
+    </div>
+  </header>
+
+  <div class="source-card">
+    <div class="source-card-label">Primary Source</div>
+    <p>
+      <a href="https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-2-reflection/" target="_blank" rel="noopener">
+        Andrew Ng &mdash; Agentic Design Patterns Part 2: Reflection
+      </a>
+    </p>
+    <p>
+      Reflection automates the feedback loop users already apply manually when pushing a chatbot to improve responses. The generate &rarr; critique &rarr; revise cycle is described as "relatively quick to implement" while delivering "surprising performance gains," and is best applied to code generation, writing, and question answering where quality criteria can be articulated.
+    </p>
+  </div>
+
+  <h2>What Is Reflection?</h2>
+  <p>
+    When you ask a chatbot to write something, then say "that's not quite right — can you improve it?", you are manually running a reflection loop. Reflection as an agentic design pattern automates exactly that cycle. The agent generates an initial output, then a critic (either the same model or a separate one) evaluates it and returns feedback, and the generator revises based on that feedback. The loop repeats until quality criteria are satisfied or a revision budget is exhausted.
+  </p>
+  <p>
+    Andrew Ng describes the pattern this way: "just as we might write an essay, put it aside, then reread and improve it," a reflection loop gives an LLM the same ability to review and refine its own work. The pattern requires no new model capability — only iteration.
+  </p>
+
+  <h2>The Three Reflection Architectures</h2>
+  <p>
+    LangChain's overview of reflection agents describes three architectures of increasing sophistication, all built on the same core cycle:
+  </p>
+  <ul>
+    <li>
+      <strong>Basic Reflection:</strong> Two chained LLMs &mdash; a generator and a reflector &mdash; running a fixed number of iterations. The generator produces a draft; the reflector critiques it; the generator revises. This is the simplest form, with no external grounding.
+    </li>
+    <li>
+      <strong>Reflexion:</strong> An actor-agent that grounds critique in external evidence. The loop runs as "draft &rarr; execute tools &rarr; revise" up to a configurable <code>MAX_ITERATIONS</code>. Tool outputs &mdash; such as unit test results or search results &mdash; replace or augment the critic's judgment, making feedback objective rather than subjective.
+    </li>
+    <li>
+      <strong>LATS (Language Agent Tree Search):</strong> Unifies Reflexion, Tree of Thoughts, and plan-and-execute via Monte Carlo Tree Search. The loop selects the best candidate, expands parallel actions, reflects and scores each branch, then backpropagates scores to the root. LATS is the most sophisticated of the three and incurs the highest latency cost.
+    </li>
+  </ul>
+  <p>
+    The trade-off across all three architectures is latency for quality. Saved trajectories from any of these loops also become fine-tuning data, enabling a meta-loop in which the system that runs tasks generates the data that makes future runs better.
+  </p>
+
+  <h2>Grounding Critique in Tool Outputs</h2>
+  <p>
+    Basic reflection relies on the critic's own judgment, which may be inconsistent or too lenient. Reflexion addresses this by grounding critique in concrete evidence from the environment. Instead of asking "is this draft good?", the agent asks "do the unit tests pass?" or "what does the search result say about this claim?"
+  </p>
+  <p>
+    This grounding matters because it anchors the critique to objective signals. A test suite cannot be argued with; a failing assertion is an unambiguous revision prompt. Andrew Ng identifies this as one of the key extensions of the basic reflection pattern: using external tool outputs &mdash; unit test results, search results, linters, type checkers &mdash; as the primary feedback signal instead of or alongside model-generated critique.
+  </p>
+  <p>
+    Best domains for grounded reflection are those where quality is measurable: code generation (tests pass or fail), factual writing (claims can be search-verified), and structured outputs (schemas validate or do not).
+  </p>
+
+  <h2>Separate Generator and Critic Agents</h2>
+  <p>
+    A further extension of reflection is using distinct agents for generation and critique rather than the same model with different prompts. Andrew Ng notes that the generator and critic can be separate agents, enabling specialization: one model tuned or prompted to produce, another tuned or prompted to find flaws.
+  </p>
+  <p>
+    In practice, this means swapping the LLM instance in the critique node for a different model or a differently-configured instance of the same model. LangChain's reflection agent documentation notes that basic reflection already uses two chained LLMs in this pattern. The benefit is that a critic cannot easily "agree with itself" &mdash; a separate model is less likely to reproduce the same blind spots as the generator.
+  </p>
+
+  <h2>When to Apply Reflection</h2>
+  <p>
+    Andrew Ng recommends reflection for code generation, writing, and question answering &mdash; domains where quality criteria can be articulated clearly enough for a critic to act on them. If you cannot state what "good" looks like, the critic produces vague feedback and the revision loop makes no progress.
+  </p>
+  <p>
+    The latency cost is real: each reflection iteration adds one or more LLM calls. LangChain's analysis confirms the trade-off is latency for quality across all three reflection architectures. Reflection should therefore be applied to tasks where quality matters more than speed, and the stopping condition &mdash; approval signal or revision budget &mdash; should be set conservatively to avoid unbounded loops.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-label">Key Insight</div>
+    Reflection adds no new model capability &mdash; it adds iteration. The same LLM that produces a mediocre first draft can produce a significantly better final output simply by being asked to critique and revise that draft. Andrew Ng identifies this as one of the most impactful agentic patterns precisely because it is "relatively quick to implement" while delivering "surprising performance gains."
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-label">Watch Out</div>
+    Reflection only improves output quality when the critic can articulate meaningful feedback. If the critic is too lenient, too vague, or shares the same blind spots as the generator, iterations converge on the same mediocre output faster than they improve it. Always define a concrete approval criterion &mdash; and set a hard revision budget &mdash; before wiring a reflection loop into production.
+  </div>
+
+  <h2>LangGraph Implementation</h2>
+  <p>
+    The graph below wires the generate &rarr; critique cycle as two named nodes with a conditional edge: after each critique, the routing function checks whether the critique begins with <code>APPROVED:</code> or the revision count has reached the budget, and exits if either is true; otherwise it routes back to <code>generate</code> with the critique as the revision prompt.
+  </p>
+  <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langchain_anthropic import ChatAnthropic
+from typing import TypedDict, Literal
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+
+class ReflectionState(TypedDict):
+    task: str
+    draft: str
+    critique: str
+    revisions: int
+    approved: bool
+
+def generate(state: ReflectionState) -> dict:
+    if state["critique"]:
+        prompt = (
+            f"Revise based on this critique.\n\n"
+            f"Task: {state['task']}\nDraft: {state['draft']}\nCritique: {state['critique']}"
+        )
+    else:
+        prompt = f"Write a first draft for: {state['task']}"
+    return {"draft": llm.invoke(prompt).content, "revisions": state["revisions"] + 1}
+
+def critique(state: ReflectionState) -> dict:
+    prompt = (
+        f"Critique this draft. If it fully satisfies the task, start with 'APPROVED:'.\n\n"
+        f"Task: {state['task']}\nDraft: {state['draft']}"
+    )
+    feedback = llm.invoke(prompt).content
+    return {"critique": feedback, "approved": feedback.startswith("APPROVED:")}
+
+def route(state: ReflectionState) -> Literal["generate", "__end__"]:
+    return END if state["approved"] or state["revisions"] >= 3 else "generate"
+
+builder = StateGraph(ReflectionState)
+builder.add_node("generate", generate)
+builder.add_node("critique", critique)
+builder.set_entry_point("generate")
+builder.add_edge("generate", "critique")
+builder.add_conditional_edges("critique", route)
+
+app = builder.compile()
+result = app.invoke({"task": "Explain recursion in plain English.", "critique": "", "revisions": 0, "approved": False, "draft": ""})
+print(f"Approved after {result['revisions']} revision(s):\n{result['draft']}")</code></pre>
+
+  <div class="quiz" id="quiz-6">
+    <h3>Check Your Understanding</h3>
+    <p class="quiz-question">What distinguishes Reflexion from basic reflection?</p>
+    <div class="quiz-options">
+      <button>It grounds critique using external tool outputs</button>
+      <button>It always runs a fixed iteration count</button>
+      <button>It requires using two separate LLM models</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="exercise">
+    <h3>Skill Exercise</h3>
+    <p>
+      Design a reflection loop for a code-writing task. Write out what the generator produces, what the critic checks (style, tests, correctness), what the revision prompt looks like, and define the stopping condition. Be specific: name the quality criteria the critic will use and the exact signal that tells the loop it is done.
+    </p>
+    <textarea placeholder="Write your response here..."></textarea>
+  </div>
+
+  <p class="tutor-prompt">
+    Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+  </p>
+
+  <nav class="lesson-nav">
+    <a href="0005-action-level-oversight.html">&larr; Previous</a>
+    <a href="0007-lats-tree-search.html" class="primary">Next &rarr;</a>
+  </nav>
+
+  <script src="../assets/quiz.js"></script>
+  <script>initQuiz('quiz-6', 0, 'Reflexion grounds its critique in external evidence — the agent executes tools such as unit tests or search queries and uses those results as the revision signal, rather than relying solely on the critic model\'s judgment.');</script>
+
+</div>
+</body>
+</html>
