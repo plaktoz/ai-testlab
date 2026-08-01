@@ -112,7 +112,7 @@ async function selectTicker(symbol) {
   if (overviewContent) overviewContent.innerHTML = '<p class="loading-msg">Loading overview…</p>';
 
   const chartError = document.getElementById('chart-error');
-  if (chartError) { chartError.textContent = ''; chartError.style.display = 'none'; }
+  if (chartError) { chartError.textContent = ''; chartError.classList.add('hidden'); }
 
   const fundContent = document.getElementById('fundamentals-content');
   if (fundContent) fundContent.innerHTML = '<p class="loading-msg">Loading fundamentals…</p>';
@@ -168,7 +168,7 @@ async function selectTicker(symbol) {
     }
     if (chartError) {
       chartError.textContent = err.message || 'Failed to load chart.';
-      chartError.style.display = 'block';
+      chartError.classList.remove('hidden');
     }
   }
 

@@ -8,7 +8,7 @@ export class ApiError extends Error {
 const BASE_URL = 'https://financialmodelingprep.com/api/v3';
 const STABLE_URL = 'https://financialmodelingprep.com/stable';
 
-async function _apiFetch(path, apiKey, baseUrl = BASE_URL) {
+async function _apiFetch(path, apiKey, baseUrl = STABLE_URL) {
   const sep = path.includes('?') ? '&' : '?';
   const url = `${baseUrl}${path}${sep}apikey=${encodeURIComponent(apiKey)}`;
   let res;
@@ -34,31 +34,31 @@ async function _apiFetch(path, apiKey, baseUrl = BASE_URL) {
 }
 
 export async function searchStocks(query, apiKey) {
-  const data = await _apiFetch(`/search-symbol?query=${encodeURIComponent(query)}`, apiKey, STABLE_URL);
+  const data = await _apiFetch(`/search-symbol?query=${encodeURIComponent(query)}`, apiKey);
   return Array.isArray(data) ? data : [];
 }
 
 export async function fetchQuote(symbol, apiKey) {
-  const data = await _apiFetch(`/quote/${encodeURIComponent(symbol)}`, apiKey);
+  const data = await _apiFetch(`/quote?symbol=${encodeURIComponent(symbol)}`, apiKey);
   if (!Array.isArray(data) || !data[0]) throw new ApiError('No quote data found.', 404);
   return data[0];
 }
 
 export async function fetchProfile(symbol, apiKey) {
-  const data = await _apiFetch(`/profile/${encodeURIComponent(symbol)}`, apiKey);
+  const data = await _apiFetch(`/profile?symbol=${encodeURIComponent(symbol)}`, apiKey);
   if (!Array.isArray(data) || !data[0]) throw new ApiError('No profile data found.', 404);
   return data[0];
 }
 
 export async function fetchRatios(symbol, apiKey) {
-  const data = await _apiFetch(`/ratios-ttm/${encodeURIComponent(symbol)}`, apiKey);
+  const data = await _apiFetch(`/ratios-ttm?symbol=${encodeURIComponent(symbol)}`, apiKey);
   if (!Array.isArray(data) || !data[0]) throw new ApiError('No ratios data found.', 404);
   return data[0];
 }
 
 export async function fetchPriceHistory(symbol, apiKey) {
   const data = await _apiFetch(
-    `/historical-price-full/${encodeURIComponent(symbol)}?timeseries=365`,
+    `/historical-price-eod/full?symbol=${encodeURIComponent(symbol)}&timeseries=365`,
     apiKey
   );
   const historical = data && data.historical;
@@ -77,7 +77,7 @@ export async function fetchPriceHistory(symbol, apiKey) {
 }
 
 export async function fetchEarnings(symbol, apiKey) {
-  const data = await _apiFetch(`/historical/earning_calendar/${encodeURIComponent(symbol)}`, apiKey);
+  const data = await _apiFetch(`/earnings?symbol=${encodeURIComponent(symbol)}`, apiKey);
   const records = Array.isArray(data) ? data : (data && data.historical) || [];
 
   // Sort descending by date
