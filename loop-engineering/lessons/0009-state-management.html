@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 9 — State Management and Control Flow</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 3 — Agentic Loop Patterns › Lesson 9 of 12</p>
+      <h1>State Management and Control Flow</h1>
+      <div class="lesson-meta">
+        <span>~25 min</span>
+        <span>Module 3 — Agentic Loop Patterns</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <p class="source-card-label">Primary Source</p>
+      <p><a href="https://huyenchip.com/2025/01/07/agents.html" target="_blank">Chip Huyen — Agents: Control Flow and Evaluation</a></p>
+      <p>Huyen frames planning as a search problem — evaluating paths toward a goal using heuristics or AI judges to validate before execution. Control flows within a plan map directly to software engineering constructs: sequential, parallel, if-statement (routing), and for-loop, making agentic loops concrete and measurable.</p>
+    </div>
+
+    <h2>The Four Control Flow Types</h2>
+    <p>Huyen identifies four control flow structures that appear inside agentic plans — the same four primitives found in conventional software engineering:</p>
+    <ul>
+      <li><strong>Sequential</strong>: steps execute one after another in a fixed order. Each step depends on the output of the previous one, so the graph is a straight chain with no branching.</li>
+      <li><strong>Parallel</strong>: multiple steps fan out and run simultaneously, then merge their results. This structure applies whenever the steps are independent of one another — running them in sequence would be a pure efficiency loss.</li>
+      <li><strong>Routing (if-statement)</strong>: execution branches based on a condition — for example, routing a short input to a "brief" handler and a long input to a "detailed" handler. The condition is evaluated at runtime from the current state.</li>
+      <li><strong>For-loop</strong>: a single node repeats with an incrementing index until a list is exhausted or a stopping condition is met. The loop carries its own counter in state and terminates via a conditional self-edge.</li>
+    </ul>
+    <p>These are not new abstractions invented for agents — they are the same constructs software engineers have always used, now expressed as graph edges rather than imperative control flow statements.</p>
+
+    <h2>The Decoupling Principle: Generate, Validate, Execute</h2>
+    <p>Huyen's decoupling principle separates plan creation from plan execution. The three-stage sequence is: generate a plan, validate it against the task and the available tool inventory, and only then begin execution.</p>
+    <p>This structure creates a natural intervention point before any irreversible actions are taken. If validation fails — because the plan references a non-existent tool, uses wrong parameters, or logically fails to cover the task — the graph loops back to the generate stage rather than proceeding. The cost of replanning is a few extra tokens; the cost of discovering the same flaw mid-execution is a partially mutated state that may be difficult or impossible to roll back.</p>
+    <p>The validation step can be performed by a heuristic check, a structured assertion against a known tool schema, or a secondary LLM call acting as a judge. In all cases the goal is the same: catch structural errors before they become execution errors.</p>
+
+    <h2>Measuring Plan Quality: Three Key Metrics</h2>
+    <p>Huyen proposes evaluating plan quality using a dataset of <em>(task, tool inventory)</em> tuples. Three metrics capture different dimensions of planning reliability:</p>
+    <ul>
+      <li><strong>Valid plan ratio</strong>: the fraction of generated plans that pass validation. A low ratio means the agent regularly produces plans that reference unavailable tools or contain logically inconsistent steps.</li>
+      <li><strong>Plans-per-valid-plan</strong>: the average number of plan generations required to produce one valid plan. A high number signals that the agent struggles to plan correctly on the first attempt, adding latency and token cost before any execution has begun.</li>
+      <li><strong>Invalid tool call frequency</strong>: how often the agent calls a tool that does not exist in the inventory or passes parameters the tool cannot accept. This is the most granular of the three metrics and points directly to where hallucination enters the planning process.</li>
+    </ul>
+    <p>Together these three metrics give a precise picture of where planning breaks down — whether the problem is structural (wrong tool selection), parametric (right tool, wrong arguments), or fundamental (goal misalignment between the plan and the task description).</p>
+
+    <h2>Control Flow and Shared State in LangGraph</h2>
+    <p>All four control flow types map to distinct LangGraph primitives. Sequential control is a chain of <code>.add_edge</code> calls. Parallel fan-out uses <code>Send</code> to dispatch the same node with different payloads simultaneously; results merge automatically via <code>Annotated[list, operator.add]</code> in the shared state. Routing uses <code>add_conditional_edges</code> with a function that inspects state and returns a node name string. A for-loop is a node with a conditional self-edge that increments an index stored in the state <code>TypedDict</code> each cycle.</p>
+    <p>Because every node only reads from and writes to the shared state object, the control flow is fully visible from the graph structure alone — no hidden mutable variables exist outside the <code>TypedDict</code>, which makes the loop behavior straightforward to inspect and debug.</p>
+
+    <div class="callout key">
+      <p class="callout-label">Key Insight</p>
+      <p>Agentic control flows are ordinary software constructs — sequential, parallel, if-statement, for-loop — expressed as graph edges. Decoupling plan generation from execution creates a validation gate that prevents wasted work and enables clean replanning. The three plan quality metrics (valid plan ratio, plans-per-valid-plan, invalid tool call frequency) make loop health measurable rather than anecdotal.</p>
+    </div>
+
+    <div class="callout warning">
+      <p class="callout-label">Watch Out</p>
+      <p>Do not begin executing a plan before it has been validated. Skipping or weakening the validate step to reduce token cost means the first sign of an invalid plan is a failed tool call mid-execution — after state has already been mutated. Validation is cheapest before any side effects have occurred; fixing a bad plan during execution is orders of magnitude more expensive.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>The code below demonstrates all four control flow types as standalone LangGraph graphs. Each pattern is self-contained so you can copy the one that matches your pipeline stage — sequential for dependent steps, parallel <code>Send</code> fan-out for independent steps, conditional edges for routing, and a self-edge with an incrementing index for iterating over a list.</p>
+
+    <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langgraph.types import Send
+from typing import TypedDict, Annotated, Literal
+import operator
+
+# ── 1. Sequential: A → B → C ─────────────────────────────────────────────────
+class SeqState(TypedDict):
+    value: str
+
+def seq_a(s: SeqState) -> dict: return {"value": f"A({s['value']})"}
+def seq_b(s: SeqState) -> dict: return {"value": f"B({s['value']})"}
+def seq_c(s: SeqState) -> dict: return {"value": f"C({s['value']})"}
+
+seq = StateGraph(SeqState)
+for fn in [seq_a, seq_b, seq_c]:
+    seq.add_node(fn.__name__, fn)
+seq.set_entry_point("seq_a")
+seq.add_edge("seq_a", "seq_b")
+seq.add_edge("seq_b", "seq_c")
+seq.add_edge("seq_c", END)
+
+# ── 2. Parallel fan-out via Send ──────────────────────────────────────────────
+class ParState(TypedDict):
+    items: list[str]
+    results: Annotated[list, operator.add]
+
+def fan_out(state: ParState) -> list[Send]:
+    return [Send("worker", {"item": item, "items": [], "results": []}) for item in state["items"]]
+
+def worker(state: ParState) -> dict:
+    return {"results": [f"processed({state['item']})"]}   # type: ignore[index]
+
+par = StateGraph(ParState)
+par.add_node("fan_out_node", lambda s: s)
+par.add_node("worker", worker)
+par.set_entry_point("fan_out_node")
+par.add_conditional_edges("fan_out_node", fan_out)  # Send triggers parallel dispatch
+par.add_edge("worker", END)
+
+# ── 3. Routing (if-statement) ─────────────────────────────────────────────────
+class RouteState(TypedDict):
+    input: str
+    category: str
+
+def classify(state: RouteState) -> dict:
+    return {"category": "short" if len(state["input"]) < 20 else "long"}
+
+def handle_short(state: RouteState) -> dict: return {"input": f"brief({state['input']})"}
+def handle_long(state: RouteState) -> dict: return {"input": f"detailed({state['input']})"}
+
+def router(state: RouteState) -> Literal["handle_short", "handle_long"]:
+    return "handle_short" if state["category"] == "short" else "handle_long"
+
+route = StateGraph(RouteState)
+route.add_node("classify", classify)
+route.add_node("handle_short", handle_short)
+route.add_node("handle_long", handle_long)
+route.set_entry_point("classify")
+route.add_conditional_edges("classify", router)
+route.add_edge("handle_short", END)
+route.add_edge("handle_long", END)
+
+# ── 4. For-loop (self-edge with index) ────────────────────────────────────────
+class LoopState(TypedDict):
+    items: list[str]
+    idx: int
+    results: list[str]
+
+def process(state: LoopState) -> dict:
+    item = state["items"][state["idx"]]
+    return {"results": state["results"] + [f"done({item})"], "idx": state["idx"] + 1}
+
+def keep_going(state: LoopState) -> Literal["process", "__end__"]:
+    return END if state["idx"] >= len(state["items"]) else "process"
+
+loop = StateGraph(LoopState)
+loop.add_node("process", process)
+loop.set_entry_point("process")
+loop.add_conditional_edges("process", keep_going)
+
+# Compile and run any of the above:
+# seq_app = seq.compile(); seq_app.invoke({"value": "start"})
+# par_app = par.compile(); par_app.invoke({"items": ["a", "b", "c"], "results": []})
+# route_app = route.compile(); route_app.invoke({"input": "hello world", "category": ""})
+# loop_app = loop.compile(); loop_app.invoke({"items": ["x", "y", "z"], "idx": 0, "results": []})</code></pre>
+
+    <div class="quiz" id="quiz-9">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">Which of the following is one of Huyen's three plan quality metrics?</p>
+      <div class="quiz-options">
+        <button>Valid plan ratio measures how often plans are accepted</button>
+        <button>Execution latency measures the speed of each loop step</button>
+        <button>Memory utilization measures the context window usage per cycle</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Map the four control flow types (sequential, parallel, if-statement, for-loop) onto four real pipeline tasks you know — then write the metric you would track for each to measure loop quality.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0008-planning-loops.html">← Previous</a>
+      <a href="0010-failure-taxonomy.html" class="primary">Next →</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-9', 0, 'Valid plan ratio, plans-per-valid-plan, and invalid tool call frequency are Huyen\'s three plan quality metrics — evaluated against a dataset of (task, tool inventory) tuples. Execution latency and memory utilization are not part of this evaluation framework.');</script>
+
+  </div>
+</body>
+</html>

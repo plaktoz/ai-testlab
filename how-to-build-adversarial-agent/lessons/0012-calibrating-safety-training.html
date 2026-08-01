@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 12: Calibrating Safety Training — RLHF, Data Efficiency, and the Over-Refusal Trap</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &gt; Adversarial Training &gt; Lesson 12 of 14
+      </div>
+      <h1>Calibrating Safety Training — RLHF, Data Efficiency, and the Over-Refusal Trap</h1>
+      <div class="lesson-meta">
+        <span>Estimated reading time: ~25 minutes</span>
+        <span>Module: Adversarial Training</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Sources:</strong><br>
+      Bai, Y. et al., Anthropic (2022). <em>Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback</em>.
+      <a href="https://arxiv.org/abs/2204.05862" target="_blank">arXiv:2204.05862</a>.
+      Key result: A preference model trained on human comparisons provides a stable RLHF reward signal, and a linear relationship between reward and the square root of KL divergence prevents over-optimization of the base policy.
+      <br><br>
+      Bhatt, U. et al. (2023). <em>Safety-Tuned LLaMAs: Lessons From Improving the Safety of Large Language Models that Follow Instructions</em>.
+      <a href="https://arxiv.org/abs/2309.07875" target="_blank">arXiv:2309.07875</a>.
+      Key result: Adding only 3% safety examples to a fine-tuning dataset meaningfully improves safety without degrading capability, but exceeding this proportion induces exaggerated safety behaviors and harmful over-refusal.
+    </div>
+
+    <!-- ============================================================
+         SECTION 1 — RLHF and the Preference Model
+         ============================================================ -->
+    <h2>RLHF and the Preference Model</h2>
+    <p>
+      Reinforcement Learning from Human Feedback (RLHF) is the dominant paradigm for steering large language
+      models toward helpful and safe behavior after pre-training. The foundational paper by Bai et al. (2022)
+      at Anthropic establishes the core pipeline: human annotators read pairs of model responses to the same
+      prompt and indicate which response is more helpful, more honest, or less harmful. These pairwise
+      comparisons are used to train a separate neural network — the <em>preference model</em> — which learns
+      to score any given response on those same dimensions.
+    </p>
+    <p>
+      The preference model acts as a proxy for human judgment at scale. Once trained, it can evaluate
+      thousands of model outputs per second without requiring a human annotator for every query. This proxy
+      reward signal is then fed into a reinforcement learning loop: the language model generates responses,
+      the preference model scores them, and policy gradient updates push the language model toward higher-scoring
+      outputs. Iterative refinement is built into the pipeline — Bai et al. describe weekly refresh cycles
+      in which new human feedback produces updated preference models, which in turn produce improved RL
+      policies.
+    </p>
+    <p>
+      A key empirical observation from Bai et al. is that alignment training via this pipeline did not degrade
+      performance on standard NLP benchmarks. Capability and safety are not necessarily in tension: the same
+      training signal that reduced harmful outputs also maintained or improved benchmark scores. This finding
+      challenges the widespread assumption that safety training must come at the cost of capability.
+    </p>
+
+    <!-- ============================================================
+         SECTION 2 — KL Divergence as a Training Constraint
+         ============================================================ -->
+    <h2>KL Divergence as a Training Constraint</h2>
+    <p>
+      One of the most technically important findings in Bai et al. concerns the relationship between the
+      reward signal and a quantity called KL divergence. KL divergence, in this context, measures how far
+      the current RL policy has drifted from the original supervised fine-tuning (SFT) base model. A
+      language model that is being reinforced to score high on the preference model will, if left unconstrained,
+      begin to exploit weaknesses in the reward signal — producing outputs that look good to the preference
+      model but are incoherent, repetitive, or pathological in ways the preference model did not anticipate.
+      This failure mode is called <em>reward hacking</em>.
+    </p>
+    <p>
+      The KL constraint is the standard defense. By penalizing the RL policy whenever it drifts too far from
+      the base distribution, the constraint keeps outputs grounded in language that the base model already
+      generates fluently. Bai et al. discovered a specific empirical relationship: RL reward scales linearly
+      with the <em>square root</em> of KL divergence from the starting policy. This linear-in-sqrt-KL
+      relationship is a useful diagnostic: it tells practitioners how much reward improvement to expect per
+      unit of policy drift, and it establishes a practical envelope within which training remains stable.
+    </p>
+    <p>
+      Setting the KL constraint too tightly prevents the model from learning anything new. Setting it too
+      loosely allows reward hacking to corrupt the policy. The square root relationship provides a quantitative
+      tool for calibrating this tradeoff: practitioners can plot reward against sqrt(KL) during training and
+      verify that the linear relationship holds, flagging runs that deviate from the expected curve as
+      potential reward-hacking events.
+    </p>
+
+    <!-- ============================================================
+         SECTION 3 — Safety Data Efficiency: The 3% Finding
+         ============================================================ -->
+    <h2>Safety Data Efficiency: The 3% Finding</h2>
+    <p>
+      Bhatt et al. (2023) begin from a stark observation: popular instruction-tuned open-source language
+      models are highly unsafe when probed with adversarial prompts. Despite being designed to follow user
+      instructions helpfully, these models comply with a surprising fraction of requests that a responsible
+      deployment would refuse. The question the paper investigates is how much safety-specific fine-tuning
+      data is required to close this gap — and at what cost to general capability.
+    </p>
+    <p>
+      The central finding is striking in its efficiency: adding only 3% safety examples to a fine-tuning
+      dataset — a few hundred safety demonstrations drawn from a corpus of thousands of total training
+      examples — produces a meaningful and reliable improvement in safety on adversarial evaluation sets.
+      Crucially, this 3% addition did not degrade performance on standard capability benchmarks. The model
+      became safer without becoming less capable.
+    </p>
+    <p>
+      This result has significant practical implications for practitioners building safety-tuned models on
+      limited budgets. Safety fine-tuning does not require constructing a massive safety dataset from
+      scratch. A targeted, carefully curated set of a few hundred examples can shift model behavior
+      substantially. The 3% finding establishes a useful baseline: it locates a region on the data-mixture
+      curve that is near the efficient frontier for most general-purpose use cases, where safety is
+      meaningfully improved without introducing the failure modes that come from over-tuning.
+    </p>
+
+    <!-- ============================================================
+         SECTION 4 — Exaggerated Safety Behaviors and Over-Refusal
+         ============================================================ -->
+    <h2>Exaggerated Safety Behaviors and Over-Refusal</h2>
+    <p>
+      Bhatt et al. identify a second critical finding that is as important as the 3% efficiency result: when
+      models are trained with <em>too many</em> safety examples, or with too strong a safety signal, they
+      develop what the paper calls <em>exaggerated safety behaviors</em>. An over-tuned model begins to
+      refuse legitimate user requests that superficially pattern-match to harmful topics, even when the
+      user's actual intent is clearly benign.
+    </p>
+    <p>
+      A canonical example from the paper is a model that refuses to discuss chemistry because chemistry
+      knowledge could, in principle, enable harm. The model has learned an overly broad association between
+      chemistry-related language and harmful content, and this association fires even when the user is
+      asking about a high-school homework problem or a cooking reaction. The refusal is technically
+      "safe" in the narrow sense that it avoids the model producing a harmful chemistry output — but it
+      is deeply unhelpful to the user and erodes trust in the system.
+    </p>
+    <p>
+      Over-refusal is a distinct failure mode from under-refusal. Under-refusal means the model complies
+      with requests it should decline; over-refusal means the model declines requests it should accept.
+      Both modes degrade the utility of the model, but they are caused by different training signals and
+      require different corrective interventions. Treating over-refusal as merely "being extra safe" is
+      an error: from the perspective of the user whose legitimate request was blocked, the model has
+      failed just as surely as if it had produced a harmful output.
+    </p>
+
+    <!-- ============================================================
+         SECTION 5 — Navigating the Capability-Safety Tradeoff Curve
+         ============================================================ -->
+    <h2>Navigating the Capability-Safety Tradeoff Curve</h2>
+    <p>
+      Taken together, the two papers map out a tradeoff curve that every practitioner doing safety
+      fine-tuning must navigate. On one end of the curve, insufficient safety data leaves the model
+      vulnerable to adversarial prompts. On the other end, excessive safety data induces exaggerated
+      safety behaviors that block legitimate use. The 3% finding from Bhatt et al. marks a practical
+      starting point near the efficient frontier for general-purpose models, but the optimal point on
+      the curve shifts depending on deployment context.
+    </p>
+    <p>
+      For a model deployed in a high-stakes domain — such as a medical information assistant or a
+      platform accessible to minors — a practitioner might reasonably accept some degree of over-refusal
+      in exchange for stronger safety guarantees, shifting the data mixture above 3%. For a model
+      deployed in a low-risk developer context where users are sophisticated adults working on
+      legitimate security research, over-refusal is more costly and a lower safety proportion may be
+      appropriate.
+    </p>
+    <p>
+      The RLHF framework from Bai et al. adds another lever: the KL constraint. A tighter KL constraint
+      limits how far the policy can drift from the base model, which can act as a form of implicit
+      regularization against both under-refusal and over-refusal. The two frameworks — data mixture
+      proportion from Bhatt et al. and KL constraint calibration from Bai et al. — are complementary
+      tools. Effective safety training requires tuning both, and evaluating the resulting model on
+      held-out sets designed to surface both failure modes, not just the under-refusal mode that most
+      red-teaming benchmarks test for.
+    </p>
+
+    <div class="callout key">
+      <strong>Key Insight:</strong> The 3% finding from Bhatt et al. reveals that safety fine-tuning
+      is dramatically data-efficient — a few hundred carefully chosen safety demonstrations can meaningfully
+      improve safety without hurting capability. But this efficiency cuts both ways: small changes in the
+      safety data proportion or signal strength can push the model past the efficient frontier into
+      exaggerated safety behaviors. Over-refusal is not a sign of a model being "too safe" — it is a
+      calibration failure with real costs to users.
+    </div>
+
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Many practitioners treat safety and capability as a simple
+      tradeoff where more safety always means less capability. The Bai et al. RLHF paper directly
+      contradicts this: alignment training improved rather than degraded NLP benchmark performance.
+      The real tradeoff is not safety vs. capability — it is <em>under-refusal vs. over-refusal</em>.
+      A model can be simultaneously safe (low under-refusal) and helpful (low over-refusal), but
+      only if the training data mixture and KL constraint are calibrated carefully.
+    </div>
+
+    <!-- ============================================================
+         QUIZ
+         ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        According to Bhatt et al. 2023, what proportion of safety examples in a fine-tuning dataset
+        is sufficient to meaningfully improve safety without degrading downstream capability?
+      </p>
+      <div class="quiz-options">
+        <button>As little as three percent safety data meaningfully improves safety without capability loss.</button>
+        <button>At least fifty percent safety data is required before meaningful safety improvements appear.</button>
+        <button>Any safety data proportion inevitably causes significant capability loss on standard evaluation benchmarks.</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         EXERCISE
+         ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Design a safety training dataset recipe with three components:
+      </p>
+      <ol>
+        <li>
+          <strong>Proposed ratio of safety to capability examples.</strong> Justify your ratio
+          explicitly using Bhatt et al.'s 3% finding. Specify at least one scenario where you
+          would increase this ratio from the baseline and at least one scenario where you would
+          decrease it, explaining the reasoning in each case.
+        </li>
+        <li>
+          <strong>Three specific over-refusal failure modes to guard against.</strong> Describe each
+          as a concrete example of a legitimate user request that an over-tuned model would wrongly
+          refuse. Make each example specific enough that you could write an evaluation prompt for it.
+        </li>
+        <li>
+          <strong>One evaluation metric for each of the three failure modes.</strong> For each failure
+          mode you identified, describe how you would measure the over-refusal rate in that specific
+          category — including what the test set would look like and what threshold would signal a
+          problem requiring corrective retraining.
+        </li>
+      </ol>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+    </div>
+
+    <nav class="lesson-nav">
+      <a href="0011-latent-adversarial-training.html">&larr; Previous</a>
+      <a class="primary" href="0013-garak-pyrit-tooling.html">Next &rarr;</a>
+    </nav>
+
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'Bhatt et al. 2023 found that as little as 3% safety examples — a few hundred demonstrations out of thousands of total fine-tuning examples — meaningfully improved safety without degrading capability on standard benchmarks. The 50% option is wrong: exceeding the efficient frontier induces exaggerated safety behaviors and over-refusal, making more data counterproductive rather than helpful. The third option is wrong because Bai et al. 2022 explicitly found that RLHF alignment training improved rather than degraded NLP benchmark performance, directly disconfirming the claim that safety data inevitably causes capability loss.'
+    );
+  </script>
+</body>
+</html>

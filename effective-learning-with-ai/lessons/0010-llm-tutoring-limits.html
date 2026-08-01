@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 10 — What Off-the-Shelf LLMs Can't Do (Yet) | AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ──────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <p class="breadcrumb">
+      <a href="../index.html">AI Tutoring Systems</a> ›
+      Module 4: Evaluation &amp; State of the Art ›
+      Lesson 10 of 13
+    </p>
+    <h1>What Off-the-Shelf LLMs Can't Do (Yet)</h1>
+    <div class="lesson-meta">
+      <span>Module 4 — Evaluation &amp; State of the Art</span>
+      <span>Lesson 10 of 13</span>
+    </div>
+  </header>
+
+  <!-- ─── Source ──────────────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>Can Large Language Models Match Tutoring System Adaptivity? A Benchmarking Study</strong>
+    <a href="https://arxiv.org/abs/2504.05570" target="_blank" rel="noopener">arxiv.org/abs/2504.05570</a>
+    — tests Llama3-8B, Llama3-70B, and GPT-4o across 75 real-world ITS scenarios
+    (1,350 instructional moves)
+  </div>
+
+  <!-- ─── 1. The Benchmark ─────────────────────────────────── -->
+  <h2>The Benchmark</h2>
+
+  <p>
+    The study constructs a rigorous evaluation from 75 real-world scenarios drawn from
+    proven adaptive tutoring systems — the kind of Intelligent Tutoring Systems (ITS)
+    that have been deployed in classrooms and studied for decades. These scenarios yield
+    1,350 discrete instructional moves: specific decision points where the tutoring
+    system must choose what to say or ask next, given where the student is in their
+    understanding.
+  </p>
+
+  <p>
+    For each scenario, the benchmark records what a real ITS would do — the adaptive
+    decision a purpose-built system makes. The question is whether an LLM, prompted to
+    act as a tutor, makes the same decision. The test is not whether the LLM gives
+    a correct factual answer; it is whether the LLM exhibits the same
+    <em>instructional behavior</em> as a system explicitly designed to adapt to learners.
+  </p>
+
+  <!-- ─── 2. Headline Finding ───────────────────────────────── -->
+  <div class="callout warning">
+    <div class="callout-title">Headline Finding</div>
+    <p>
+      Even GPT-4o — the strongest model tested — <strong>"only marginally mimics the
+      adaptivity of ITS."</strong> Across all three models studied, the best performance
+      fell far short of what purpose-built tutoring systems do routinely. Off-the-shelf
+      LLMs are not a drop-in replacement for adaptive tutoring infrastructure.
+    </p>
+  </div>
+
+  <!-- ─── 3. Three Failure Modes ──────────────────────────── -->
+  <h2>Three Specific Failure Modes</h2>
+
+  <p>
+    The benchmark identifies three recurring ways LLMs diverge from how real ITS systems
+    behave. These are not edge cases — they are structural differences in how the models
+    approach instructional interaction.
+  </p>
+
+  <h3>1. Overly Direct Feedback</h3>
+
+  <p>
+    GPT-4o tends to give the answer too quickly. Real ITS systems operate on a different
+    principle: they <em>withhold</em> the answer and instead provide hints that
+    progressively narrow the student's search space. The idea is to keep the student
+    actively reasoning — making the cognitive work visible — rather than short-circuiting
+    it with a complete solution. LLMs default to "here's the answer," which eliminates
+    exactly the effortful retrieval practice that produces durable learning.
+  </p>
+
+  <h3>2. Failure to Use Open-Ended Questioning</h3>
+
+  <p>
+    Real ITS systems regularly ask questions like "what do you think?" or "why might
+    that be?" — moves that force the student to construct an explanation rather than
+    receive one. The benchmark finds that LLMs rarely make these moves. They prefer
+    declarative, complete responses: the model explains, the student reads. This
+    pattern is comfortable and fluent, but it transfers the cognitive load away from
+    the learner, which is the opposite of what effective tutoring does.
+  </p>
+
+  <h3>3. No Explicit Student Knowledge Modeling</h3>
+
+  <p>
+    Perhaps the most structurally significant gap: LLMs have no persistent model of the
+    individual student's knowledge state. Each API call begins from scratch, or from
+    whatever context the developer has manually assembled and injected into the prompt.
+    Real ITS systems, by contrast, maintain continuous probabilistic models — Bayesian
+    Knowledge Tracing or equivalent — that update with every student interaction and
+    inform every subsequent instructional decision. An LLM has no such model unless
+    one is built and supplied externally.
+  </p>
+
+  <!-- ─── 4. What GPT-4o Does Well ─────────────────────────── -->
+  <h2>What GPT-4o Does Well</h2>
+
+  <p>
+    The picture is not entirely negative. The benchmark surfaces a clear strength: GPT-4o
+    follows instructions reliably. If you write a detailed system prompt that specifies
+    the student's current knowledge state, the rules for hint sequencing, and explicit
+    guidelines for when to ask versus tell, GPT-4o can execute those rules consistently.
+  </p>
+
+  <p>
+    The gap is not in the model's ability to <em>follow</em> a student model — it is in
+    the model's ability to <em>automatically build and maintain</em> one. Supply the
+    state; GPT-4o can act on it. Expect the model to construct the state on its own
+    across sessions; it cannot.
+  </p>
+
+  <!-- ─── 5. Comparison Table ──────────────────────────────── -->
+  <h2>LLMs vs. ITS Systems: What the Benchmark Reveals</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>What LLMs Do Well</th>
+        <th>What ITS Systems Do That LLMs Don't</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Follow explicit tutoring rules in a detailed system prompt</td>
+        <td>Automatically build and update a student knowledge model</td>
+      </tr>
+      <tr>
+        <td>Generate fluent, factually accurate explanations on demand</td>
+        <td>Withhold answers and provide calibrated progressive hints</td>
+      </tr>
+      <tr>
+        <td>Adapt tone and vocabulary to a stated learner level</td>
+        <td>Proactively ask open-ended questions to force student cognition</td>
+      </tr>
+      <tr>
+        <td>Handle diverse subject domains without domain-specific retraining</td>
+        <td>Maintain persistent per-student state across multiple sessions</td>
+      </tr>
+      <tr>
+        <td>Produce coherent multi-turn dialogue when given prior context</td>
+        <td>Make adaptive decisions from a continuous Bayesian knowledge trace</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── 6. The Design Implication ─────────────────────────── -->
+  <h2>The Design Implication</h2>
+
+  <p>
+    The benchmark's findings converge on a single practical conclusion about system
+    architecture. An off-the-shelf LLM wrapped in a prompt is not itself a tutoring
+    system. It is a tutoring system <em>interface</em>. It can deliver instructions,
+    generate explanations, and apply rules — but it cannot supply the adaptive machinery
+    on its own.
+  </p>
+
+  <div class="callout key">
+    <div class="callout-title">Key Distinction</div>
+    <p>
+      <strong>LLM = interface; system = the infrastructure around it.</strong>
+      The student knowledge model, the hint sequencing logic, and the open-ended
+      questioning rules must be built and maintained <em>externally</em> — then
+      passed into the LLM as structured context. The model executes; the system decides.
+    </p>
+  </div>
+
+  <p>
+    This is a useful reframe for anyone designing AI-powered learning tools. The question
+    is not "can GPT-4o tutor students?" — it demonstrably can, in a limited sense. The
+    question is "what infrastructure needs to exist around it to make it adaptive?" The
+    benchmark gives a clear answer: at minimum, you need persistent student knowledge
+    modeling, explicit hint sequencing, and rules for when to prompt student reasoning
+    rather than supply an answer.
+  </p>
+
+  <!-- ─── Quiz ─────────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-10">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      According to the benchmarking study, GPT-4o's biggest gap compared to real ITS systems is its failure to:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button>
+          A. Follow detailed system prompt instructions reliably when given explicit rules about tutoring behavior
+        </button>
+      </li>
+      <li>
+        <button>
+          B. Maintain an explicit persistent model of each student's knowledge state across multiple interactions
+        </button>
+      </li>
+      <li>
+        <button>
+          C. Generate grammatically correct and factually accurate explanations on demand for any diverse topic
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Exercise ─────────────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise</div>
+    <p>
+      You are reviewing an AI tutor prototype that wraps GPT-4o with a system prompt.
+      After reading this lesson, identify <strong>two specific capabilities the prototype
+      definitely lacks</strong> and describe, in one sentence each, what infrastructure
+      you would add to address them.
+    </p>
+    <textarea placeholder="Capability 1 the prototype lacks:&#10;Infrastructure to add:&#10;&#10;Capability 2 the prototype lacks:&#10;Infrastructure to add:"></textarea>
+  </div>
+
+  <!-- ─── Tutor Prompt ──────────────────────────────────────── -->
+  <div class="tutor-prompt">
+    <strong>Ask your tutor:</strong> "If GPT-4o follows instructions reliably, why can't I just write a system prompt that tells it to do knowledge tracing? What would that prompt be missing?"
+  </div>
+
+  <!-- ─── Navigation ────────────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0009-pace-learning-styles.html">&#8592; Lesson 9: Pacing and Learning Styles</a>
+    <a href="0011-tutorgym-evaluation.html" class="primary">Lesson 11: TutorGym Evaluation &#8594;</a>
+  </nav>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  // Correct answer is option B (index 1)
+  initQuiz('quiz-10', 1,
+    'GPT-4o actually follows instructions well — the gap is that it has no built-in ' +
+    'persistent student model. Without one, it can’t adapt to the individual learner ' +
+    'across sessions, which is what ITS systems do natively.'
+  );
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 3: Gradient-Based Attacks — Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &gt; Attack Techniques &gt; Lesson 3 of 14
+      </div>
+      <h1>Gradient-Based Attacks — Adversarial Suffixes That Transfer Across Models</h1>
+      <div class="lesson-meta">
+        <span>~30 minutes</span>
+        <span>Module: Attack Techniques</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Source:</strong> Zou et al. (2023), "Universal and Transferable Adversarial Attacks on Aligned Language Models,"
+      <a href="https://arxiv.org/abs/2307.15043" target="_blank">arXiv:2307.15043</a> —
+      This paper introduces the Greedy Coordinate Gradient (GCG) method, demonstrating that adversarial suffixes
+      optimized on open-source white-box models transfer to closed black-box commercial systems including
+      ChatGPT, GPT-4, Bard, and Claude without any gradient access to those systems.
+    </div>
+
+    <h2>The Problem: Automating Adversarial Prompt Discovery</h2>
+    <p>
+      Prior to Zou et al. 2023, the dominant approach to jailbreaking large language models relied on human
+      creativity: researchers and adversaries manually crafted prompts, role-play scenarios, and indirect
+      phrasings designed to coax aligned models into producing harmful outputs. While effective in individual
+      cases, this approach does not scale. Each new model variant, each new safety patch, and each new refusal
+      style requires a fresh round of manual experimentation, making systematic evaluation of model robustness
+      extremely difficult.
+    </p>
+    <p>
+      Zou et al. posed a sharper question: can adversarial prompts be discovered automatically, using the same
+      gradient-based optimization techniques that underlie neural network training itself? The answer, documented
+      in their paper, is yes. The key insight is that an aligned language model's resistance to harmful requests
+      is ultimately encoded in its weights — and those weights are differentiable. If you can compute gradients,
+      you can optimize.
+    </p>
+    <p>
+      The result is the Greedy Coordinate Gradient (GCG) algorithm: a fully automated method for discovering
+      adversarial suffixes that, when appended to a harmful request, reliably cause a model to begin its
+      response affirmatively rather than with a refusal. GCG requires no human intuition about what a jailbreak
+      might look like. It treats adversarial prompt discovery as a discrete optimization problem and searches
+      through token space guided entirely by gradient signals from the target model's weights.
+    </p>
+
+    <h2>The GCG Algorithm: Greedy Coordinate Gradient in Detail</h2>
+    <p>
+      The mechanics of GCG are precise and reproducible. Given a harmful request — for example, a query asking
+      for instructions on a dangerous activity — GCG appends a short suffix: a sequence of tokens that initially
+      carries no semantic meaning. The optimization target is to minimize the model's loss on a desired harmful
+      completion. In other words, the algorithm searches for a suffix that makes the model assign high
+      probability to producing a harmful response.
+    </p>
+    <p>
+      At each iteration, GCG computes the gradient of the target loss with respect to the one-hot encoding of
+      each token in the suffix. This gradient signal identifies which token replacements at each position would
+      most reduce the loss — that is, which tokens would make the model more likely to produce the harmful
+      target output. The algorithm then evaluates a batch of candidate token replacements and selects the single
+      swap that yields the greatest improvement across the suffix positions.
+    </p>
+    <p>
+      This is a greedy coordinate descent approach over discrete token space. Because token embeddings are
+      discrete, GCG uses the gradient as an approximation to rank candidates, then validates the best candidate
+      through a forward pass. The process repeats across many iterations, gradually shaping the suffix into a
+      token sequence that reliably triggers the desired output. White-box access to the model — specifically
+      access to its weights and activations for gradient computation — is required during optimization.
+      Zou et al. used Vicuna-7B and Vicuna-13B as their white-box target models for the optimization phase.
+    </p>
+
+    <h2>White-Box Results: What GCG Achieves on Target Models</h2>
+    <p>
+      On the white-box models used during optimization, GCG achieves high attack success rates across a broad
+      range of harmful requests. The suffixes it produces are not human-readable — they appear as nonsense
+      sequences of tokens, often including unusual punctuation, fragments of unrelated words, or encoding
+      artifacts. This unintelligibility is a by-product of pure loss minimization: GCG optimizes for the
+      gradient objective, not for linguistic coherence or human interpretability.
+    </p>
+    <p>
+      A particularly important result is that a single suffix can be optimized to work across multiple harmful
+      prompts simultaneously. Zou et al. demonstrate "universal" adversarial suffixes: a single token string
+      that causes the model to comply with a wide variety of different harmful inputs, not just the specific
+      request it was optimized against. This universality means an adversary does not need to run a fresh
+      optimization for each new query — one suffix can serve as a general-purpose jailbreak for an entire
+      category of harmful requests.
+    </p>
+    <p>
+      The white-box results establish a foundational baseline: on the models where GCG has direct gradient
+      access, it fully automates adversarial suffix discovery without any human creativity. This is the first
+      systematic demonstration that safety-aligned LLMs can be compromised through pure gradient-based
+      optimization, directly analogous to the adversarial examples literature in computer vision but applied to
+      discrete token sequences in language models.
+    </p>
+
+    <h2>Black-Box Transferability: Attacking Models You Cannot Access</h2>
+    <p>
+      The most consequential finding in the Zou et al. paper is that suffixes optimized on open-source
+      white-box models transfer to commercial black-box models — including ChatGPT, GPT-4, Bard, and Claude —
+      without any gradient access to those systems. This is a transfer attack: the adversary optimizes on one
+      model and deploys the resulting suffix against a different, inaccessible model through its public API.
+    </p>
+    <p>
+      Transfer attacks are well-documented in the adversarial examples literature for image classifiers, but
+      their effectiveness against large language models with safety fine-tuning was not established prior to
+      this work. Zou et al. demonstrate that suffixes which drive Vicuna toward harmful completions also cause
+      commercial models to drop their safety-trained refusals and begin complying with the original harmful
+      request.
+    </p>
+    <p>
+      Both white-box and black-box settings are validated in the paper. In the white-box setting, GCG is run
+      directly against the target model. In the black-box setting, suffixes are first optimized on Vicuna and
+      then evaluated against commercial APIs with no further modification. Transfer success rates are lower
+      than white-box results, as expected, but remain substantial enough to constitute a real security concern.
+      This finding implies that safety-aligning a closed commercial model does not provide immunity against
+      adversaries who have access to open-source models in the same general family.
+    </p>
+
+    <h2>Why Transferability Works: Shared Internal Representations</h2>
+    <p>
+      Transferability is not an accident — it reflects something structural about how large language models are
+      trained. Safety alignment training uses similar data, similar techniques (RLHF, DPO, and related methods),
+      and similar objectives across models from different organizations. As a result, safety-aligned models tend
+      to develop similar internal representations of safety-relevant concepts, even when specific architectures
+      and proprietary details differ significantly between them.
+    </p>
+    <p>
+      Zou et al. propose that a suffix optimized on one model occupies a similar geometric region in other
+      models' embedding spaces, because alignment training on similar data creates similar internal structures.
+      When GCG finds a suffix that pushes Vicuna toward a harmful completion, that suffix is navigating a region
+      of the embedding space that corresponds to low safety inhibition — and other safety-aligned models share a
+      geometrically similar structure in that same region, making the transfer attack effective.
+    </p>
+    <p>
+      This is a deep point about the nature of safety alignment as it is currently practiced. It suggests that
+      surface-level differences between models — different parameter counts, different architectures, different
+      proprietary training details — do not fully insulate them from transfer attacks, because the
+      safety-relevant geometry emerges from shared training objectives and shared data distributions. An
+      adversarial suffix is not merely a syntactic trick; it is a structured input that exploits the shared
+      geometric consequences of similar alignment procedures across a family of models.
+    </p>
+
+    <div class="callout key">
+      <strong>Key Insight:</strong> GCG is the first fully automated, gradient-based method for adversarial
+      suffix optimization against aligned LLMs — and its most striking result is not the white-box attack itself,
+      but the demonstration that suffixes transfer to black-box commercial models. Safety alignment on a closed
+      system does not provide immunity against adversaries with gradient access to any open-source model in the
+      same general family, because alignment training on similar data creates similar internal safety geometry
+      across models.
+    </div>
+
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> It is tempting to assume that the unintelligibility of GCG suffixes
+      makes them easy to filter — a simple perplexity check or token-anomaly detector could flag the nonsense
+      sequences before they reach the model. In practice, this surface-level defense is incomplete. Adversaries
+      can incorporate fluency or perplexity constraints directly into the GCG optimization objective to produce
+      more natural-looking suffixes, and the underlying vulnerability — the exploitable safety geometry shared
+      across aligned models — is not addressed by input filtering alone. Filtering is a partial mitigation, not
+      a structural solution.
+    </div>
+
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">What does the GCG algorithm directly optimize when constructing an adversarial suffix?</p>
+      <div class="quiz-options">
+        <button>Minimize model loss on desired harmful output response text</button>
+        <button>Maximize cosine distance between suffix tokens and safety embeddings</button>
+        <button>Reduce token perplexity so the suffix avoids detection systems</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Consider the GCG adversarial suffix concept from Zou et al.: a token string appended to a harmful
+        request that causes the model to begin its response affirmatively. Annotate its structural properties
+        in three parts: (1) State what the gradient optimization target is — what loss is being minimized and
+        against what desired output. (2) Describe what the initialization string looks like and why
+        initialization matters. (3) State the transfer hypothesis in exactly one sentence. Then write two
+        sentences explaining why the suffix should (or should not) transfer to a model it was never optimized on.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+    </div>
+
+    <nav class="lesson-nav">
+      <a href="0002-lm-as-red-teamer.html">&#8592; Previous</a>
+      <a class="primary" href="0004-autodan-evolutionary-jailbreaks.html">Next &#8594;</a>
+    </nav>
+
+  </div>
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'The correct answer is option A. GCG directly minimizes the model\'s loss on a desired harmful completion — this is the gradient signal that drives token replacement at each step of the algorithm. Option B is incorrect because GCG does not compute or maximize cosine distance between suffix tokens and safety embeddings; that would be a fundamentally different optimization formulation with no basis in the paper. Option C is incorrect because reducing perplexity is not the objective — GCG-optimized suffixes typically exhibit high perplexity precisely because they are optimized purely for loss reduction, not linguistic naturalness.'
+    );
+  </script>
+</body>
+</html>

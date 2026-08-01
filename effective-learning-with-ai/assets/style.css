@@ -1,0 +1,372 @@
+/* Shared stylesheet for AI Tutoring Systems course */
+/* Tufte-inspired — clean, readable, print-ready */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --text:       #1a1a1a;
+  --muted:      #555;
+  --accent:     #2563eb;
+  --accent-bg:  #eff6ff;
+  --border:     #e2e8f0;
+  --bg:         #fafaf8;
+  --card-bg:    #ffffff;
+  --success:    #16a34a;
+  --error:      #dc2626;
+  --warning:    #d97706;
+  --code-bg:    #f1f5f9;
+  --max-w:      720px;
+}
+
+html { font-size: 18px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.7;
+  margin: 0;
+  padding: 2rem 1rem 6rem;
+}
+
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+/* ─── Header ─────────────────────────────────────────── */
+
+.lesson-header {
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.breadcrumb {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.breadcrumb a { color: var(--accent); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+.lesson-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.lesson-meta span::before { margin-right: 0.3em; }
+
+/* ─── Typography ─────────────────────────────────────── */
+
+h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.5rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: system-ui, sans-serif;
+}
+
+p { margin: 0 0 1rem; }
+
+a { color: var(--accent); }
+
+strong { font-weight: 600; }
+
+em { font-style: italic; }
+
+ul, ol {
+  padding-left: 1.5rem;
+  margin: 0 0 1rem;
+}
+
+li { margin-bottom: 0.35rem; }
+
+code {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.82em;
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
+blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.25rem;
+  background: var(--accent-bg);
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ─── Callout boxes ──────────────────────────────────── */
+
+.callout {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  background: var(--card-bg);
+}
+
+.callout.key {
+  border-left: 4px solid var(--accent);
+  background: var(--accent-bg);
+}
+
+.callout.warning {
+  border-left: 4px solid var(--warning);
+  background: #fffbeb;
+}
+
+.callout-title {
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+}
+
+.callout.warning .callout-title { color: var(--warning); }
+
+/* ─── Source citation ────────────────────────────────── */
+
+.source-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+  margin: 1.5rem 0;
+  background: var(--card-bg);
+  font-size: 0.85rem;
+}
+
+.source-card .source-label {
+  font-family: system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.source-card strong { display: block; margin-bottom: 0.3rem; }
+
+/* ─── Quiz widget ────────────────────────────────────── */
+
+.quiz {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  background: var(--card-bg);
+}
+
+.quiz-title {
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.quiz-question {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.quiz-options {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quiz-options li {
+  margin: 0;
+}
+
+.quiz-options button {
+  width: 100%;
+  text-align: left;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--text);
+}
+
+.quiz-options button:hover { border-color: var(--accent); background: var(--accent-bg); }
+.quiz-options button.correct { border-color: var(--success); background: #f0fdf4; color: var(--success); font-weight: 600; }
+.quiz-options button.incorrect { border-color: var(--error); background: #fef2f2; color: var(--error); }
+.quiz-options button:disabled { cursor: default; }
+
+.quiz-feedback {
+  font-size: 0.88rem;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  display: none;
+  margin-top: 0.5rem;
+}
+
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct { background: #f0fdf4; color: var(--success); }
+.quiz-feedback.incorrect { background: #fef2f2; color: var(--error); }
+
+/* ─── Skill exercise ─────────────────────────────────── */
+
+.exercise {
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  background: var(--accent-bg);
+}
+
+.exercise-title {
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.exercise textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: 'Lora', Georgia, serif;
+  font-size: 0.9rem;
+  resize: vertical;
+  margin-top: 0.5rem;
+  background: var(--card-bg);
+}
+
+/* ─── Nav footer ─────────────────────────────────────── */
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  gap: 1rem;
+}
+
+.lesson-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  text-decoration: none;
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--card-bg);
+  transition: border-color 0.15s;
+}
+
+.lesson-nav a:hover { border-color: var(--accent); color: var(--accent); }
+.lesson-nav a.primary { background: var(--accent); border-color: var(--accent); color: white; }
+.lesson-nav a.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+
+/* ─── Ask your tutor banner ──────────────────────────── */
+
+.tutor-prompt {
+  margin: 3rem 0 0;
+  padding: 1rem 1.25rem;
+  border: 1px dashed var(--accent);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ─── Table ──────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 1.5rem 0;
+}
+
+th {
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:last-child td { border-bottom: none; }
+
+/* ─── Print ──────────────────────────────────────────── */
+
+@media print {
+  body { padding: 0; background: white; }
+  .lesson-nav, .tutor-prompt { display: none; }
+  .quiz-options button { border: 1px solid #ccc; background: white; }
+}
+
+/* ─── Responsive ─────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  .lesson-nav { flex-direction: column; }
+  .lesson-nav a { width: 100%; justify-content: center; }
+}

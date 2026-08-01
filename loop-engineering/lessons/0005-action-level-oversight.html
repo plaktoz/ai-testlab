@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 5 — Designing Oversight at the Action Level</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <header class="lesson-header">
+    <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 2 — Human Oversight › Lesson 5 of 12</p>
+    <h1>Designing Oversight at the Action Level</h1>
+    <div class="lesson-meta">
+      <span>~20 min</span>
+      <span>Module 2 — Human Oversight</span>
+    </div>
+  </header>
+
+  <div class="source-card">
+    <div class="source-card-label">Primary Source</div>
+    <p><a href="https://huyenchip.com/2025/01/07/agents.html">Chip Huyen — Agents (2025) + Anthropic — Building Effective Agents</a></p>
+    <p>Huyen frames human oversight as a continuum where humans can intervene at any stage — providing plans, validating them, or approving risky operations. The key design principle is defining automation level per action type, not per system.</p>
+  </div>
+
+  <h2>Per-Action Autonomy: Beyond System-Level Settings</h2>
+  <p>Lesson 4 introduced the HITL spectrum as a way to classify entire systems — fully manual, supervised, or fully autonomous. This lesson shifts the unit of analysis from system to action.</p>
+  <p>Chip Huyen argues that the most practical way to implement oversight is not to pick a single autonomy level for an agent system and apply it uniformly. Instead, automation level should be defined per action type. A single agent might run hundreds of read-only lookups autonomously while still pausing for explicit human approval before deleting a record or sending an email.</p>
+  <p>This per-action framing is the design principle that makes the HITL spectrum actionable at the architecture level. Rather than asking "how autonomous is this system?", the useful question becomes "how autonomous is each specific action this system takes?"</p>
+
+  <h2>Reversibility and Consequence Severity</h2>
+  <p>Two dimensions determine where any given action falls on the oversight spectrum: reversibility and consequence severity.</p>
+  <p><strong>Reversibility</strong> asks whether the action can be undone if the agent made an error. Reading a file is fully reversible — no state changes. Sending an email or deleting a database record is not reversible: the action cannot be recalled once executed.</p>
+  <p><strong>Consequence severity</strong> asks how much damage an incorrect execution causes. Querying an API may be technically reversible but if it triggers a billing charge or an external side effect, its effective severity may be medium or high regardless.</p>
+  <p>Together, these two dimensions produce a policy table that can be evaluated at runtime. Actions that are both reversible and low-severity — such as reading a file — flow straight to execution with no human pause. Actions that are irreversible or high-severity — such as sending email or deleting a record — trigger a checkpoint before the agent is allowed to proceed.</p>
+
+  <h2>The Intern Analogy</h2>
+  <p>Chip Huyen grounds the severity-based rule in a concrete analogy: "Just as you shouldn't give an intern the authority to delete your production database, you shouldn't allow an unreliable AI to initiate bank transfers."</p>
+  <p>The analogy captures two things at once. First, it establishes that capability and authorization are distinct — an agent (or an intern) may be technically capable of executing an action while still lacking the organizational trust required to do so autonomously. Second, it establishes that the appropriate level of oversight scales with the consequence of error, not merely the competence of the actor.</p>
+  <p>A senior engineer can delete a production database because trust has been established through a track record. An AI agent earns equivalent trust through demonstrated reliability over time — not by default at deployment. Until that track record exists, the safe default is to gate actions proportional to their consequences.</p>
+
+  <h2>Placing Checkpoints in Your Loop</h2>
+  <p>Anthropic's guidance on checkpoint placement is direct: build human checkpoints at natural pause points within the agentic loop, particularly before irreversible actions and when the agent encounters ambiguity or blockers it cannot resolve on its own.</p>
+  <p>Critically, this is framed as a design choice in the loop's stopping conditions — not an external add-on bolted on after the fact. Checkpoints are first-class citizens of the loop architecture. The practical workflow is: identify which steps in your loop are irreversible, then place human-in-the-loop gates before those steps.</p>
+  <p>Anthropic further recommends that well-designed agent systems should request only the permissions they actually need, prefer reversible actions where equivalent alternatives exist, and err toward doing less and confirming with users when uncertain about intended scope. A reversibility and severity matrix operationalizes this recommendation directly in code.</p>
+
+  <div class="callout key">
+    <span class="callout-label">Key Insight</span>
+    Oversight is a property of actions, not of systems. The same agent can execute low-risk actions fully autonomously while requiring explicit human approval for irreversible or high-severity steps — setting oversight per action type prevents both over-restriction of routine work and under-protection of consequential operations.
+  </div>
+
+  <div class="callout warning">
+    <span class="callout-label">Watch Out</span>
+    Setting a single oversight level for an entire agent system is a common design mistake. Applied uniformly, a conservative setting creates unnecessary friction on every low-risk action; a permissive setting leaves high-severity actions unchecked. Per-action policy takes more upfront design work but avoids both failure modes.
+  </div>
+
+  <h2>LangGraph Implementation</h2>
+  <p>The <code>gate</code> node checks each incoming action against a policy table keyed on reversibility and consequence severity — only actions that fail the policy (irreversible or high/critical severity) call <code>interrupt()</code>, so cheap read-only actions like <code>read_file</code> flow straight to <code>execute</code> with no human pause. Add new action types to <code>ACTION_POLICY</code> to extend coverage without changing the graph structure.</p>
+
+  <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.types import interrupt, Command
+from typing import TypedDict
+
+ACTION_POLICY = {
+    "read_file":     {"reversible": True,  "severity": "low"},
+    "write_file":    {"reversible": True,  "severity": "medium"},
+    "query_api":     {"reversible": True,  "severity": "medium"},
+    "send_email":    {"reversible": False, "severity": "high"},
+    "delete_record": {"reversible": False, "severity": "critical"},
+}
+
+def needs_gate(action: str) -> bool:
+    policy = ACTION_POLICY.get(action, {"reversible": False, "severity": "critical"})
+    return not policy["reversible"] or policy["severity"] in ("high", "critical")
+
+class ActionState(TypedDict):
+    action: str
+    payload: dict
+    result: str
+
+def gate(state: ActionState) -> dict:
+    if needs_gate(state["action"]):
+        policy = ACTION_POLICY.get(state["action"], {})
+        answer = interrupt({
+            "action": state["action"],
+            "severity": policy.get("severity"),
+            "reversible": policy.get("reversible"),
+            "message": "Irreversible or high-severity — approve?",
+        })
+        if answer != "yes":
+            return {"result": "blocked by oversight gate"}
+    return {}
+
+def execute(state: ActionState) -> dict:
+    if state.get("result"):
+        return {}   # already blocked upstream
+    return {"result": f"executed {state['action']}({state['payload']})"}
+
+checkpointer = MemorySaver()
+builder = StateGraph(ActionState)
+builder.add_node("gate", gate)
+builder.add_node("execute", execute)
+builder.set_entry_point("gate")
+builder.add_edge("gate", "execute")
+builder.add_edge("execute", END)
+
+app = builder.compile(checkpointer=checkpointer)
+config = {"configurable": {"thread_id": "action-1"}}
+
+# send_email triggers interrupt; read_file flows straight through
+app.invoke({"action": "send_email", "payload": {"to": "team@co.com"}, "result": ""}, config=config)
+# app.invoke(Command(resume="yes"), config=config)   # to approve</code></pre>
+
+  <div class="quiz" id="quiz-5">
+    <h3>Check Your Understanding</h3>
+    <p class="quiz-question">What is the key design principle Chip Huyen recommends for assigning human oversight in agent systems?</p>
+    <div class="quiz-options">
+      <button>Define the automation level per action type</button>
+      <button>Use one global oversight rule for all</button>
+      <button>Always require human approval before any action</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="exercise">
+    <h3>Skill Exercise</h3>
+    <p>Given a list of five agent actions — read file, write file, send email, delete record, query API — rate each on a reversibility/consequence matrix and assign an oversight level (autonomous, supervised, or human-in-the-loop). Then identify where in the loop you would insert a human gate, and explain your reasoning for the highest-severity action on the list.</p>
+    <textarea placeholder="Write your response here..."></textarea>
+  </div>
+
+  <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+  <nav class="lesson-nav">
+    <a href="0004-hitl-spectrum.html">← Previous</a>
+    <a href="0006-reflection-loops.html" class="primary">Next →</a>
+  </nav>
+
+  <script src="../assets/quiz.js"></script>
+  <script>initQuiz('quiz-5', 0, 'Chip Huyen\'s key principle is that automation level should be defined per action type — not applied uniformly across the whole system. This lets a single agent run low-risk actions autonomously while still pausing for human approval on irreversible or high-severity steps.');</script>
+
+</div>
+</body>
+</html>

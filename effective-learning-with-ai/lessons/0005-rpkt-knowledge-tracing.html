@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 5 — Dynamic Knowledge Tracing | AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ──────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <p class="breadcrumb">
+      <a href="../index.html">AI Tutoring Systems</a> ›
+      Module 2: Technical Architecture ›
+      Lesson 5 of 13
+    </p>
+    <h1>Dynamic Knowledge Tracing — Finding What Students Don't Know They Don't Know</h1>
+    <div class="lesson-meta">
+      <span>Module 2 — Technical Architecture</span>
+      <span>Lesson 5 of 13</span>
+    </div>
+  </header>
+
+  <!-- ─── Source ──────────────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>RPKT: Recursive Prerequisite Knowledge Tracing in Conversational AI Tutors</strong>
+    <a href="https://arxiv.org/abs/2508.11892" target="_blank" rel="noopener">arxiv.org/abs/2508.11892</a>
+    — demonstrated across computer science domains
+  </div>
+
+  <!-- ─── 1. The Unknown Unknowns Problem ─────────────────── -->
+  <h2>The Unknown Unknowns Problem</h2>
+
+  <p>
+    Standard curriculum design rests on a flawed assumption: that students can accurately
+    self-report what they do and don't understand. In practice, a learner might confidently
+    claim they know recursion while holding a fundamentally broken mental model of the call
+    stack. They have never been shown the gap — so they cannot name it.
+  </p>
+
+  <p>
+    Quiz-based assessments only surface what the instructor thought to test. If the quiz
+    author didn't anticipate that a student might confuse stack frames with heap allocation,
+    the confusion goes undetected. The result is a student who progresses through material
+    without the foundations they actually need, and an AI tutor that answers questions
+    fluently without ever diagnosing the underlying misunderstanding.
+  </p>
+
+  <p>
+    This is the unknown unknowns problem: <strong>the knowledge gaps that matter most
+    are precisely the ones neither the student nor a static assessment can surface</strong>.
+  </p>
+
+  <!-- ─── 2. Why Static Knowledge Graphs Fall Short ───────── -->
+  <h2>Why Static Knowledge Graphs Fall Short</h2>
+
+  <p>
+    One response to the unknown unknowns problem is to build a detailed knowledge graph
+    (KG) in advance — a map of every concept in a domain and every prerequisite relationship
+    between them. An AI tutor can then walk this graph to identify where a student's
+    understanding breaks down.
+  </p>
+
+  <p>
+    The problem is that hand-authored KGs are fragile in practice:
+  </p>
+
+  <ul>
+    <li><strong>They go stale.</strong> Curricula evolve, new frameworks emerge, and the
+    relationships between concepts shift. A graph authored two years ago may no longer
+    reflect how practitioners think about a domain.</li>
+    <li><strong>They miss edge cases.</strong> Human authors encode the obvious prerequisite
+    chains but often miss the subtle conceptual dependencies that trip real students up.</li>
+    <li><strong>They don't transfer.</strong> A KG painstakingly built for introductory
+    Python is useless when you need a tutor for, say, distributed consensus protocols.
+    You'd need a domain expert to build a new graph from scratch for every subject.</li>
+  </ul>
+
+  <p>
+    This last point is especially limiting for the ambition of general-purpose AI tutoring.
+    If every new domain requires months of expert curation, the system cannot scale.
+  </p>
+
+  <!-- ─── 3. RPKT's Solution ──────────────────────────────── -->
+  <h2>RPKT's Solution: Dynamic Prerequisite Extraction at Runtime</h2>
+
+  <p>
+    RPKT — Recursive Prerequisite Knowledge Tracing — takes a different approach. Rather
+    than relying on a pre-built graph, it uses an LLM to generate prerequisite relationships
+    <em>dynamically</em>, at the moment they are needed.
+  </p>
+
+  <p>
+    The core insight is that large language models already encode a substantial understanding
+    of how concepts relate to one another within their training data. When a student struggles
+    with concept X, RPKT asks the LLM: <em>"What must a student already understand in
+    order to grasp X?"</em> The LLM returns a set of prerequisite concepts. RPKT then
+    probes the student on each of those, and if a gap is found, it recurses — asking the
+    same question about the prerequisite concept, and so on down the dependency tree.
+  </p>
+
+  <p>
+    The process terminates when the student demonstrates understanding at the bottom of a
+    branch, or when no deeper prerequisites can be generated. What emerges is a
+    <strong>hierarchical learning path tailored to this student, for this concept,
+    at this moment</strong> — generated entirely at runtime with no pre-built curriculum.
+  </p>
+
+  <!-- ─── 4. How Recursive Tracing Works ──────────────────── -->
+  <h2>How the Recursive Trace Works</h2>
+
+  <p>
+    RPKT walks the prerequisite dependency tree depth-first. The algorithm follows a
+    consistent pattern at each step:
+  </p>
+
+  <ol>
+    <li><strong>Start at the target concept.</strong> The student has indicated difficulty
+    with, or the system has detected confusion about, a specific concept.</li>
+    <li><strong>Extract prerequisites via LLM.</strong> Query the LLM for the set of
+    concepts a student must understand before they can understand this one.</li>
+    <li><strong>Probe the student on each prerequisite.</strong> Ask a targeted question
+    that reveals whether the student has a working understanding of each prerequisite
+    concept — not just a surface-level definition.</li>
+    <li><strong>If a gap is found, recurse.</strong> Treat the prerequisite concept as the
+    new target and repeat from step 2. This generates a deeper branch of the dependency
+    tree.</li>
+    <li><strong>If no gap is found, move on.</strong> The student is solid on this
+    prerequisite; continue checking the remaining ones at this level.</li>
+  </ol>
+
+  <p>
+    Because the trace is depth-first, RPKT follows one branch all the way to its root
+    before backtracking. The result is a precise identification of the <em>actual</em>
+    knowledge boundary — not a guess based on what the curriculum designer thought to
+    include.
+  </p>
+
+  <!-- ─── 5. No Pre-Built Curriculum ──────────────────────── -->
+  <div class="callout key">
+    <div class="callout-title">Key Design Win</div>
+    <p>
+      RPKT requires no pre-built curriculum. Because prerequisite relationships are
+      generated by the LLM at runtime, the system works in any domain where the LLM has
+      sufficient training knowledge to reason about concept dependencies. This makes it
+      tractable to build an adaptive AI tutor for arbitrary topics — without hiring domain
+      experts to hand-author a knowledge graph for each one.
+    </p>
+  </div>
+
+  <p>
+    This portability is the defining advantage over static KG approaches. Deploying RPKT
+    to a new domain — say, Byzantine fault tolerance, or financial derivatives pricing —
+    requires no additional upfront work. The prerequisite graph is generated fresh for
+    every student interaction.
+  </p>
+
+  <!-- ─── 6. Comparison to Static KG ──────────────────────── -->
+  <h2>RPKT vs. Static Knowledge Graphs</h2>
+
+  <p>
+    Lesson 4 covered KG-RAG: a system that uses a hand-authored knowledge graph to guide
+    retrieval, ensuring that answers are grounded in validated, structured domain knowledge.
+    RPKT and KG-RAG solve different problems and are designed to be complementary.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Static Knowledge Graph (KG-RAG)</th>
+        <th>RPKT (Dynamic Tracing)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Graph construction</strong></td>
+        <td>Hand-authored by domain experts before deployment</td>
+        <td>Generated by LLM at runtime, on demand</td>
+      </tr>
+      <tr>
+        <td><strong>Primary purpose</strong></td>
+        <td>Grounding answers in validated, structured knowledge</td>
+        <td>Discovering the student's actual knowledge boundary</td>
+      </tr>
+      <tr>
+        <td><strong>Domain portability</strong></td>
+        <td>Low — requires expert curation per domain</td>
+        <td>High — works in any domain the LLM knows well</td>
+      </tr>
+      <tr>
+        <td><strong>Handles unknown unknowns?</strong></td>
+        <td>Only if the gap was anticipated in the graph</td>
+        <td>Yes — recursion surfaces unanticipated gaps</td>
+      </tr>
+      <tr>
+        <td><strong>Best used for</strong></td>
+        <td>Retrieving precise, trustworthy explanations</td>
+        <td>Generating adaptive learning paths from a gap</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    In a well-designed AI tutoring system, both components earn their place: KG-RAG
+    ensures that the content delivered is accurate and well-structured; RPKT ensures
+    that the content delivered is the content the student actually needs.
+  </p>
+
+  <!-- ─── Quiz ─────────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-5">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      RPKT differs from a static knowledge graph primarily because it:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button>
+          A. Requires a team of domain experts to hand-author all concept nodes and prerequisite edges upfront
+        </button>
+      </li>
+      <li>
+        <button>
+          B. Uses an LLM to generate prerequisite relationships dynamically when a student shows a knowledge gap
+        </button>
+      </li>
+      <li>
+        <button>
+          C. Retrieves pre-written explanations from a fixed database rather than generating new content with an LLM
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback">
+      RPKT generates prerequisites at runtime using an LLM, eliminating the need for a
+      pre-built curriculum and making the system portable to any domain.
+    </div>
+  </div>
+
+  <!-- ─── Exercise ─────────────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Skill Exercise</div>
+    <p>
+      Pick any programming concept — for example, <em>promises in JavaScript</em>,
+      <em>binary search</em>, or <em>SQL joins</em>. Trace the prerequisite chain manually:
+      what must a student know first? Go at least three levels deep. This is exactly what
+      RPKT automates.
+    </p>
+    <p>
+      Example starting point: <strong>Binary search</strong> requires understanding
+      sorted arrays → which requires understanding array indexing → which requires
+      understanding contiguous memory allocation. What does your chosen concept require?
+    </p>
+    <textarea placeholder="Concept: &#10;Level 1 prerequisite: &#10;Level 2 prerequisite: &#10;Level 3 prerequisite: &#10;&#10;Notes on what surprised you about the dependency chain:"></textarea>
+  </div>
+
+  <!-- ─── Tutor Prompt ──────────────────────────────────────── -->
+  <div class="tutor-prompt">
+    <strong>Ask your tutor:</strong> "Walk me through how RPKT would trace the prerequisites
+    if a student said they didn't understand closures in JavaScript."
+  </div>
+
+  <!-- ─── Navigation ────────────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0004-kg-rag-architecture.html">&#8592; Lesson 4: KG-RAG Architecture</a>
+    <a href="0006-multi-agent-learning-path.html" class="primary">Lesson 6: Multi-Agent Learning Paths &#8594;</a>
+  </nav>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  // Correct answer is option B (index 1)
+  initQuiz('quiz-5', 1,
+    'RPKT generates prerequisites at runtime using an LLM, eliminating the need for a ' +
+    'pre-built curriculum and making the system portable to any domain.'
+  );
+</script>
+</body>
+</html>

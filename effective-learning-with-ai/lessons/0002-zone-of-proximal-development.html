@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2: Zone of Proximal Development — Teaching at the Edge · AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- ─── Header ─────────────────────────────────────── -->
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        AI Tutoring Systems &rsaquo; Module 1: Learning Science &rsaquo; Lesson 2 of 13
+      </div>
+      <h1>Zone of Proximal Development — Teaching at the Edge</h1>
+      <div class="lesson-meta">
+        <span>&#8987; ~12 min</span>
+        <span>Module 1: Learning Science Foundations</span>
+      </div>
+    </header>
+
+    <!-- ─── Source card ────────────────────────────────── -->
+    <div class="source-card">
+      <div class="source-label">Primary Source</div>
+      <strong>Inquizzitor: Human-AI Hybrid Intelligence for Formative Assessment (AAAI 2026)</strong>
+      <a href="https://arxiv.org/abs/2508.01503" target="_blank" rel="noopener">arxiv.org/abs/2508.01503</a>
+      — Evidence-Centered Design, Social Cognitive Theory, and Vygotsky's ZPD as theoretical foundations for adaptive formative assessment.
+    </div>
+
+    <!-- ─── Key Concepts ───────────────────────────────── -->
+    <h2>Key Concepts</h2>
+
+    <p>
+      Lev Vygotsky's <strong>Zone of Proximal Development (ZPD)</strong> describes the gap between two levels of a learner's ability: what they can accomplish entirely on their own, and what they can accomplish with guidance from a more knowledgeable other. The ZPD is not a fixed property of a student — it shifts constantly as competence grows.
+    </p>
+
+    <p>
+      This gap is where learning actually happens. Below the ZPD, tasks are already mastered — completing them produces no new knowledge, only practice of what is already known. Above the ZPD, the challenge exceeds any scaffold the learner can use — the result is confusion and cognitive overload, not growth. The productive zone is the edge: hard enough to require effort, achievable enough that guidance can bridge the gap.
+    </p>
+
+    <p>
+      For an AI tutoring system, this creates a precise design requirement. The system must not just track whether a student answers correctly. It must continuously estimate <em>where the boundary sits</em> — and ensure that every question it poses lands just inside that boundary, on the hard side.
+    </p>
+
+    <div class="callout key">
+      <div class="callout-title">Core Insight</div>
+      A student who scores 100% on every question is not being taught in the ZPD. Perfect performance is a signal to scaffold up, not a signal that the system is working well. The AI tutor's job is to find the edge and keep the student there.
+    </div>
+
+    <!-- ─── The Three Pillars ──────────────────────────── -->
+    <h2>The Three Pillars</h2>
+
+    <p>
+      The Inquizzitor framework grounds its adaptive assessment design in three complementary theoretical foundations. Each one addresses a different dimension of the learning problem: how to measure competence, how beliefs shape learning, and where to target instruction.
+    </p>
+
+    <h3>1. Evidence-Centered Design (ECD)</h3>
+
+    <p>
+      Evidence-Centered Design begins with a question most assessment systems never ask: what exactly do you want to observe, and what evidence would tell you it is present? ECD works backwards from the desired competency.
+    </p>
+
+    <p>
+      The framework has three linked models:
+    </p>
+
+    <ul>
+      <li><strong>Competency model</strong> — what knowledge and skills the student is expected to develop. This is the target.</li>
+      <li><strong>Task model</strong> — what kinds of tasks or questions would require a student to demonstrate those competencies.</li>
+      <li><strong>Evidence model</strong> — what observable student responses count as evidence that the competency is present or absent.</li>
+    </ul>
+
+    <p>
+      Designing backwards forces precision. Without an evidence model, it is easy to mistake task completion for competency. A student who memorizes the right answers to a fixed question bank is producing surface behavior, not demonstrating deep understanding. ECD demands that assessment tasks be genuinely diagnostic — that the student's response can only be produced by someone who actually possesses the targeted competency.
+    </p>
+
+    <h3>2. Social Cognitive Theory</h3>
+
+    <p>
+      Albert Bandura's Social Cognitive Theory holds that learning is not purely a matter of receiving content. It is shaped by three interacting factors: the student's <strong>self-efficacy beliefs</strong> (whether they believe they can succeed), observation of others performing the skill, and the quality of feedback they receive about their own performance.
+    </p>
+
+    <p>
+      Self-efficacy is particularly important for AI tutor design. A student who has failed repeatedly may have low self-efficacy even in areas where their underlying ability is sufficient to succeed with modest scaffolding. A system that only tracks correctness will misread this student — interpreting failures as evidence of low competency rather than as evidence of a belief problem that requires a different intervention.
+    </p>
+
+    <p>
+      Feedback, in Social Cognitive Theory, is not merely informational. It is also motivational. Feedback that accurately reflects the student's performance, connects success to effort rather than fixed ability, and points toward a specific next step tends to raise self-efficacy and increase persistence. Feedback that is generic, punitive, or disconnected from the student's actual reasoning does the opposite.
+    </p>
+
+    <h3>3. Vygotsky's ZPD (as Adaptive Scaffolding Target)</h3>
+
+    <p>
+      The ZPD ties the first two pillars together. ECD defines what to measure and how. Social Cognitive Theory explains how beliefs and feedback mediate whether the student can engage productively. ZPD answers the question of <em>where</em> to pitch the task: always at the learner's edge.
+    </p>
+
+    <p>
+      Scaffolding in the ZPD context means temporary support structures — hints, partial solutions, guided questions — that enable a student to reach a conclusion they could not have reached alone. As the student internalizes the skill, the scaffold is reduced. Crucially, the scaffold is not a crutch: it is a bridge. A tutor that permanently supplies hints is not scaffolding; it is substituting its own competency for the student's.
+    </p>
+
+    <!-- ─── ZPD in Practice ────────────────────────────── -->
+    <h2>ZPD in Practice</h2>
+
+    <h3>Human-AI hybrid intelligence</h3>
+
+    <p>
+      Inquizzitor's central architectural decision is that neither AI nor human judgment alone is sufficient for reliable adaptive assessment. The AI generates formative questions and adjusts difficulty dynamically based on student responses. But human judgment — specifically, teacher calibration — informs how the system's difficulty model maps onto real-world competency.
+    </p>
+
+    <p>
+      Teachers possess contextual knowledge that the AI cannot infer from response patterns alone: whether the class just covered a prerequisite, whether a student is having a difficult week, whether a topic requires cultural familiarity the AI cannot assess. This human layer corrects for blind spots in the AI's student model. The hybrid design treats AI and human as complementary estimators of the same ZPD boundary, each with information the other lacks.
+    </p>
+
+    <h3>Estimating the ZPD boundary continuously</h3>
+
+    <p>
+      A student model that only tracks correctness is insufficient. Correctness alone cannot distinguish among three very different students who all scored 8/10 on a quiz:
+    </p>
+
+    <ul>
+      <li>A student who found all ten questions straightforward and guessed on two (operating below ZPD).</li>
+      <li>A student who struggled on four questions but worked through them successfully with effort (operating in ZPD).</li>
+      <li>A student who understood eight questions confidently but was blocked by two that introduced new vocabulary (operating at ZPD ceiling).</li>
+    </ul>
+
+    <p>
+      A richer student model incorporates response time, hint usage, confidence signals, error patterns, and performance trajectory across sessions. These signals help the system triangulate whether the student is coasting, productively struggling, or hitting genuine confusion — and adjust accordingly.
+    </p>
+
+    <h3>The scaffolding decision loop</h3>
+
+    <p>
+      In practice, adaptive scaffolding in the ZPD follows a clear decision structure:
+    </p>
+
+    <ul>
+      <li><strong>Start at the edge.</strong> Pose a prompt the student can almost-but-not-quite answer without help. This is the target state.</li>
+      <li><strong>If the student fails completely</strong> — no partial answer, no productive attempt — scaffold down. The edge was miscalibrated; the task landed above the ZPD. Offer a simpler version or a bridging hint.</li>
+      <li><strong>If the student answers easily with no effort</strong> — scaffold up immediately. The student is operating below the ZPD floor. Increase difficulty before the next question.</li>
+      <li><strong>If the student struggles but succeeds</strong> — this is the productive zone. Maintain the difficulty level or advance modestly.</li>
+    </ul>
+
+    <div class="callout warning">
+      <div class="callout-title">Common Mistake</div>
+      Treating high accuracy as a success metric for the AI tutor. If the system's goal is to keep students in the ZPD, then high accuracy is evidence the system is failing — the difficulty is too low. A well-calibrated AI tutor should produce moderate error rates by design, because it is operating at the student's current edge.
+    </div>
+
+    <!-- ─── Quiz ────────────────────────────────────────── -->
+    <div class="quiz" id="quiz-2">
+      <div class="quiz-title">Check Your Understanding</div>
+      <p class="quiz-question">A student scores 95% on every quiz without any difficulty. From a ZPD perspective, what should the AI tutor do?</p>
+      <ul class="quiz-options">
+        <li>
+          <button type="button">
+            A. Continue at the same level since high scores prove the student has mastered all the material
+          </button>
+        </li>
+        <li>
+          <button type="button">
+            B. Immediately increase the difficulty level because the student is currently performing below their ZPD upper boundary
+          </button>
+        </li>
+        <li>
+          <button type="button">
+            C. Record the scores as evidence of mastery and move the student to the next curriculum module
+          </button>
+        </li>
+      </ul>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ─── Skill exercise ─────────────────────────────── -->
+    <div class="exercise">
+      <div class="exercise-title">Skill Exercise — Calibrating the ZPD Boundary</div>
+      <p>
+        You are calibrating an AI tutor for a new student who just answered three questions: one correct, one correct with a hint, one wrong. Write a one-paragraph assessment of where their ZPD boundary likely sits and what you would do next.
+      </p>
+      <textarea placeholder="Write your assessment here…" rows="6" aria-label="ZPD calibration exercise response"></textarea>
+    </div>
+
+    <!-- ─── Lesson nav ──────────────────────────────────── -->
+    <nav class="lesson-nav" aria-label="Lesson navigation">
+      <a href="0001-two-enemies-of-learning.html">&larr; Previous: Two Enemies of Learning</a>
+      <a href="0003-learning-performance-paradox.html" class="primary">Next: Learning-Performance Paradox &rarr;</a>
+    </nav>
+
+    <!-- ─── Tutor prompt ───────────────────────────────── -->
+    <div class="tutor-prompt">
+      Confused about where the ZPD boundary sits for a particular student? Paste your student's response pattern and ask your AI tutor to help you calibrate.
+    </div>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    // Quiz 2: correct answer is B (index 1, zero-based)
+    initQuiz(
+      'quiz-2',
+      1,
+      'A 95% score with no difficulty signals the student is operating below their ZPD ceiling — the AI should scaffold up immediately to push them into the productive struggle zone.'
+    );
+  </script>
+</body>
+</html>

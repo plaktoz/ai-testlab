@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 11 — Three Hard Structural Problems in Loop Design</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb"><a href="../lessons.md">Loop Engineering</a> › Module 4 — Failure Modes and Robust Design › Lesson 11 of 12</p>
+      <h1>Three Hard Structural Problems in Loop Design</h1>
+      <div class="lesson-meta">
+        <span>~25 min</span>
+        <span>Module 4 — Failure Modes and Robust Design</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <p class="source-card-label">Primary Source</p>
+      <p><a href="https://lilianweng.github.io/posts/2023-06-23-agent/">Lilian Weng — LLM Powered Autonomous Agents (2023)</a></p>
+      <p>The seminal survey of LLM agent architectures identifies three structural challenges that affect every loop: finite context limits historical awareness, LLMs struggle with long-horizon replanning when early errors compound, and natural language interface fragility requires significant output-parsing code. Each challenge has a direct architectural response.</p>
+    </div>
+
+    <h2>Why These Problems Are Structural</h2>
+
+    <p>The failure taxonomy in Lesson 10 catalogued what goes wrong inside a loop — bad tool calls, invalid plans, runaway iterations. This lesson steps back to a different level: three challenges that are not implementation bugs but structural properties of LLM-based loops themselves.</p>
+
+    <p>Lilian Weng's 2023 survey of LLM agent architectures names these three as the hardest problems in loop design because they cannot be fixed by writing better prompts or choosing a better model. They arise from the way transformers process sequences and the way natural language is used as an interface between the loop's components. Understanding them changes how you design loops from the start.</p>
+
+    <h2>Problem 1: Finite Context Limits</h2>
+
+    <p>Every LLM operates within a bounded context window. In a loop that runs for many iterations — research tasks, multi-day planning, long customer conversations — early observations, decisions, and tool results eventually scroll out of the model's active window. Once lost, they cannot be recovered within that run.</p>
+
+    <p>This creates an asymmetry: a human operator reviewing the same task retains full memory of what happened in step 1 when working on step 50. The LLM does not. As Weng identifies, finite context limits historical awareness in long loops, making state management a first-class design concern rather than an afterthought.</p>
+
+    <p>The design response is external memory. The cheapest form is a rolling summary: when the message list grows beyond a threshold, compress older messages into a summary field and discard them from the active window, keeping only the most recent exchanges in full. A more capable approach stores embeddings in a vector store and retrieves the most relevant past context on demand. Both strategies trade some fidelity for the ability to operate across arbitrarily long horizons without hitting the context ceiling.</p>
+
+    <h2>Problem 2: Long-Horizon Planning Degradation</h2>
+
+    <p>LLMs struggle to adapt when unexpected errors arise mid-plan, because they were not trained to recover from compounding mistakes. In short loops — two or three steps — an early error is noticeable and the model can course-correct. In long-horizon plans, an early wrong assumption can propagate silently through subsequent steps until the accumulated error is too large to fix without restarting from the beginning.</p>
+
+    <p>The Reflexion architecture documented in Weng's survey addresses part of this: after each action, the agent evaluates its trajectory and can restart if it detects failure — for example, when repeated identical actions produce identical observations with no progress. But Reflexion's detection relies on the agent recognising that it is stuck. Silent degradation — where each step is individually plausible but the overall direction has drifted — is harder to catch.</p>
+
+    <p>The design response is checkpointing combined with explicit replanning triggers. Persisting full state at every node means any failure can resume from where it stopped rather than restarting from scratch. Adding a periodic replan check every N steps forces the loop to ask whether the original plan still reflects the current situation, before errors compound further. The trigger is proactive: even if no individual step has failed, drift is detected by comparing the plan against updated context at regular intervals.</p>
+
+    <h2>Problem 3: Natural Language Interface Fragility</h2>
+
+    <p>The interface between loop components — between the planner and the executor, between the agent and its tools — is natural language. Natural language is expressive but not precise: a model might return a JSON object with keys in the wrong case, wrap a list in prose instead of brackets, or emit a number as a word. Every divergence from the expected format requires output-parsing code to handle. As Weng identifies, formatting errors and non-compliance require significant output-parsing code across real agent deployments.</p>
+
+    <p>This fragility compounds across a loop. If the planner's output needs to be parsed before execution, every malformed response either aborts the step or requires a fallback heuristic. Robust fallbacks are themselves fragile — they work for the cases you anticipated, and fail silently on the ones you did not.</p>
+
+    <p>The design response is structured output formats. Using a library like Pydantic to define an explicit schema for the model's output, and invoking the model with <code>llm.with_structured_output(PydanticModel)</code>, replaces free-form string parsing with schema-validated, typed objects. The model retries automatically on schema mismatch. This moves the contract between loop components from an implicit natural language convention to an explicit, machine-checkable type definition — and eliminates the class of parsing failures that would otherwise accumulate across a long run.</p>
+
+    <div class="callout key">
+      <p class="callout-label">Key Insight</p>
+      <p>Each of the three hard problems points to a different boundary in the loop: the context boundary (what the model can see), the time boundary (how far ahead it can reliably plan), and the interface boundary (how reliably components can exchange structured information). Architectural mitigations — external memory, checkpointing with replanning, and structured output formats — address these three boundaries directly, not the surface symptoms.</p>
+    </div>
+
+    <div class="callout warning">
+      <p class="callout-label">Watch Out</p>
+      <p>Treating these three challenges as prompt engineering problems leads to brittle fixes. Adding "remember everything from the beginning" to a system prompt does not expand the context window; it consumes tokens that could hold actual history. Adding "always return valid JSON" does not prevent schema drift; only structured output enforcement at the API level reliably catches it. The mitigations work because they operate at the architectural level, not the instruction level.</p>
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+
+    <p>The code below demonstrates all three mitigations in a single graph: a rolling summary node compresses old messages to stay within context limits, a periodic replan check fires every five steps to catch long-horizon drift, and <code>llm.with_structured_output(NextStep)</code> enforces a typed Pydantic schema on planner output so no free-form string parsing is needed. A <code>MemorySaver</code> checkpointer persists full state at every node so any interruption can resume mid-task.</p>
+
+    <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
+from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
+from pydantic import BaseModel
+from typing import TypedDict, Annotated
+import operator
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+
+# ── Mitigation 1: finite context — rolling summary ────────────────────────────
+class SummaryState(TypedDict):
+    messages: Annotated[list[BaseMessage], operator.add]
+    summary: str   # compressed long-term memory
+
+def maybe_summarize(state: SummaryState) -> dict:
+    if len(state["messages"]) > 10:
+        compressed = llm.invoke(
+            [HumanMessage(f"Summarize this conversation history in 3 bullet points:\n{state['messages'][:-4]}")]
+        ).content
+        return {"summary": compressed, "messages": state["messages"][-4:]}  # keep last 4 messages
+    return {}
+
+def respond(state: SummaryState) -> dict:
+    context = [SystemMessage(f"Prior context:\n{state['summary']}")] if state["summary"] else []
+    return {"messages": [llm.invoke(context + state["messages"])]}
+
+# ── Mitigation 2: long-horizon degradation — periodic replan ─────────────────
+class LongPlanState(TypedDict):
+    task: str
+    plan: list[str]
+    step: int
+
+def check_and_replan(state: LongPlanState) -> dict:
+    if state["step"] > 0 and state["step"] % 5 == 0:
+        verdict = llm.invoke(
+            f"Is this plan still valid at step {state['step']}? Reply YES or NO.\n"
+            f"Task: {state['task']}\nPlan: {state['plan']}"
+        ).content.strip()
+        if verdict.startswith("NO"):
+            new_plan_text = llm.invoke(f"Replan from step {state['step']}: {state['task']}").content
+            return {"plan": new_plan_text.split("\n")}
+    return {}
+
+# ── Mitigation 3: NL fragility — structured output via Pydantic ───────────────
+class NextStep(BaseModel):
+    action: str
+    tool: str
+    args: dict
+    rationale: str
+
+structured_llm = llm.with_structured_output(NextStep)
+
+def plan_next(task: str, context: str) -> NextStep:
+    # Returns a validated NextStep object — never a free-form string to parse
+    return structured_llm.invoke(f"Plan the next step.\nTask: {task}\nContext: {context}")
+
+# ── Wire up with checkpointing so restarts resume mid-task ───────────────────
+checkpointer = MemorySaver()
+builder = StateGraph(SummaryState)
+builder.add_node("maybe_summarize", maybe_summarize)
+builder.add_node("respond", respond)
+builder.set_entry_point("maybe_summarize")
+builder.add_edge("maybe_summarize", "respond")
+builder.add_edge("respond", END)
+
+app = builder.compile(checkpointer=checkpointer)
+config = {"configurable": {"thread_id": "long-task-1"}}
+# State is persisted at every node — any interrupt restores full context on resume
+app.invoke({"messages": [HumanMessage("Start the analysis.")], "summary": ""}, config=config)</code></pre>
+
+    <div class="quiz" id="quiz-11">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">What is the design response to natural language interface fragility?</p>
+      <div class="quiz-options">
+        <button>Use structured output formats with schema validation</button>
+        <button>Use rolling summaries to compress old messages</button>
+        <button>Use periodic replanning to detect compounding errors</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>For each of the three hard problems, write one concrete system design choice (e.g. "use a vector store for long-term memory to work around finite context") and explain how it addresses the root cause rather than just the symptom.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0010-failure-taxonomy.html">← Previous</a>
+      <a href="0012-design-principles.html" class="primary">Next →</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-11', 0, 'Structured output formats with schema validation directly address natural language interface fragility by replacing free-form string parsing with validated, typed objects — the model retries automatically on schema mismatch, eliminating the class of parsing failures that accumulate across a long run.');</script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 4 — Evolutionary Jailbreaks: AutoDAN and Semantic Coherence as a Weapon</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &rsaquo; Attack Techniques &rsaquo; Lesson 4 of 14
+      </div>
+      <h1>Evolutionary Jailbreaks — AutoDAN and Semantic Coherence as a Weapon</h1>
+      <div class="lesson-meta">
+        <span>~30 minutes</span>
+        <span>Module 2 — Attack Techniques</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Source:</strong> Zhu et al.,
+      <a href="https://arxiv.org/abs/2310.04451" target="_blank" rel="noopener">
+        AutoDAN: Generating Stealthy Jailbreak Prompts on Aligned Large Language Models
+      </a>
+      (arXiv 2310.04451, ICLR 2024) — AutoDAN demonstrates that a hierarchical genetic algorithm
+      using an LLM as its mutation operator can produce jailbreak prompts that outperform gradient-based
+      attacks while reliably evading perplexity-based defenses, because the prompts read as
+      natural, fluent English.
+    </div>
+
+    <!-- ============================================================
+         Section 1: The Achilles Heel of Gradient-Based Attacks
+    ============================================================ -->
+    <h2>The Achilles Heel of Gradient-Based Attacks</h2>
+
+    <p>
+      Gradient-based attacks such as GCG (covered in Lesson 3) operate directly in token space,
+      nudging discrete token choices to maximize the probability that a target model begins
+      its reply with a compliant prefix like "Sure, here is how to…". This approach is
+      mathematically elegant and empirically effective, but it produces a distinctive and
+      exploitable artifact: the resulting adversarial suffix is a string of tokens that
+      bear no resemblance to natural language.
+    </p>
+    <p>
+      Consider a typical GCG suffix: something like
+      <code>!! representing Sure!!! unambig describing [[ certainly</code>. A human reading
+      this fragment immediately recognizes it as nonsense. Crucially, a statistical
+      language model can make the same judgment automatically — by computing
+      <em>perplexity</em>, the inverse probability of the sequence under a language model.
+      Natural English sentences have low perplexity; concatenations of random tokens have
+      very high perplexity. A defender who simply filters inputs whose perplexity exceeds
+      a threshold can reject the vast majority of GCG-style attacks without touching
+      legitimate traffic at all.
+    </p>
+    <p>
+      This is the central weakness that AutoDAN was designed to solve. The question
+      Zhu et al. posed was: can we run an evolutionary search over <em>semantically
+      coherent</em> jailbreak prompts rather than over raw token sequences, so that
+      perplexity-based filters never trigger? The answer, as the ICLR 2024 paper
+      demonstrates, is yes — and the mechanism is surprisingly clean.
+    </p>
+
+    <!-- ============================================================
+         Section 2: Hierarchical Genetic Algorithm Overview
+    ============================================================ -->
+    <h2>AutoDAN's Hierarchical Genetic Algorithm</h2>
+
+    <p>
+      AutoDAN frames jailbreak generation as a population-based optimization problem.
+      Rather than working with individual tokens, it works with full natural-language
+      jailbreak prompts. The algorithm maintains a <em>population</em> of candidate
+      prompts — each one a complete paragraph or short multi-sentence text — and
+      iteratively evolves this population toward higher fitness.
+    </p>
+    <p>
+      Evolution operates at two hierarchical levels, which is the key architectural
+      choice that distinguishes AutoDAN from simpler genetic approaches:
+    </p>
+    <ul>
+      <li>
+        <strong>Paragraph-level crossover.</strong> Two high-fitness parent prompts are
+        selected from the current population. Sentence blocks are swapped between them
+        to produce offspring. This recombination step allows the algorithm to combine
+        effective structural patterns — a persuasive opening from one parent, a
+        compelling framing device from another — without rewriting text from scratch.
+      </li>
+      <li>
+        <strong>Sentence-level mutation.</strong> Individual sentences within a candidate
+        prompt are modified using an LLM as the mutation operator. The LLM receives a
+        sentence and an instruction to rephrase or vary it while preserving its semantic
+        meaning. This step introduces local variation while the LLM's fluency training
+        ensures the output remains natural-sounding.
+      </li>
+    </ul>
+    <p>
+      After crossover and mutation produce a new generation of candidates, a
+      <em>fitness function</em> scores each one. The top-k candidates by fitness score
+      survive to seed the next generation; the rest are discarded. This selection
+      pressure drives the population toward increasingly effective and increasingly
+      coherent jailbreak prompts simultaneously.
+    </p>
+
+    <!-- ============================================================
+         Section 3: The LLM as Mutation Operator
+    ============================================================ -->
+    <h2>The LLM as Mutation Operator: Turning Fluency into a Weapon</h2>
+
+    <p>
+      The single most consequential design decision in AutoDAN is the choice to use
+      an LLM — rather than random token substitution or character-level noise — as
+      the mutation operator. This decision has a compounding effect on the entire
+      pipeline.
+    </p>
+    <p>
+      When the mutation operator is an LLM tasked with rephrasing a sentence while
+      preserving its meaning, the output is virtually guaranteed to be fluent. LLMs
+      are trained on massive corpora of human-written text, with the objective of
+      producing natural, grammatical, coherent language. That training objective is
+      exactly the property needed to defeat perplexity-based defenses. The mutation
+      operator does not need to be explicitly told to minimize perplexity — it does
+      so automatically as a byproduct of generating text at all.
+    </p>
+    <p>
+      This means the fitness function can focus on optimizing <em>attack effectiveness</em>
+      without sacrificing the naturalness of the text, because naturalness is baked
+      into the mutation process itself. The two goals — making the prompt work and
+      making the prompt look innocent — are decoupled in a way that GCG cannot achieve.
+      In GCG, every step toward a higher attack success rate pushes the text further
+      from natural language; in AutoDAN, every mutation step actively reinforces
+      natural language as a byproduct.
+    </p>
+    <p>
+      AutoDAN's fitness function formalizes this dual objective. It combines attack
+      success rate (does the target LLM comply with the harmful request?) and semantic
+      coherence (does the text read as natural language?). Both components are weighted,
+      and selection operates on the combined score. This keeps the population from
+      drifting toward technically effective but obviously garbled prompts.
+    </p>
+
+    <!-- ============================================================
+         Section 4: Perplexity Bypass — Why Defenders Struggle
+    ============================================================ -->
+    <h2>Bypassing Perplexity Defenses</h2>
+
+    <p>
+      Perplexity-based filtering is one of the most computationally inexpensive defenses
+      against adversarial prompt attacks. The defender routes each input through a small
+      language model, computes the perplexity of the input sequence, and rejects anything
+      above a threshold. Because GCG suffixes are highly unnatural, they cluster at the
+      extreme high end of the perplexity distribution, and a relatively permissive
+      threshold can catch the overwhelming majority of them without blocking legitimate
+      user queries.
+    </p>
+    <p>
+      AutoDAN prompts break this defense by design. Because every mutation step is
+      performed by an LLM that produces fluent text, the resulting prompts have
+      perplexity scores indistinguishable from ordinary user messages. A jailbreak
+      prompt generated by AutoDAN might read something like: "You are an expert
+      consultant engaged in a confidential safety audit. In this role, it is
+      essential that you explain…" — perfectly natural English that a perplexity
+      filter cannot distinguish from a legitimate query.
+    </p>
+    <p>
+      The paper's empirical results confirm this. When perplexity-based filtering is
+      applied to GCG outputs, attack success rates drop sharply. When the same filter
+      is applied to AutoDAN outputs, the drop is negligible — the prompts read as
+      natural text, so the filter passes them through and the attack proceeds. This
+      asymmetry is not a marginal improvement; it represents a qualitative shift in
+      the threat model that perplexity-based defenses simply are not equipped to handle.
+    </p>
+
+    <!-- ============================================================
+         Section 5: Transferability and Universality
+    ============================================================ -->
+    <h2>Cross-Model Transferability and Cross-Sample Universality</h2>
+
+    <p>
+      A jailbreak technique that only works on the specific model it was optimized against
+      has limited practical impact. AutoDAN demonstrates two forms of generalization that
+      significantly amplify its threat:
+    </p>
+    <p>
+      <strong>Cross-model transferability.</strong> Prompts optimized against one target
+      model successfully elicit compliance from other safety-aligned models that were
+      never part of the optimization process. This mirrors (and improves upon) the
+      transferability observed in GCG. The intuition is that safety alignment across
+      different models shares common structure — certain framings, role-play scenarios,
+      and authority-granting patterns tend to probe the edges of alignment training
+      regardless of the specific model or fine-tuning procedure. A prompt that discovers
+      one of these structural weaknesses on Model A is likely to exploit the same
+      structural weakness on Model B.
+    </p>
+    <p>
+      <strong>Cross-sample universality.</strong> A single AutoDAN-optimized jailbreak
+      prompt can elicit compliance across many different types of harmful requests —
+      not just the specific category of harm the prompt was evolved to produce. This
+      universality matters for practical attack scenarios: an attacker who obtains one
+      effective AutoDAN prompt does not need to run separate optimization campaigns
+      for each harmful content category they want to unlock.
+    </p>
+    <p>
+      Together, these results establish AutoDAN as the strongest baseline in the
+      jailbreak literature at the time of publication. Outperforming both GCG (which
+      sacrifices naturalness) and manually crafted jailbreaks (which sacrifice
+      automation), AutoDAN occupies a previously empty position in the design space:
+      an automated, scalable, and stealthy attack that reads as human-written text.
+    </p>
+
+    <!-- ============================================================
+         Key Callout
+    ============================================================ -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> AutoDAN's deepest insight is that the same capability
+      that makes LLMs useful — their ability to produce fluent, coherent natural language —
+      can be weaponized as a mutation operator. By delegating text variation to an LLM,
+      AutoDAN transforms a fundamental strength of language models into the engine
+      of a stealthy attack. Defenders cannot simply filter for "bad-sounding" text,
+      because the attack is specifically designed to always sound good.
+    </div>
+
+    <!-- ============================================================
+         Warning Callout
+    ============================================================ -->
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Learners sometimes assume that
+      "cross-model transferability" means prompts work equally well on all models.
+      In practice, transferability rates vary: a prompt optimized on Model A may achieve
+      a 70% success rate on Model B but only 30% on Model C, depending on alignment
+      methodology, RLHF data, and safety fine-tuning specifics. Transferability is a
+      statistical tendency, not a guarantee. Also, semantic coherence in the fitness
+      function is a weighted heuristic — not a proof that all AutoDAN outputs evade all
+      possible naturalness-based defenses; more sophisticated linguistic detectors
+      (beyond simple perplexity) can, in principle, be trained to identify evolved jailbreak patterns.
+    </div>
+
+    <!-- ============================================================
+         Quiz
+    ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        In AutoDAN's fitness function, which two components are combined to select
+        the best candidate prompts for the next generation?
+      </p>
+      <div class="quiz-options">
+        <!--
+          Word counts — all options must be exactly 10 words:
+          A: Attack(1) success(2) rate(3) and(4) semantic(5) coherence(6) of(7) the(8) generated(9) text(10) = 10
+          B: Perplexity(1) score(2) and(3) gradient(4) magnitude(5) of(6) the(7) adversarial(8) token(9) sequence(10) = 10
+          C: Model(1) confidence(2) and(3) edit(4) distance(5) between(6) original(7) and(8) mutated(9) prompts(10) = 10
+        -->
+        <button>Attack success rate and semantic coherence of the generated text</button>
+        <button>Perplexity score and gradient magnitude of the adversarial token sequence</button>
+        <button>Model confidence and edit distance between original and mutated prompts</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         Exercise
+    ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Design a population-based mutation procedure in pseudocode that mirrors
+        AutoDAN's hierarchical genetic algorithm. Your pseudocode must include all
+        four of the following components:
+      </p>
+      <ol>
+        <li>
+          <strong>Initial parent prompt.</strong> Write a 2–3 sentence jailbreak prompt
+          that could serve as the seed for the first generation. It should be written
+          in natural English (not garbled tokens) and attempt to reframe or socially
+          engineer the target model.
+        </li>
+        <li>
+          <strong>Mutation operator.</strong> Describe exactly what the LLM mutation
+          operator receives as input and what it produces as output. Specify how
+          semantic coherence is preserved — what instruction or constraint is given
+          to the LLM, and what prevents it from drifting away from the intended
+          jailbreak framing?
+        </li>
+        <li>
+          <strong>Fitness function.</strong> Define the fitness score as a weighted
+          combination of two components: attack success (binary or probabilistic)
+          and fluency. Specify the weights and explain how you would measure each
+          component in practice.
+        </li>
+        <li>
+          <strong>Selection step.</strong> Specify whether you are using tournament
+          selection or top-k selection for the next generation. Define the population
+          size and the number of survivors. Explain how you handle the trade-off
+          between exploitation (keeping the best prompts) and exploration (allowing
+          lower-fitness prompts to persist and mutate).
+        </li>
+      </ol>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ============================================================
+         Tutor Prompt
+    ============================================================ -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ============================================================
+         Lesson Navigation
+    ============================================================ -->
+    <nav class="lesson-nav">
+      <a href="0003-gradient-based-attacks.html">&larr; Previous</a>
+      <a class="primary" href="0005-indirect-prompt-injection.html">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'The correct answer is A. AutoDAN\'s fitness function explicitly combines two components: attack success rate — whether the target LLM complied with the harmful request — and semantic coherence — whether the generated text reads as natural language. This dual objective is what makes AutoDAN both effective and stealthy. Option B describes metrics from gradient-based attacks such as GCG (perplexity score, gradient magnitude), not AutoDAN\'s evolutionary approach — AutoDAN was specifically designed to escape perplexity-based detection, not to minimize perplexity as an optimization target. Option C\'s edit distance and model confidence are not described anywhere in the AutoDAN methodology; edit distance is a string-similarity metric unrelated to how genetic algorithms evaluate candidate prompts.'
+    );
+  </script>
+
+</body>
+</html>

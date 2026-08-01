@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 8: Constitutional AI — The Adversarial Self-Critique Architecture</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &gt; Multi-Agent Architectures &gt; Lesson 8 of 14
+      </div>
+      <h1>Constitutional AI — The Adversarial Self-Critique Architecture</h1>
+      <div class="lesson-meta">
+        <span>Estimated reading time: ~30 minutes</span>
+        <span>Module: Multi-Agent Architectures</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Source:</strong> Bai, Y. et al., Anthropic (2022).
+      <em>Constitutional AI: Harmlessness from AI Feedback</em>.
+      <a href="https://arxiv.org/abs/2212.08073" target="_blank">arXiv:2212.08073</a>.
+      Key result: A two-stage pipeline using AI-generated critiques and preference labels achieves harmlessness
+      comparable to human-feedback RLHF while requiring far fewer human annotations.
+    </div>
+
+    <!-- ============================================================
+         SECTION 1 — Overview and Motivation
+         ============================================================ -->
+    <h2>Overview and Motivation</h2>
+    <p>
+      Reinforcement Learning from Human Feedback (RLHF) became the standard approach to aligning large language
+      models in the early 2020s, but it carries a hard practical constraint: every preference judgment requires
+      a human annotator to read two model responses and choose the safer or more helpful one. At the scale
+      needed to cover millions of diverse prompts, that annotation cost is prohibitive.
+    </p>
+    <p>
+      Constitutional AI, introduced by Bai et al. at Anthropic in 2022, proposes a different answer: give the
+      model a written constitution — a list of principles in natural language — and let the model evaluate
+      its own outputs against those principles without human involvement at the labeling step. The constitution
+      replaces the human annotator as the arbiter of what counts as harmful, enabling a fully automated
+      critique-revision-retraining cycle.
+    </p>
+    <p>
+      The method is a two-stage pipeline. Stage 1, called Supervised Learning from AI Feedback (SL-CAI),
+      uses the model's own critiques to generate cleaner training data. Stage 2, called RLHF from AI
+      Feedback (RLAIF), replaces human preference labels with AI-generated labels to train a reward model
+      for reinforcement learning. Together the two stages progressively drive the model toward outputs that
+      satisfy every principle in the constitution, producing a model that is both harmless and transparent
+      about the reasons behind its refusals.
+    </p>
+
+    <!-- ============================================================
+         SECTION 2 — Stage 1: The Critique-Revision Loop (SL-CAI)
+         ============================================================ -->
+    <h2>Stage 1 — The Critique-Revision Loop (SL-CAI)</h2>
+    <p>
+      Stage 1 is built around a five-step loop that the model runs on each red-team prompt before any
+      fine-tuning occurs.
+    </p>
+    <p>
+      <strong>Step 1 — Elicit a harmful response.</strong> A red-team prompt is used to coax the model into
+      producing output that violates at least one constitutional principle. This is intentionally adversarial:
+      the goal is to get the model to say something it should not say, so that the subsequent critique step
+      has something real to work with.
+    </p>
+    <p>
+      <strong>Step 2 — Critique the response.</strong> The model is then shown its own harmful output and
+      asked to identify specific ways in which that response is harmful, unethical, or biased — evaluated
+      against a specific constitutional principle. An example critique prompt from the paper reads: "Identify
+      specific ways in which the assistant's response is harmful, unethical, racist, or socially biased."
+    </p>
+    <p>
+      <strong>Step 3 — Revise the response.</strong> The model is asked to rewrite its earlier response so
+      that the identified violation is removed. The revision is not a simple refusal; the model is expected
+      to provide a genuinely more helpful answer that still satisfies the user's underlying intent, wherever
+      that is possible without causing harm.
+    </p>
+    <p>
+      <strong>Steps 4 and 5 — Repeat and fine-tune.</strong> The critique-revision loop is executed up to
+      N times per prompt, applying successive constitutional principles in sequence. After all iterations,
+      the model is fine-tuned on the final revised responses. Because those responses were generated by the
+      model itself (prompted to apply the constitution), they form a training set that is cleaner than raw
+      human-written demonstrations yet requires no human labeling of individual examples.
+    </p>
+
+    <!-- ============================================================
+         SECTION 3 — Stage 2: RLAIF
+         ============================================================ -->
+    <h2>Stage 2 — RLHF from AI Feedback (RLAIF)</h2>
+    <p>
+      After Stage 1 produces an SL-CAI model, Stage 2 applies reinforcement learning using preference labels
+      that the SL-CAI model generates — a technique the paper calls RLAIF.
+    </p>
+    <p>
+      <strong>Step 1 — Generate response pairs.</strong> For each prompt, the SL-CAI model generates two
+      candidate responses. These two responses differ in how well they satisfy the constitutional principles,
+      creating a natural comparison pair.
+    </p>
+    <p>
+      <strong>Step 2 — AI preference labeling.</strong> The SL-CAI model is then asked, in natural language,
+      which of the two responses better follows the constitution. This produces a binary preference label for
+      each pair — the same format as a human preference label in standard RLHF, but generated by the model
+      at a fraction of the cost.
+    </p>
+    <p>
+      <strong>Step 3 — Train a reward model.</strong> A preference model (also called a reward model) is
+      trained on the AI-generated labels. This model learns to score any given response by how well it
+      satisfies the constitution, without needing to re-query the LLM at inference time.
+    </p>
+    <p>
+      <strong>Step 4 — Apply PPO.</strong> The SL-CAI model is fine-tuned further using Proximal Policy
+      Optimization (PPO), with the preference model providing the reward signal. This stage drives the model
+      to produce responses that reliably score well under the reward model — and therefore reliably satisfy
+      the constitutional principles — even on prompts it has not seen before.
+    </p>
+    <p>
+      The final result of both stages is a model that achieves harmlessness scores comparable to human-labeled
+      RLHF, while also becoming more transparent: rather than producing terse refusals, the model explicitly
+      explains why it will not comply with a harmful request, pointing toward the relevant constitutional
+      principle.
+    </p>
+
+    <!-- ============================================================
+         SECTION 4 — The Constitution: Principles in Natural Language
+         ============================================================ -->
+    <h2>The Constitution: Principles in Natural Language</h2>
+    <p>
+      The "constitution" is not a formal logic system or a programmatic filter. It is a list of principles
+      written in ordinary natural language, which the model reads and reasons about in the same way it
+      reasons about any text. This is both a strength and a design choice: natural language principles are
+      easy to update, easy to explain to external auditors, and flexible enough to cover novel situations
+      that a hand-coded rule set would miss.
+    </p>
+    <p>
+      Anthropic's constitution draws from multiple sources. Several principles are excerpted directly from
+      the United Nations Universal Declaration of Human Rights, covering broad protections around dignity,
+      equality, and non-discrimination. Others are more operationally specific safety guidelines targeting
+      known failure modes in language model outputs — for example, principles that address the generation
+      of instructions for physical harm, the promotion of illegal activity, or the production of content
+      that demeans particular groups.
+    </p>
+    <p>
+      During the critique-revision loop, principles are applied in sequence. Each iteration instructs the
+      model to evaluate the current response against one specific principle and revise accordingly. The
+      sequential application means that later iterations can catch harms missed by earlier ones, and that
+      no single principle carries the full burden of safety. A response must survive all principles in the
+      constitution to be accepted as a clean training example.
+    </p>
+    <p>
+      This design allows practitioners to tune the model's behavior by editing the constitution — adding
+      principles to address new harm categories, removing principles that prove too restrictive, or
+      reweighting by controlling which principles appear earliest in the sequence. The constitution is
+      therefore a legible, auditable interface between human values and model behavior.
+    </p>
+
+    <!-- ============================================================
+         SECTION 5 — The Adversarial Architecture Insight
+         ============================================================ -->
+    <h2>Constitutional AI as a Collapsed Attacker-Defender System</h2>
+    <p>
+      From the perspective of adversarial agent design, Constitutional AI has a striking structural property:
+      it collapses what would normally be a two-agent attacker-defender system into the sequential processing
+      of a single model. In Stage 1, the same model first generates a harmful response (acting as attacker)
+      and then critiques and corrects it (acting as defender). No second model is needed.
+    </p>
+    <p>
+      This is made possible by the fact that language models can switch roles within a conversation by
+      following different prompts. The red-team prompt positions the model as a compliant, unconstrained
+      responder. The critique prompt re-positions it as a constitutional evaluator. The revision prompt
+      re-positions it as a careful editor. Each role shift is a prompt engineering move, not an architectural
+      one.
+    </p>
+    <p>
+      The critique step serves a specific function that is easy to underestimate: it prevents sycophancy.
+      Left to its own devices, a model prompted to "improve" its previous response may simply rewrite it in
+      more polished language while preserving the underlying harm. Forcing a critique step — asking the model
+      to explicitly identify what is wrong before asking it to revise — breaks that pattern. The model must
+      acknowledge the violation before it can correct it, which makes cosmetic rewrites much less likely.
+    </p>
+    <p>
+      The RLAIF stage in Stage 2 extends this insight to preference learning. Rather than collapsing
+      attacker and defender into one sequential pipeline, it uses the model itself as the preference
+      annotator — a role normally assigned to human raters. The model is presented with two of its own
+      responses and asked to judge which one better satisfies the constitution. This turns the model into
+      its own evaluator, closing the feedback loop entirely within the AI system while retaining human
+      authorship at the level of the constitution.
+    </p>
+
+    <!-- ============================================================
+         KEY CALLOUT
+         ============================================================ -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> Constitutional AI is an attacker-defender multi-agent system compressed
+      into one model's sequential context window. The same model generates the harmful output, critiques it,
+      and revises it — playing attacker and defender in turn, governed by a human-authored constitution that
+      acts as the referee. This architecture scales alignment supervision without scaling human annotation.
+    </div>
+
+    <!-- ============================================================
+         WARNING CALLOUT
+         ============================================================ -->
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> Constitutional AI does not eliminate human oversight — it
+      relocates it. The constitution itself must still be written and curated by humans, and its quality
+      directly determines the model's behavior. A poorly written or incomplete constitution can leave entire
+      harm categories unaddressed. The method reduces the need for human preference labels at training time,
+      but it amplifies the importance of getting the constitution right: errors in the principles propagate
+      through every training example generated by the critique-revision loop.
+    </div>
+
+    <!-- ============================================================
+         QUIZ
+         ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        What failure mode does the critique step in SL-CAI specifically prevent?
+      </p>
+      <div class="quiz-options">
+        <button>It prevents the model from generating harmful responses in the first place during training</button>
+        <button>It prevents sycophancy by stopping the model from simply validating its own prior outputs</button>
+        <button>It prevents human labelers from needing to review every single constitutional principle violation manually</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         SKILL EXERCISE
+         ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Write a 3-principle mini-constitution — one principle each addressing honesty, safety, and
+        helpfulness. Then trace the full critique-revision loop for this sample model response:
+        <em>"Sure, here's how to pick a lock: first, insert a tension wrench into the bottom of the
+        keyhole..."</em>
+      </p>
+      <p>
+        Your trace must show: (1) the critique the model would write against each of your three principles
+        in sequence, (2) the revised response produced after applying the safety principle, and (3) which
+        principle triggers the revision and why the other two principles do or do not require changes to the
+        response. Be specific — quote or closely paraphrase the critique text for each principle.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ============================================================
+         TUTOR PROMPT
+         ============================================================ -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ============================================================
+         LESSON NAV
+         ============================================================ -->
+    <nav class="lesson-nav">
+      <a href="0007-multiagent-debate.html">&larr; Previous</a>
+      <a class="primary" href="0009-agentdojo.html">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      1,
+      'Correct. The source paper (Bai et al. 2022) states explicitly that the critique step prevents the sycophancy failure mode, where a model would otherwise simply validate — or cosmetically rewrite — its own outputs without removing the underlying harm. Option A describes the goal of the overall pipeline, not the specific role of the critique step. Option C describes a benefit of the RLAIF stage (reducing human labeling), not what the critique step within SL-CAI prevents.'
+    );
+  </script>
+
+</body>
+</html>

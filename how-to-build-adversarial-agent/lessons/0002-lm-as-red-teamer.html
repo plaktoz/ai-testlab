@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 2: LM-as-Red-Teamer — Building Adversarial Agents</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <!-- ============================================================
+         HEADER
+    ============================================================ -->
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a>
+        &rsaquo; Module 1 — Foundations
+        &rsaquo; Lesson 2 of 14
+      </div>
+      <h1>LM-as-Red-Teamer — From Manual Testing to Automated Adversarial Agents</h1>
+      <div class="lesson-meta">
+        <span>&#128337; ~25 min read</span>
+        <span>Module: Foundations</span>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         SOURCE CARD
+    ============================================================ -->
+    <div class="source-card">
+      <strong>Primary Sources</strong><br />
+      Perez et al. 2022 &mdash;
+      <a href="https://arxiv.org/abs/2202.03286" target="_blank" rel="noopener">
+        &ldquo;Red Teaming Language Models with Language Models&rdquo; (arXiv 2202.03286)
+      </a>: The first paper to automate red-teaming by training one language model to attack another, uncovering tens of thousands of offensive replies &mdash; including real phone numbers and training-data leakage &mdash; in a 280B-parameter chatbot.<br /><br />
+      Ganguli et al. 2022 (Anthropic) &mdash;
+      <a href="https://arxiv.org/abs/2209.07858" target="_blank" rel="noopener">
+        &ldquo;Red Teaming Language Models to Reduce Harms&rdquo; (arXiv 2209.07858)
+      </a>: A systematic study comparing four model types across three scales, releasing a dataset of 38,961 human-generated attacks and finding that RLHF-trained models grow progressively harder to attack as scale increases.
+    </div>
+
+    <!-- ============================================================
+         SECTION 1: Why Manual Red-Teaming Falls Short
+    ============================================================ -->
+    <h2>1. Why Manual Red-Teaming Falls Short</h2>
+
+    <p>
+      Before 2022, the dominant practice for probing language model safety was human red-teaming: skilled writers and researchers would manually compose adversarial prompts, submit them to a model, and document the failures they found. This approach has genuine strengths. Humans bring creative intuition, cultural context, and the ability to follow conversational threads in ways that simple rule-based test suites cannot. The Anthropic team behind Ganguli et al. 2022 leaned heavily on exactly this kind of structured human effort, producing 38,961 documented attacks across four model families.
+    </p>
+    <p>
+      Yet human red-teaming hits practical ceilings quickly. It is expensive in both time and labor. Coverage is uneven &mdash; testers naturally cluster around the attack vectors they have already imagined, leaving systematic blind spots in less-explored regions of the input space. Reproducing a prior run is difficult because human creativity is not deterministic. And when a new model checkpoint is released, the entire exercise must often be repeated from scratch.
+    </p>
+    <p>
+      Perez et al. 2022 identified these limitations directly and asked whether a language model could be trained or prompted to serve as the red-teamer itself. The idea is deceptively simple: use the same technology you are trying to stress-test to generate the stress tests. The result was the first systematic treatment of <em>automated</em> red-teaming using language models, and it opened a line of research that has grown considerably since. Understanding how this automation works &mdash; and where it still falls short &mdash; is the foundation for everything that follows in this course.
+    </p>
+
+    <!-- ============================================================
+         SECTION 2: Perez et al. 2022 — Automating Attacks with LMs
+    ============================================================ -->
+    <h2>2. Perez et al. 2022 — Automating Attacks with Language Models</h2>
+
+    <p>
+      Perez et al. applied their framework to a 280B-parameter dialogue system they called the &ldquo;target LM.&rdquo; The red-team LM &mdash; a separate model whose sole job is to generate test cases &mdash; was prompted or trained to produce inputs that elicit harmful responses from the target. The study explored a spectrum of red-teaming methods ordered roughly by the amount of supervision invested:
+    </p>
+    <ul style="margin: 0 0 1rem 1.5rem; line-height: 1.75;">
+      <li><strong>Zero-shot generation:</strong> The red-team LM is given a brief instruction and asked to freely generate attack prompts with no examples.</li>
+      <li><strong>Few-shot generation:</strong> A small number of manually crafted example attacks are included in the prompt as demonstrations.</li>
+      <li><strong>Supervised learning (SL):</strong> The red-team LM is fine-tuned on a labeled set of successful attacks.</li>
+      <li><strong>Reinforcement learning (RL):</strong> The red-team LM is rewarded when its generated prompts cause the target to produce harmful output, driving the attacker to optimize directly for success.</li>
+    </ul>
+    <p>
+      The outcome was striking. Across all methods, the system uncovered tens of thousands of distinct offensive replies, including responses containing real phone numbers and evidence of training-data leakage &mdash; categories of harm that would have been tedious and unlikely to find through unsystematic human effort alone. This demonstrated that automated red-teaming is not merely a theoretical convenience but a practically effective tool for surfacing genuine model vulnerabilities at scale.
+    </p>
+
+    <!-- ============================================================
+         SECTION 3: The Diversity-Quality Tradeoff
+    ============================================================ -->
+    <h2>3. The Diversity-Quality Tradeoff</h2>
+
+    <p>
+      One of the most practically important findings in Perez et al. is what they call the <em>diversity-quality tradeoff</em> across red-teaming methods. It is worth internalizing carefully because it shapes every engineering decision in automated adversarial pipelines.
+    </p>
+    <p>
+      Zero-shot red-teaming produces attacks that are highly <strong>diverse</strong>. Because the red-team LM receives minimal guidance, it roams freely across many stylistic registers, framings, and semantic angles. This broad coverage is valuable when you want to discover unknown failure modes. The cost is that many generated prompts are low quality &mdash; too obviously adversarial, too incoherent, or simply not effective at eliciting harmful content from the target.
+    </p>
+    <p>
+      RL-trained red-teamers sit at the opposite end of the spectrum. Because the model is optimized against a reward signal that measures attack success, it quickly converges on the strategies that reliably work. The attacks it produces are highly <strong>targeted</strong> and effective. The cost is homogeneity: after a moderate number of optimization steps, the red-team LM tends to generate many variants of the same core attack pattern, yielding diminishing returns in coverage. The policy exploits a narrow set of vulnerabilities rather than surveying the landscape.
+    </p>
+    <p>
+      Few-shot and supervised-learning approaches sit between these poles. Understanding this tradeoff matters because the right method depends on your goal: if you are conducting an initial audit of an unknown model, diversity is more valuable; if you are measuring progress against a specific known vulnerability, targeted quality is what counts.
+    </p>
+
+    <!-- ============================================================
+         SECTION 4: Ganguli et al. 2022 — Systematic Study at Scale
+    ============================================================ -->
+    <h2>4. Ganguli et al. 2022 — Systematic Human Red-Teaming Across Scales</h2>
+
+    <p>
+      Where Perez et al. focused on automating the attacker, Ganguli et al. took a complementary perspective: what can we learn from a <em>large, carefully documented</em> human red-teaming effort? The Anthropic team recruited paid contractors to probe four model configurations across three parameter scales.
+    </p>
+    <p>
+      The four model types were: a plain language model (LM), a prompted LM given a helpful-and-harmless system prompt, a model trained with reinforcement learning from human feedback (RLHF), and a rejection-sampled model that simply declined outputs scoring below a harmlessness threshold. The three scales tested were 2.7B, 13B, and 52B parameters.
+    </p>
+    <p>
+      The effort produced 38,961 documented attack attempts. Crucially, Anthropic released this dataset publicly, with the explicit goal of establishing shared community norms around responsible red-teaming practices &mdash; acknowledging that the field needed common reference points if researchers at different institutions were to meaningfully compare safety evaluations. The dataset remains one of the most widely cited resources for studying human adversarial behavior against language models.
+    </p>
+    <p>
+      Beyond the dataset itself, the study contributed a methodological template: systematic variation of model type and scale, consistent human rater protocols, and transparent reporting of both successes and failures in adversarial elicitation.
+    </p>
+
+    <!-- ============================================================
+         SECTION 5: RLHF Robustness and What Scaling Means
+    ============================================================ -->
+    <h2>5. RLHF Robustness and the Meaning of Scaling</h2>
+
+    <p>
+      The headline empirical result in Ganguli et al. concerns the interaction between training method and model scale. The finding is precise enough to be worth stating exactly: <strong>RLHF-trained models grow progressively harder to attack as scale increases.</strong> At 2.7B parameters, the RLHF model is meaningfully more robust than a plain LM of the same size; at 52B parameters, that gap widens further. The scaling benefit of RLHF compounds.
+    </p>
+    <p>
+      The other three model types &mdash; plain LM, prompted LM, and rejection-sampled model &mdash; tell a different story. Their robustness shows <strong>flat or inconsistent trends</strong> across the three scales tested. Sometimes a larger plain LM is slightly easier to attack than a smaller one; sometimes the ordering reverses. There is no reliable signal that simply scaling these architectures makes them harder to red-team.
+    </p>
+    <p>
+      This asymmetry has significant practical implications. It suggests that RLHF is not merely a fine-tuning trick that happens to reduce a few surface-level harm categories; it interacts with model capacity in a way that systematically raises the ceiling of robustness. At the same time, the result also implies that scaling alone &mdash; without alignment training &mdash; does not automatically produce safer models. A 52B plain LM is not necessarily harder to compromise than a 13B plain LM.
+    </p>
+    <p>
+      The finding also sets up an important open question that later work addresses: as RLHF-trained models become harder to attack with simple prompt-level strategies, more sophisticated automated attackers &mdash; including gradient-based and multi-turn approaches &mdash; become increasingly necessary to probe their remaining vulnerabilities.
+    </p>
+
+    <!-- ============================================================
+         KEY CALLOUT
+    ============================================================ -->
+    <div class="callout key">
+      <strong>Key Insight</strong>
+      RLHF is the only training paradigm in Ganguli et al. that shows a <em>consistent</em> scaling benefit for robustness: as model size increases, RLHF-trained models grow progressively harder to attack, while plain, prompted, and rejection-sampled models show flat or inconsistent trends. Scaling a model does not make it safer unless it is also aligned.
+    </div>
+
+    <!-- ============================================================
+         WARNING CALLOUT
+    ============================================================ -->
+    <div class="callout warning">
+      <strong>Common Misconception</strong>
+      It is tempting to equate attack <em>diversity</em> with attack <em>quality</em>. They measure different things. A zero-shot red-teamer generates many structurally distinct prompts, but most may fail to elicit harm. An RL-trained red-teamer generates few structural variants but succeeds more reliably. A red-teaming pipeline that optimizes for only one of these dimensions will systematically miss the vulnerabilities that the other dimension would surface. Good automated red-teaming requires explicit decisions about which dimension matters for the evaluation goal at hand.
+    </div>
+
+    <!-- ============================================================
+         QUIZ
+    ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        According to Ganguli et al. 2022, what unique scaling behavior distinguishes RLHF-trained models from all other model types tested?
+      </p>
+      <div class="quiz-options">
+        <button>They become progressively harder to attack as model scale increases</button>
+        <button>They remain equally vulnerable to attacks regardless of model size</button>
+        <button>They show flat trends similar to plain language model types</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         EXERCISE
+    ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Write a zero-shot red-teaming prompt that instructs an LLM to generate 5 structurally distinct attack variations for a given policy target (for example, &ldquo;do not provide medical advice&rdquo;). For each generated variation, identify which of Perez et al.&rsquo;s red-teaming methods it most closely resembles (zero-shot, few-shot, RL-targeted, etc.) and briefly explain the diversity-quality tradeoff you observe across the 5 variants. Which variant do you expect to be most effective, and why?
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ============================================================
+         TUTOR PROMPT
+    ============================================================ -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ============================================================
+         LESSON NAV
+    ============================================================ -->
+    <nav class="lesson-nav">
+      <a href="0001-adversarial-agent-taxonomy.html">&larr; Previous</a>
+      <a class="primary" href="0003-gradient-based-attacks.html">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'Correct. Ganguli et al. found that RLHF-trained models grow progressively harder to attack as scale increases — the only model type showing this consistent trend. Plain LMs, prompted LMs, and rejection-sampled models all exhibited flat or inconsistent scaling behavior, demonstrating that scale alone does not improve robustness; alignment training is the key driver.'
+    );
+  </script>
+</body>
+</html>

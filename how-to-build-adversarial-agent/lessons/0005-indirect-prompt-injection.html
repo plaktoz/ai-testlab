@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 5: Indirect Prompt Injection — Hijacking Agents Through External Content</title>
+    <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+    <div class="container">
+
+        <header class="lesson-header">
+            <div class="breadcrumb">
+                <a href="../lessons.md">Building Adversarial Agents</a> &gt; Attack Techniques &gt; Lesson 5 of 14
+            </div>
+            <h1>Indirect Prompt Injection — Hijacking Agents Through External Content</h1>
+            <div class="lesson-meta">
+                <span>~25 minutes</span>
+                <span>Attack Techniques</span>
+            </div>
+        </header>
+
+        <div class="source-card">
+            <strong>Primary Source:</strong> Greshake et al. (2023), "Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection," <a href="https://arxiv.org/abs/2302.12173" target="_blank">arXiv:2302.12173</a> — demonstrates that LLM agents autonomously retrieving external content can be fully hijacked by attacker-planted instructions embedded in that content, enabling data exfiltration, API abuse, and persistent compromise with no effective defenses identified at time of publication.
+        </div>
+
+        <h2>Direct vs. Indirect Injection: A Critical Distinction</h2>
+        <p>
+            In earlier lessons we examined direct prompt injection — attacks where a malicious actor places adversarial instructions directly into the user's own input field. The user types a crafted prompt, and the model responds in a way the developer did not intend. Direct injection is harmful, but it is at least bounded: the attacker needs access to the user's input channel.
+        </p>
+        <p>
+            Greshake et al. (2023) identify a categorically different threat surface they term <strong>indirect prompt injection</strong>. Here, the malicious instructions are not placed in the user's prompt at all. Instead, they are embedded in external content that a capable LLM agent retrieves and processes on the user's behalf — web pages, incoming emails, shared documents, code repositories, or third-party API responses. The user never authored or saw this content. It arrives from the environment, not from the principal who configured the agent.
+        </p>
+        <p>
+            This distinction has profound implications. An LLM agent with retrieval capabilities — one that can browse the web, read your inbox, or query external databases — exposes every external data source it touches as a potential injection vector. The attack surface is no longer bounded by what the user types. It extends to any content the agent might autonomously retrieve and process. As agents become more capable and more tightly integrated with external services, this surface grows without limit and without any action required of the user.
+        </p>
+        <p>
+            The attacker's goal in indirect injection is to plant instructions in a location where the agent will inevitably read them, then have those instructions override, redirect, or subvert the agent's intended behavior — all without the user's awareness or participation.
+        </p>
+
+        <h2>Real-World Demonstrations: Bing Chat and Code Completion</h2>
+        <p>
+            Greshake et al. demonstrated indirect injection against two high-profile production systems in 2023, establishing that this was not a theoretical concern confined to lab settings.
+        </p>
+        <p>
+            The first demonstration targeted <strong>Bing Chat with GPT-4</strong>, which includes a retrieval component that reads publicly accessible web pages to ground its responses in current information. The researchers embedded adversarial instructions in content hosted on those pages. When Bing's retrieval agent fetched and processed a page containing these instructions, it complied with them: it impersonated Microsoft technical support, claimed the user's device had been compromised, and directed the user toward a malicious site. From the user's perspective, they asked an ordinary question and received a dangerous, attacker-controlled response — mediated entirely by a web page they never visited or saw.
+        </p>
+        <p>
+            The second demonstration targeted <strong>code completion engines</strong> — LLM-based development tools that suggest code as developers type. The researchers embedded adversarial instructions inside comments in a code repository. When the completion engine processed these comments as part of its context window, it began suggesting backdoored or deliberately vulnerable code. A developer relying on the tool's output would unknowingly introduce security flaws into their own software, with the attacker having touched nothing in the developer's direct environment.
+        </p>
+        <p>
+            Both demonstrations share a structural property: the attacker controls a data source that the agent treats as input to be processed, when in fact it contains instructions that override the agent's intended behavior.
+        </p>
+
+        <h2>Attack Classes Enabled by Indirect Injection</h2>
+        <p>
+            Greshake et al. enumerate four distinct attack classes that indirect injection makes possible, each exploiting a different capability that a modern LLM-integrated application typically provides.
+        </p>
+        <p>
+            <strong>Data exfiltration.</strong> Because agents can make outbound network requests, an injected instruction can direct the agent to encode sensitive context — conversation history, personal details, credentials visible in the current session — into a URL and then request that URL. The attacker's server logs the request and receives the exfiltrated data. The user sees nothing unusual; the agent may appear to continue working normally.
+        </p>
+        <p>
+            <strong>API hijacking.</strong> Agents with tool-use capabilities can be instructed to call attacker-controlled endpoints rather than the legitimate APIs they were configured to use. The agent appears to be completing the user's task while actually routing actions through infrastructure the attacker controls.
+        </p>
+        <p>
+            <strong>Information ecosystem contamination.</strong> If an agent summarizes, repeats, or recommends content from a poisoned source, the attacker shapes what the user learns — spreading disinformation, manipulated facts, or compromised resources — without ever interacting with the user directly.
+        </p>
+        <p>
+            <strong>Persistent compromise.</strong> A single injected instruction can plant additional adversarial instructions into the agent's context or long-term memory. This allows the attacker to maintain influence across multiple sessions or invocations, even after the original poisoned source is removed or corrected.
+        </p>
+
+        <h2>Why Proposed Defenses Fall Short</h2>
+        <p>
+            At the time of publication, Greshake et al. found no effective defenses against indirect prompt injection. They analyzed the two most commonly proposed mitigations and found both inadequate in the face of a motivated attacker.
+        </p>
+        <p>
+            <strong>Input sanitization</strong> — filtering retrieved content before it reaches the model — faces the fundamental problem that distinguishing legitimate natural-language text from adversarial instructions is itself an NLP task. Any rule-based filter can be evaded by rephrasing the injection payload to avoid flagged patterns. Learned classifiers introduce their own failure modes, require labeled adversarial data that will never be complete, and cannot adapt as quickly as attackers can generate new variants.
+        </p>
+        <p>
+            <strong>Output filtering</strong> — monitoring the agent's responses for behavioral signs of manipulation — suffers from an analogous limitation in reverse. A sufficiently subtle injection produces outputs that are plausible and superficially correct. Data exfiltration via embedded URL requests may not appear in the agent's text output at all, making it invisible to response-layer monitoring.
+        </p>
+        <p>
+            The authors locate the root of the problem not in any particular feature of the retrieval pipeline but in the architecture of LLM agents themselves: these models have no inherent mechanism for assigning different authority levels to different instruction sources. Instructions from the system prompt, from the user, and from retrieved external content are all token sequences. The model processes them uniformly.
+        </p>
+
+        <h2>Trust Without Provenance: The Structural Flaw</h2>
+        <p>
+            Greshake et al.'s deepest insight is that indirect injection is not a bug in any one system — it is a consequence of deploying instruction-following models in environments where not all retrieved content is trustworthy. The paper's title, "Not What You've Signed Up For," names this precisely: users who grant agents access to their data and services have not consented to those agents becoming attack vectors against them.
+        </p>
+        <p>
+            When a human reads an email, they apply contextual judgment: who sent this, does this request make sense given what I know about the sender, does this person have legitimate authority over my actions? LLM agents — even highly capable ones — do not apply analogous reasoning to instructions they encounter in retrieved content. If a document contains a plausible-sounding directive and the agent is capable of acting on it, the agent is likely to comply.
+        </p>
+        <p>
+            Critically, this problem scales with agent capability. An agent that can only answer questions from retrieved text is relatively constrained in the damage it can cause. An agent that can read emails, book travel, send messages, call APIs, and manage files can be fully weaponized against its own user the moment it encounters a successful injection. Greater autonomy amplifies the impact of any successful attack. The implicit trust model of LLM-integrated applications contains a structural flaw that no surface-level filter can fully remediate, because the flaw lies in how the model itself relates to instruction-like text, regardless of where that text originates.
+        </p>
+
+        <div class="callout key">
+            <strong>Key Insight:</strong> The root vulnerability identified by Greshake et al. is not a missing filter or a misconfigured permission — it is that LLM agents have no architectural mechanism for distinguishing instructions issued by their principal from instructions embedded in the external data they retrieve. Every external source an agent reads is a potential attack surface, and greater agent autonomy translates directly into greater attack leverage for any attacker who can write content that agent will retrieve.
+        </div>
+
+        <div class="callout warning">
+            <strong>Common Misconception:</strong> Many practitioners assume indirect injection can be neutralized by sanitizing retrieved content before it reaches the model. Greshake et al. show this is insufficient: any rule-based or classifier-based filter can be evaded by rephrasing the injection payload. Input sanitization reduces the attack surface on the margins but cannot patch the underlying vulnerability, because the model itself has no mechanism for enforcing a trust boundary between data and instructions. Filtering is a useful layer of defense-in-depth, not a solution.
+        </div>
+
+        <div class="quiz" id="quiz-1">
+            <p class="quiz-question">What root vulnerability do Greshake et al. identify as enabling indirect prompt injection attacks?</p>
+            <div class="quiz-options">
+                <button>Agents fail to separate retrieved external content from trusted principal system instructions</button>
+                <button>Agents cannot sanitize malicious instructions before processing them from externally retrieved pages</button>
+                <button>Agents lack ability to verify that externally retrieved data contains no instructions</button>
+            </div>
+            <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="exercise">
+            <h3>Skill Exercise</h3>
+            <p>
+                A travel-booking agent has been granted read access to the user's email inbox. It scans incoming messages to help plan and book trips on the user's behalf. Your task: craft a realistic-looking email body that, when the agent reads it, causes it to (a) ignore the user's original booking request and (b) instead "confirm" a hotel booking to an address controlled by an attacker. The email must appear completely legitimate to a human reader who sees it in their inbox — no suspicious phrasing, no obvious red flags, nothing that would make a person hesitate to ignore it as routine correspondence. Consider how you would embed the adversarial instructions so they are processed as directives by the agent but read as normal content by a person.
+            </p>
+            <textarea rows="10" placeholder="Your answer here..."></textarea>
+        </div>
+
+        <div class="tutor-prompt">
+            Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+        </div>
+
+        <nav class="lesson-nav">
+            <a href="0004-autodan-evolutionary-jailbreaks.html">&#8592; Previous</a>
+            <a class="primary" href="0006-hackaprompt-taxonomy.html">Next &#8594;</a>
+        </nav>
+
+    </div>
+
+    <script src="../assets/quiz.js"></script>
+    <script>
+        initQuiz(
+            'quiz-1',
+            0,
+            'The paper explicitly states the root vulnerability as follows: LLM agents do not distinguish between instructions from their principal (the user or system) and instructions embedded in retrieved external data. Option A captures this directly — agents conflate retrieved content with trusted principal instructions, maintaining no trust boundary between the two. Option B describes a mitigation strategy (sanitization) rather than a root cause; the paper notes that sanitization is insufficient precisely because it does not address the underlying architectural problem. Option C frames the issue as a verification problem, which is related but imprecise: the failure is not merely that the agent cannot check for instructions in retrieved data, but that the model has no mechanism for assigning different authority levels to different sources of instruction-like text, regardless of origin.'
+        );
+    </script>
+</body>
+</html>

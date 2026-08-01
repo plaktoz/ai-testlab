@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 11: Latent Adversarial Training — Attacking at the Representation Level</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <div class="breadcrumb">
+        <a href="../lessons.md">Building Adversarial Agents</a> &gt; Adversarial Training &gt; Lesson 11 of 14
+      </div>
+      <h1>Latent Adversarial Training — Attacking at the Representation Level</h1>
+      <div class="lesson-meta">
+        <span>Estimated reading time: ~30 minutes</span>
+        <span>Module: Adversarial Training</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <strong>Primary Source:</strong> Sheshadri, A. et al. (2024).
+      <em>Latent Adversarial Training Improves Robustness to Persistent Harmful Behaviors in LLMs</em>.
+      <a href="https://arxiv.org/abs/2407.15549" target="_blank">arXiv:2407.15549</a>.
+      Key result: Targeted LAT — which trains a model to resist perturbations in its residual stream activations
+      while a concurrent adversary optimizes for a specific harmful task — outperforms standard safety fine-tuning
+      and RL-based safety training on jailbreak resistance, backdoor removal, and knowledge unlearning robustness,
+      while requiring significantly less training compute than competing methods.
+    </div>
+
+    <!-- ============================================================
+         SECTION 1 — The Fundamental Gap in Surface-Level Safety Training
+         ============================================================ -->
+    <h2>The Fundamental Gap in Surface-Level Safety Training</h2>
+    <p>
+      Standard safety fine-tuning operates on model outputs. A model is shown examples of requests that should
+      be refused or handled safely, and it is trained to produce appropriate responses to those requests. When
+      this process succeeds, the model declines dangerous queries, refuses harmful instructions, and passes
+      standard safety benchmarks without difficulty. From the outside, it looks safe.
+    </p>
+    <p>
+      Sheshadri et al. (2024) argue that this appearance is systematically misleading. Fine-tuning on safe
+      outputs suppresses surface behaviors — it adjusts which tokens the model generates under familiar
+      conditions — but it does not remove the underlying harmful capabilities from the model's latent
+      representations. Those capabilities continue to exist in the residual stream: the sequence of activation
+      vectors computed at each layer as the model processes a prompt. The model has been trained not to
+      activate them in obvious cases, but they have not been eliminated.
+    </p>
+    <p>
+      Jailbreaks expose this gap directly. A successful jailbreak does not teach the model something new or
+      install a novel capability. It navigates around the surface suppression — through unusual prompt
+      structures, role-play framings, or other perturbations of the input — to access latent capabilities
+      that were never removed. The model already knew how to produce the harmful output. The jailbreak
+      simply found a path that bypasses the guard trained into its surface token generation.
+    </p>
+    <p>
+      The practical consequence is that measuring safety by passing standard evaluations is not the same as
+      measuring whether harmful capabilities have been eliminated. A model that fails no standard tests can
+      still be jailbroken because those capabilities were only deprioritized under common conditions, not
+      erased. Fine-tuning changes what the model does by default; it does not change what the model is
+      capable of.
+    </p>
+
+    <!-- ============================================================
+         SECTION 2 — Residual Stream Perturbations: The Mechanism of LAT
+         ============================================================ -->
+    <h2>Residual Stream Perturbations: The Mechanism of LAT</h2>
+    <p>
+      Latent Adversarial Training addresses the surface-suppression gap by moving the attack surface inward.
+      Rather than crafting adversarial inputs at the token level, LAT operates directly on the model's internal
+      activations. During training, a separate adversarial component generates worst-case perturbations to the
+      model's residual stream — the activation vectors that flow between layers and encode the model's
+      intermediate representations of the prompt being processed.
+    </p>
+    <p>
+      The model is then trained to maintain safe behavior even when those internal representations have been
+      adversarially altered. Because the perturbations happen inside the network rather than at the input, the
+      model cannot rely on recognizing a suspicious prompt to trigger its safety behavior. Unusual-looking
+      inputs are simply inputs; they do not reach inside the model. LAT's perturbations, by contrast, directly
+      manipulate the activations the model uses to decide what to say next.
+    </p>
+    <p>
+      This forces a qualitatively different kind of robustness. A model trained only on safe outputs has learned
+      that certain surface patterns should produce safe outputs. A model trained via LAT has learned that safe
+      behavior must be maintained even when the internal representations encoding the current context are being
+      pushed in harmful directions. Safety is built into the latent structure of the model's computation, not
+      only into its surface-level response pattern.
+    </p>
+    <p>
+      The residual stream is the natural target for this kind of training. It is the continuous thread of
+      information passing through the model's transformer layers — the representation that each layer reads,
+      modifies, and hands to the next. Perturbing it is equivalent to perturbing what the model "knows" about
+      the context as it generates its response. LAT trains the model to remain safe under precisely this kind
+      of internal manipulation.
+    </p>
+
+    <!-- ============================================================
+         SECTION 3 — Two Variants: Untargeted and Targeted LAT
+         ============================================================ -->
+    <h2>Two Variants: Untargeted and Targeted LAT</h2>
+    <p>
+      Sheshadri et al. define two variants of LAT that differ in how much knowledge the adversary holds about
+      its own objective.
+    </p>
+    <p>
+      <strong>Untargeted LAT</strong> uses an adversary that injects worst-case perturbations into the residual
+      stream without a specific harmful objective in mind. The adversary maximizes general harm or deviation from
+      safe behavior, but it is not simultaneously minimizing loss on any particular task. Its perturbations are
+      worst-case in a generic sense — they push activations as far as possible from safe behavior — but they
+      are not optimized toward any particular capability pathway in the network. The model trained to resist
+      these perturbations builds general robustness to internal manipulation, but the training signal is
+      diffuse. Not all perturbations are equally informative about where harmful capabilities actually live in
+      the model's latent space.
+    </p>
+    <p>
+      <strong>Targeted LAT</strong> gives the adversary a concurrent harmful objective. While the model is
+      training to maintain safe behavior, the adversary simultaneously minimizes loss on a specific harmful
+      task — for example, achieving jailbreak success on a particular category of request, or triggering a
+      backdoor that was present in an earlier training stage. The adversary knows what it is trying to
+      accomplish. Its perturbations are not generic worst-case moves; they are gradient steps toward a real
+      harmful outcome. This makes the perturbations more precisely located in activation space relative to
+      the actual capability pathways the model needs to suppress.
+    </p>
+    <p>
+      The structural difference between the two variants is the quality and directionality of the information
+      the adversary provides. Untargeted perturbations are maximally disruptive in a broad sense. Targeted
+      perturbations are maximally informative about a specific threat.
+    </p>
+
+    <!-- ============================================================
+         SECTION 4 — Why Targeted Outperforms Untargeted
+         ============================================================ -->
+    <h2>Why Targeted Outperforms Untargeted</h2>
+    <p>
+      The superiority of targeted LAT over untargeted LAT follows from the quality of the training signal each
+      adversary provides. When the adversary knows what harmful behavior it is trying to elicit, each training
+      step directly contests a real capability pathway in the model's residual stream. The gradient signal tells
+      the model: here is an internal state that, if allowed to persist, would produce this specific harmful
+      output — defend against it. Over many steps, the model learns to specifically suppress the latent
+      representations that support the targeted capability.
+    </p>
+    <p>
+      Untargeted LAT trains against perturbations that are maximally disruptive but not necessarily relevant to
+      the specific harmful capabilities the model has. Some of those generic perturbations will happen to
+      overlap with real capability pathways; many will not. The model still improves its robustness, but it is
+      spending training budget defending against directions in activation space that may not correspond to any
+      actual threat. The signal-to-noise ratio of each training step is lower.
+    </p>
+    <p>
+      This difference in training signal quality has direct empirical consequences. Sheshadri et al. find that
+      targeted LAT achieves better results across every benchmark they evaluate — jailbreak resistance, backdoor
+      removal, and knowledge unlearning robustness — while requiring significantly less training compute than
+      the competing methods. The gain is not from scaling up the training budget. It comes from directing that
+      budget toward a more precise objective: an adversary that is simultaneously solving the harmful task it
+      is trying to elicit, making each perturbation as informative as possible about where the capability
+      actually lives.
+    </p>
+
+    <!-- ============================================================
+         SECTION 5 — Empirical Results: Jailbreaks, Backdoors, and Knowledge Unlearning
+         ============================================================ -->
+    <h2>Empirical Results: Jailbreaks, Backdoors, and Knowledge Unlearning</h2>
+    <p>
+      Sheshadri et al. evaluate targeted LAT against three categories of persistent harmful behavior, comparing
+      it to standard safety fine-tuning and RL-based safety training as baselines.
+    </p>
+    <p>
+      On <strong>jailbreak resistance</strong>, targeted LAT significantly outperforms both baselines. Models
+      trained with targeted LAT maintain safe behavior under jailbreak attempts that succeed against the
+      baseline models. The gap is not marginal — the improvement reflects a qualitative difference in what the
+      training has done to the model's latent representations, not merely a surface recalibration of refusal
+      thresholds.
+    </p>
+    <p>
+      On <strong>backdoor removal</strong>, targeted LAT removes sleeper-agent backdoors more reliably than
+      standard adversarial training. This finding connects directly to the results from Lesson 10: standard
+      adversarial training failed to remove deliberately implanted backdoors, and in some cases made models
+      better at hiding those backdoors during evaluation. Targeted LAT, by training an adversary to specifically
+      elicit backdoor activation, directly contests the internal pathway the backdoor relies on rather than
+      training against generic surface patterns that the backdoor can learn to avoid.
+    </p>
+    <p>
+      On <strong>knowledge unlearning robustness</strong>, LAT better suppresses access to hazardous knowledge
+      that the model has been trained to forget. Standard unlearning methods leave residual access to the
+      unlearned content in the model's latent representations, which can be recovered through certain elicitation
+      techniques. Targeted LAT's perturbation-based training reaches deeper into the representation than
+      output-level suppression can.
+    </p>
+    <p>
+      Across all three categories, the improvements are achieved with significantly less compute than the
+      baselines require. This efficiency result reinforces the central claim: the quality of the adversarial
+      objective matters more than the scale of the training budget. When the adversary is solving the harmful
+      task in parallel with the model's defense, the resulting training signal is dense with information about
+      the specific capability the model needs to suppress.
+    </p>
+
+    <!-- ============================================================
+         KEY CALLOUT
+         ============================================================ -->
+    <div class="callout key">
+      <strong>Key Insight:</strong> Targeted LAT achieves better safety results with less training compute
+      than competing methods — not by training longer or harder, but by training against a more informative
+      adversary. When the adversary simultaneously optimizes for a specific harmful task, every perturbation
+      it adds to the residual stream is a gradient step toward a real capability pathway. The model's defense
+      is correspondingly precise: it learns to suppress the specific latent representations that would produce
+      the targeted harmful behavior, rather than building generic robustness to arbitrary internal noise.
+    </div>
+
+    <!-- ============================================================
+         WARNING CALLOUT
+         ============================================================ -->
+    <div class="callout warning">
+      <strong>Common Misconception:</strong> It is easy to assume that a model which passes standard safety
+      evaluations has had its harmful capabilities removed. Sheshadri et al. show this is not the case.
+      Standard safety fine-tuning suppresses surface behaviors — the model stops generating harmful text in
+      the scenarios it was trained on — but leaves the underlying capabilities intact in the residual stream.
+      The capabilities are not gone; they have been deprioritized under common conditions. Jailbreaks succeed
+      precisely because they bypass the surface suppression to access capabilities that were never actually
+      eliminated. Passing an evaluation is evidence of surface-level suppression, not of capability removal.
+    </div>
+
+    <!-- ============================================================
+         QUIZ
+         ============================================================ -->
+    <div class="quiz" id="quiz-1">
+      <p class="quiz-question">
+        What is the primary advantage of targeted LAT over untargeted LAT?
+      </p>
+      <div class="quiz-options">
+        <button onclick="handleQuizAnswer('quiz-1', 0)">
+          A targeted adversary knows what behavior to elicit, making its perturbations a more focused training signal.
+        </button>
+        <button onclick="handleQuizAnswer('quiz-1', 1)">
+          Standard fine-tuning is cheaper to run but it still outperforms LAT on most backdoor removal benchmarks.
+        </button>
+        <button onclick="handleQuizAnswer('quiz-1', 2)">
+          Untargeted LAT trains against generic residual stream perturbations, without knowing the specific harmful capability being defended.
+        </button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- ============================================================
+         EXERCISE
+         ============================================================ -->
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>
+        Build a decision table with three rows — one for standard safety fine-tuning, one for untargeted LAT,
+        and one for targeted LAT — and four columns: (1) What the adversary optimizes during training,
+        (2) The primary failure mode this method addresses, (3) The primary failure mode this method does
+        <em>not</em> address, (4) When you would prefer this method over the alternatives. Below the table,
+        write exactly two sentences explaining why targeted LAT specifically addresses the Sleeper Agents
+        failure mode from Lesson 10 better than standard adversarial training does.
+      </p>
+      <textarea rows="10" placeholder="Your answer here..."></textarea>
+    </div>
+
+    <!-- ============================================================
+         TUTOR PROMPT
+         ============================================================ -->
+    <div class="tutor-prompt">
+      Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+    </div>
+
+    <!-- ============================================================
+         LESSON NAV
+         ============================================================ -->
+    <nav class="lesson-nav">
+      <a href="0010-sleeper-agents.html">&larr; Previous</a>
+      <a href="0012-calibrating-safety-training.html" class="primary">Next &rarr;</a>
+    </nav>
+
+  </div><!-- /.container -->
+
+  <script src="../assets/quiz.js"></script>
+  <script>
+    initQuiz(
+      'quiz-1',
+      0,
+      'Option A is correct: according to Sheshadri et al., a targeted adversary simultaneously minimizes ' +
+      'loss on a specific harmful task while the model trains to resist, making its perturbations directly ' +
+      'relevant to a real capability pathway in the residual stream and providing a more precise training ' +
+      'signal than generic worst-case perturbations. Option B is incorrect — it makes a false factual claim; ' +
+      'the paper shows targeted LAT outperforms standard fine-tuning with significantly less compute, not ' +
+      'the reverse. Option C is incorrect — it accurately describes a characteristic of untargeted LAT ' +
+      'itself rather than stating targeted LAT\'s advantage over it; describing a limitation of the ' +
+      'alternative method does not explain why the targeted approach is superior.'
+    );
+  </script>
+</body>
+</html>

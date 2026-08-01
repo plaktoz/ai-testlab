@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 8 — Planning Loops — When Structure Beats Improvisation</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb">
+        <a href="../lessons.md">Loop Engineering</a> &rsaquo; Module 3 &mdash; Agentic Loop Patterns &rsaquo; Lesson 8 of 12
+      </p>
+      <h1>Planning Loops &mdash; When Structure Beats Improvisation</h1>
+      <div class="lesson-meta">
+        <span>~25 min</span>
+        <span>Module 3 &mdash; Agentic Loop Patterns</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <div class="source-card-label">Primary Source</div>
+      <p>
+        <a href="https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-4-planning/">
+          Andrew Ng &mdash; Agentic Design Patterns Part 4: Planning
+        </a>
+        &nbsp;&amp;&nbsp;
+        <a href="https://huyenchip.com/2025/01/07/agents.html">
+          Chip Huyen &mdash; Agents (2025)
+        </a>
+      </p>
+      <p>Planning is the pattern where the LLM determines a multi-step sequence at runtime rather than following a predefined workflow. A live demo illustrates dynamic adaptation: when a search API rate-limited, the agent pivoted to Wikipedia without any human intervention.</p>
+    </div>
+
+    <h2>Planning vs. Chaining &mdash; Choosing the Right Architecture</h2>
+    <p>
+      Not every multi-step task requires a planning loop. Anthropic distinguishes between <strong>workflows</strong> &mdash; predefined code paths where steps are fixed at design time &mdash; and <strong>agents</strong> &mdash; LLMs that dynamically direct their own process at runtime. The choice between them is not about raw capability; it is about whether the task decomposition is predictable before execution begins.
+    </p>
+    <p>
+      Andrew Ng makes the decision crisp: planning adds value specifically when task decomposition cannot be specified in advance. If you can enumerate all the steps before any specific task instance arrives, a simpler chaining workflow suffices and will be faster, cheaper, and easier to debug. Reaching for a planning loop when a fixed workflow would do is one of the most common sources of unnecessary complexity in agentic systems.
+    </p>
+
+    <h2>Dynamic Task Decomposition at Runtime</h2>
+    <p>
+      A planning loop asks the model to produce the step sequence as part of the task itself. Rather than executing a hardcoded path, the LLM reads the task description and generates an ordered list of sub-tasks it will need to complete. Chip Huyen frames this as a <strong>search problem</strong>: the agent evaluates paths toward a goal using heuristics or AI judges to validate candidate plans before any execution begins.
+    </p>
+    <p>
+      The rate-limit adaptation example from Ng&rsquo;s live demo captures what makes planning loops valuable in practice. When a search API returned a rate-limit error mid-task, the agent did not fail &mdash; it replanned, substituting Wikipedia as the information source and continuing without human intervention. A hardcoded workflow would have halted at that point. The planning loop adapted because it treated its own plan as a revisable artifact, not as fixed instructions.
+    </p>
+
+    <h2>The Plan &rarr; Validate &rarr; Execute Cycle</h2>
+    <p>
+      Huyen&rsquo;s <strong>decoupling principle</strong> structures the planning loop into three distinct phases that should never be collapsed into one. First, <em>generate a plan</em>: the LLM decomposes the task into an ordered list of steps given the available tool inventory. Second, <em>validate the plan</em>: a separate validation pass &mdash; a heuristic check or a second LLM call &mdash; confirms the plan is complete and uses only available tools before any execution begins. Third, <em>execute step by step</em>: each step runs in sequence, with the option to replan if validation or a step fails.
+    </p>
+    <p>
+      Control flows within a plan map directly to software engineering constructs: sequential chains, parallel fan-out, if-statement routing, and for-loop step iteration. To measure planning quality in production, Huyen recommends three metrics evaluated against a dataset of (task, tool inventory) tuples: <em>valid plan ratio</em>, <em>plans-per-valid-plan</em>, and <em>invalid tool call frequency</em>. These metrics separate planning failures from execution failures, making loop problems diagnosable.
+    </p>
+
+    <h2>When Planning Adds Value &mdash; and When It Does Not</h2>
+    <p>
+      Of the four agentic design patterns &mdash; reflection, tool use, planning, and multi-agent collaboration &mdash; Andrew Ng considers planning the least mature. Reliability and predictability vary more across tasks than with reflection or tool use, and rapid improvement is expected as the research matures. This relative immaturity is an argument for applying planning conservatively: use it when the task genuinely requires runtime decomposition, and fall back to a simpler design when the steps are predictable.
+    </p>
+    <p>
+      The practical test: if a domain expert can enumerate the steps needed to complete a task before seeing any specific instance of it, a workflow is the right tool. If the steps depend on information that becomes available only mid-task &mdash; search results, API responses, intermediate computations &mdash; a planning loop earns its overhead. &ldquo;Scrape a list of URLs&rdquo; is a workflow. &ldquo;Research a company and write a competitive analysis&rdquo; is a planning problem, because the right sub-tasks depend on what the research uncovers.
+    </p>
+
+    <div class="callout key">
+      <div class="callout-label">Key Insight</div>
+      Planning loops add value specifically when task decomposition cannot be specified at design time. For predictable step sequences, a simpler chaining workflow is faster, cheaper, and easier to debug.
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out</div>
+      Planning is the least mature of the four agentic design patterns. Applying it to tasks with predictable steps adds latency and complexity without benefit. Always verify that a fixed workflow cannot solve the problem before reaching for a planning loop.
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>
+      The code below implements the plan &rarr; validate &rarr; execute cycle as a LangGraph <code>StateGraph</code>. The <code>plan &rarr; validate</code> edge adds a gate before any step is executed; if validation fails, the graph re-enters <code>plan</code> with the failure reason as context, enabling replanning. Once valid, <code>execute_step</code> runs one step at a time and loops back to itself until the plan is exhausted &mdash; this inner for-loop is what separates a planning agent from a single ReAct call.
+    </p>
+    <pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langchain_anthropic import ChatAnthropic
+from typing import TypedDict, Literal
+import json
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+
+class PlanState(TypedDict):
+    task: str
+    plan: list[str]
+    step_index: int
+    results: list[str]
+    valid: bool
+    done: bool
+
+def plan(state: PlanState) -&gt; dict:
+    context = f"\nPrevious plan was rejected. Revise it." if state["plan"] else ""
+    response = llm.invoke(
+        f"Decompose this task into ordered steps. Return a JSON array of strings.{context}\nTask: {state['task']}"
+    )
+    try:
+        steps = json.loads(response.content)
+    except Exception:
+        steps = [response.content]
+    return {"plan": steps, "step_index": 0, "results": []}
+
+def validate(state: PlanState) -&gt; dict:
+    response = llm.invoke(
+        f"Does this plan fully cover the task without missing steps? Reply 'VALID' or 'INVALID: &lt;reason&gt;'.\n"
+        f"Task: {state['task']}\nPlan: {state['plan']}"
+    )
+    return {"valid": response.content.strip().startswith("VALID")}
+
+def execute_step(state: PlanState) -&gt; dict:
+    step = state["plan"][state["step_index"]]
+    result = llm.invoke(
+        f"Execute this step: {step}\nContext from prior steps: {state['results']}"
+    ).content
+    new_index = state["step_index"] + 1
+    return {
+        "results": state["results"] + [result],
+        "step_index": new_index,
+        "done": new_index &gt;= len(state["plan"]),
+    }
+
+def route_after_validate(state: PlanState) -&gt; Literal["plan", "execute_step"]:
+    return "plan" if not state["valid"] else "execute_step"
+
+def route_after_execute(state: PlanState) -&gt; Literal["execute_step", "__end__"]:
+    return END if state["done"] else "execute_step"
+
+builder = StateGraph(PlanState)
+builder.add_node("plan", plan)
+builder.add_node("validate", validate)
+builder.add_node("execute_step", execute_step)
+builder.set_entry_point("plan")
+builder.add_edge("plan", "validate")
+builder.add_conditional_edges("validate", route_after_validate)
+builder.add_conditional_edges("execute_step", route_after_execute)
+
+app = builder.compile()
+result = app.invoke({
+    "task": "Research and summarize recent advances in LLM efficiency.",
+    "plan": [], "step_index": 0, "results": [], "valid": False, "done": False
+})
+print(f"Completed {len(result['results'])} steps.")</code></pre>
+
+    <div class="quiz" id="quiz-8">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">When is a planning loop more appropriate than a fixed workflow?</p>
+      <div class="quiz-options">
+        <button>Task decomposition cannot be specified at design time</button>
+        <button>The agent must call multiple tools in order</button>
+        <button>The task requires human approval at each step</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Given two task descriptions &mdash; one with predictable steps (scrape a list of URLs) and one with unpredictable steps (research a company and write a competitive analysis) &mdash; classify each as &ldquo;workflow&rdquo; or &ldquo;planning loop&rdquo; and explain why; then sketch the plan validation step for the second task.</p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor &mdash; copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0007-lats-tree-search.html">&larr; Previous</a>
+      <a href="0009-state-management.html" class="primary">Next &rarr;</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-8', 0, 'Correct. Andrew Ng identifies unpredictable task decomposition as the specific condition that justifies a planning loop. Using multiple tools or requiring human approval are separate design concerns that do not determine whether planning is needed.');</script>
+
+  </div>
+</body>
+</html>

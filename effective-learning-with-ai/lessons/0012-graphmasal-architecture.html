@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 12 — GraphMASAL: Current State of the Art | AI Tutoring Systems</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="container">
+
+  <!-- ─── Header ──────────────────────────────────────────── -->
+  <header class="lesson-header">
+    <p class="breadcrumb">
+      <a href="../index.html">AI Tutoring Systems</a> ›
+      Module 4: Evaluation &amp; State of the Art ›
+      Lesson 12 of 13
+    </p>
+    <h1>GraphMASAL — Current State of the Art</h1>
+    <div class="lesson-meta">
+      <span>Module 4 — Evaluation and State of the Art</span>
+      <span>Lesson 12 of 13</span>
+    </div>
+  </header>
+
+  <!-- ─── Source ──────────────────────────────────────────── -->
+  <div class="source-card">
+    <div class="source-label">Primary Source</div>
+    <strong>GraphMASAL: A Graph-based Multi-Agent System for Adaptive Learning</strong>
+    <a href="https://arxiv.org/abs/2511.11035" target="_blank" rel="noopener">arxiv.org/abs/2511.11035</a>
+    — outperforms LLM prompting baselines under blinded automated evaluations
+  </div>
+
+  <!-- ─── 1. What Is GraphMASAL ──────────────────────────── -->
+  <h2>What Is GraphMASAL?</h2>
+
+  <p>
+    GraphMASAL — <em>Graph-based Multi-Agent System for Adaptive Learning</em> — is
+    currently the state of the art for AI tutoring architectures that combine knowledge
+    graphs, multi-agent orchestration, and neural retrieval in a single integrated system.
+    It is significant not because any one of its components is novel in isolation, but
+    because it unifies them into a coherent pipeline and validates the combination
+    empirically under blinded evaluation conditions.
+  </p>
+
+  <p>
+    The name carries its architecture: <strong>Graph</strong> for its dynamic knowledge
+    graph backbone, <strong>Multi-Agent</strong> for its three specialized agents
+    coordinated through LangGraph, and <strong>Adaptive Learning</strong> for its ability
+    to personalize instruction path and content to each student's measured state.
+  </p>
+
+  <!-- ─── Key Synthesis callout ────────────────────────────── -->
+  <div class="callout key">
+    <div class="callout-title">GraphMASAL Synthesizes the Whole Course</div>
+    <p>
+      GraphMASAL is not one new idea — it is the integration of every major idea in this
+      course into a single working system. Each component introduced in Modules 1–3
+      reappears here in a production-grade form. The earlier lessons were not background;
+      they were the building blocks of this architecture.
+    </p>
+  </div>
+
+  <!-- ─── 2. Three Core Components ────────────────────────── -->
+  <h2>Three Core Components</h2>
+
+  <p>
+    GraphMASAL is built from three interlocking components. Each solves a distinct
+    sub-problem, and together they cover the full pipeline from diagnosing a student
+    to delivering instruction.
+  </p>
+
+  <h3>1. Dynamic Knowledge Graph</h3>
+
+  <p>
+    Unlike the static knowledge graphs covered in Lesson 4 — which are authored once and
+    queried read-only — GraphMASAL's knowledge graph <em>evolves as the student learns</em>.
+    Concept mastery states are nodes in the graph; prerequisite and co-requisite
+    relationships between concepts are edges. As a student works through material, the
+    system updates mastery state on nodes in real time. The graph is not a curriculum
+    imposed on the student; it is a live model of what the student knows.
+  </p>
+
+  <p>
+    This makes the knowledge graph a shared memory structure across all three agents.
+    The Diagnostician reads from it to identify gaps; the Planner writes path decisions
+    to it; the Tutor reads from it to contextualize instruction. The graph is the connective
+    tissue of the whole architecture.
+  </p>
+
+  <h3>2. LangGraph-Orchestrated Agents</h3>
+
+  <p>
+    GraphMASAL employs three specialized agents, each scoped to a distinct responsibility:
+  </p>
+
+  <ul>
+    <li>
+      <strong>Diagnostician:</strong> Assesses the student's current knowledge state by
+      probing concepts and reading the knowledge graph. It identifies gaps — concepts the
+      student needs but has not yet mastered.
+    </li>
+    <li>
+      <strong>Planner:</strong> Takes the diagnosed gaps as input and generates a learning
+      path: an ordered sequence of concepts that covers all gaps with minimal redundancy.
+      It uses the multi-source multi-sink planning engine described below.
+    </li>
+    <li>
+      <strong>Tutor:</strong> Delivers instruction for each concept on the plan, drawing on
+      retrieved learning resources. It adapts its explanations to the student's demonstrated
+      level of understanding.
+    </li>
+  </ul>
+
+  <p>
+    The three agents are orchestrated via <strong>LangGraph</strong>, a framework for
+    structured multi-step conversations between agents. LangGraph enforces the sequencing —
+    Diagnostician first, Planner second, Tutor third — and manages state between steps,
+    ensuring each agent operates on consistent, up-to-date information from the shared
+    knowledge graph.
+  </p>
+
+  <h3>3. Two-Stage Neural Information Retrieval</h3>
+
+  <p>
+    When the Tutor agent needs learning resources for a concept, it retrieves them through
+    a two-stage neural IR pipeline:
+  </p>
+
+  <ol>
+    <li>
+      <strong>Dual-encoder retrieval (Stage 1):</strong> A pair of encoders — one for
+      queries, one for documents — produces dense vector representations that enable fast
+      approximate nearest-neighbour search across the resource corpus. This stage retrieves
+      a broad set of candidate documents quickly via semantic similarity.
+    </li>
+    <li>
+      <strong>Cross-encoder re-ranking (Stage 2):</strong> A single encoder processes the
+      query and each candidate document jointly, producing a precise relevance score. The
+      top-ranked candidates from Stage 1 are re-ordered. This stage is slower but more
+      accurate than the dual-encoder alone.
+    </li>
+  </ol>
+
+  <p>
+    The two stages balance competing demands: Stage 1 provides speed by searching at
+    scale; Stage 2 provides precision by scoring candidates carefully. A single-stage
+    system would be forced to sacrifice one for the other.
+  </p>
+
+  <!-- ─── Component Overview Table ──────────────────────── -->
+  <h2>Component Overview</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>What it does</th>
+        <th>Source lesson</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Dynamic knowledge graph</strong></td>
+        <td>Tracks concept mastery as live, evolving nodes and edges; shared memory across all agents</td>
+        <td>Lessons 4 &amp; 5</td>
+      </tr>
+      <tr>
+        <td><strong>LangGraph-orchestrated agents</strong> (Diagnostician, Planner, Tutor)</td>
+        <td>Three specialized agents sequenced by LangGraph: diagnose gaps, plan a path, deliver instruction</td>
+        <td>Lessons 6, 7 &amp; 8</td>
+      </tr>
+      <tr>
+        <td><strong>Two-stage neural IR</strong> (dual-encoder + cross-encoder)</td>
+        <td>Retrieves relevant learning resources; Stage 1 for speed, Stage 2 for precision</td>
+        <td>Lesson 4 (retrieval groundwork)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Synthesis callout ──────────────────────────────── -->
+  <div class="callout key">
+    <div class="callout-title">Course Synthesis — Where Each Component Comes From</div>
+    <p>
+      GraphMASAL maps directly onto lessons you have already completed:
+    </p>
+    <ul>
+      <li><strong>Dynamic knowledge graph</strong> → Lesson 4 (KG-RAG static KG, the baseline) + Lesson 5 (RPKT dynamic prerequisite tracing)</li>
+      <li><strong>Multi-agent architecture</strong> → Lesson 6 (MALPP multi-agent learning path planning)</li>
+      <li><strong>Student knowledge modeling</strong> → Lesson 7 (TASA student modeling and state representation)</li>
+      <li><strong>Closed feedback loop</strong> → Lesson 8 (ALIGNAgent iterative alignment between student state and instruction)</li>
+      <li><strong>Dynamic path generation</strong> → Lesson 5 (RPKT runtime path construction) + Lesson 6 (MALPP path planning agents)</li>
+    </ul>
+    <p>
+      GraphMASAL is not an addendum to the course. It is the destination the course was
+      building toward.
+    </p>
+  </div>
+
+  <!-- ─── 3. Multi-Source Multi-Sink Planning ────────────── -->
+  <h2>Multi-Source Multi-Sink Planning Engine</h2>
+
+  <p>
+    At the heart of the Planner agent is a <strong>multi-source multi-sink planning
+    engine</strong> based on a greedy set cover approximation. The terminology captures
+    the real structure of adaptive learning:
+  </p>
+
+  <ul>
+    <li>
+      <strong>Multi-source</strong> means the path has multiple entry points — the student's
+      current knowledge state may span several concepts at varying levels of mastery, and
+      the plan must begin from all of them simultaneously rather than assuming a single
+      starting point.
+    </li>
+    <li>
+      <strong>Multi-sink</strong> means the path targets multiple destination concepts —
+      the student needs to reach a set of goals, not just one, and the plan must satisfy
+      all of them.
+    </li>
+  </ul>
+
+  <p>
+    Given these constraints, the Planner uses a greedy set cover approximation to construct
+    a path that covers all identified knowledge gaps with minimum redundancy. Set cover
+    is NP-hard in general, but the greedy approximation — always pick the next concept
+    that covers the most uncovered gaps — performs well in practice and runs efficiently
+    enough for real-time planning.
+  </p>
+
+  <p>
+    The result is a learning path that is both complete (no identified gap is left
+    unaddressed) and parsimonious (the student is not walked through concepts they
+    already understand).
+  </p>
+
+  <!-- ─── 4. Evaluation ─────────────────────────────────── -->
+  <h2>Evaluation: Blinded Automated Assessment</h2>
+
+  <p>
+    GraphMASAL was evaluated against LLM prompting baselines — systems that prompt a
+    language model directly to generate learning paths and instruction, without a
+    structured knowledge graph or multi-agent pipeline. The evaluation was
+    <strong>blinded</strong>: automated evaluators did not know which system produced
+    which output, eliminating scoring bias toward either approach.
+  </p>
+
+  <p>
+    GraphMASAL outperformed the LLM prompting baselines on three criteria:
+  </p>
+
+  <ol>
+    <li>
+      <strong>Structural alignment of learning paths:</strong> The paths GraphMASAL produced
+      better matched the logical prerequisite structure of the domain compared to paths
+      generated by direct LLM prompting.
+    </li>
+    <li>
+      <strong>Concept coverage:</strong> GraphMASAL's paths covered a higher proportion of
+      the identified knowledge gaps without unnecessary detours.
+    </li>
+    <li>
+      <strong>Learning cost:</strong> Students reached target concepts in fewer steps under
+      GraphMASAL than under the prompting baselines, indicating more efficient path
+      construction.
+    </li>
+  </ol>
+
+  <p>
+    Expert human raters subsequently reviewed a sample of outputs and their ratings were
+    consistent with the automated results, providing external validation that the automated
+    metrics were measuring something real.
+  </p>
+
+  <p>
+    The blinded evaluation design is significant because it rules out a common confound
+    in AI system evaluations: evaluators giving higher scores to outputs that feel more
+    fluent or more elaborate, rather than to outputs that are actually better structured
+    for learning.
+  </p>
+
+  <!-- ─── Quiz ──────────────────────────────────────────── -->
+  <div class="quiz" id="quiz-12">
+    <div class="quiz-title">Check Your Understanding</div>
+    <p class="quiz-question">
+      GraphMASAL's two-stage neural IR (dual-encoder + cross-encoder) is designed to balance:
+    </p>
+    <ul class="quiz-options">
+      <li>
+        <button>
+          A. Computational overhead across the Diagnostician and Planner agents for efficient multi-agent path coordination
+        </button>
+      </li>
+      <li>
+        <button>
+          B. Speed of semantic retrieval with precision of relevance re-ranking for accurate resource selection
+        </button>
+      </li>
+      <li>
+        <button>
+          C. Dynamic knowledge graph construction with static prerequisite concept mapping for consistent path quality
+        </button>
+      </li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Exercise ─────────────────────────────────────── -->
+  <div class="exercise">
+    <div class="exercise-title">Capstone Design Exercise</div>
+    <p>
+      Now that you have seen all the components — KG-RAG, RPKT, MALPP, TASA, ALIGNAgent,
+      and GraphMASAL — sketch a one-paragraph architecture for a tutoring system for a
+      topic you care about. Which components from the course would you include, and why?
+      Which would you leave out for a v1?
+    </p>
+    <textarea placeholder="Topic I want to build a tutoring system for:&#10;&#10;Components I would include in v1, and why:&#10;&#10;Components I would defer, and why:&#10;&#10;How the components connect in my architecture:"></textarea>
+  </div>
+
+  <!-- ─── Tutor Prompt ──────────────────────────────────── -->
+  <div class="tutor-prompt">
+    <strong>Ask your tutor:</strong> "Walk me through how GraphMASAL's Planner agent would
+    construct a learning path for a student who understands Python syntax but is missing
+    both recursion and object-oriented design — two distinct gaps with overlapping prerequisites."
+  </div>
+
+  <!-- ─── Navigation ────────────────────────────────────── -->
+  <nav class="lesson-nav">
+    <a href="0011-tutorgym-evaluation.html">&#8592; Lesson 11: TutorGym Evaluation</a>
+    <a href="0013-beagle-synthetic-students.html" class="primary">Lesson 13: BEAGLE Synthetic Students &#8594;</a>
+  </nav>
+
+</div><!-- /.container -->
+
+<script src="../assets/quiz.js"></script>
+<script>
+  // Correct answer is option B (index 1)
+  initQuiz('quiz-12', 1,
+    'Stage 1 (dual-encoder) retrieves candidates fast via semantic similarity; Stage 2 ' +
+    '(cross-encoder) re-ranks them precisely. Together they avoid the speed-precision ' +
+    'trade-off that degrades single-stage retrieval.'
+  );
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 7 — TASA: Three Dimensions of a Student Model</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="container">
+
+  <header class="lesson-header">
+    <div class="breadcrumb">
+      <a href="../lessons.md">AI Tutoring Systems</a> › Module 3: Personalization › Lesson 7 of 13
+    </div>
+    <h1>TASA — Three Dimensions of a Student Model</h1>
+    <div class="lesson-meta">
+      <span>~12 min</span>
+      <span>Module 3 — Personalization and Student Modeling</span>
+    </div>
+  </header>
+
+  <!-- ─── Source ──────────────────────────────────────────────────── -->
+
+  <div class="source-card">
+    <div class="source-label">Primary source</div>
+    <strong>TASA: Persona-, Memory-, and Forgetting-Aware LLMs (arXiv 2511.15163)</strong>
+    Evaluated in mathematics tutoring. Compared against representative baselines on learning outcomes and behavioral adaptivity.
+    <br>Result: <strong>TASA outperformed all baselines</strong>; the forgetting curve dimension contributed the most improvement.
+  </div>
+
+  <!-- ─── Section 1: Why flat correctness tracking fails ──────────── -->
+
+  <h2>Why a score is not a student model</h2>
+
+  <p>Suppose a student scores 7 out of 10 on a quiz. What do you now know? You know roughly how many items they got right — and almost nothing else. You do not know <em>which</em> concepts were wrong, <em>when</em> those concepts were first encountered, or <em>how quickly</em> the student tends to forget them.</p>
+
+  <p>Flat correctness tracking treats every mistake as equally informative and every correct answer as equally durable. It cannot distinguish a student who has mastered fractions but forgotten exponents from a student who vaguely recalls both. It cannot detect that a concept explained two weeks ago has since decayed. It cannot avoid repeating an explanation already given in the previous session.</p>
+
+  <p>To do any of those things, a tutoring system needs a richer internal representation of the learner — a <strong>student model</strong> with at least three distinct dimensions.</p>
+
+  <!-- ─── Section 2: The three dimensions ─────────────────────────── -->
+
+  <h2>TASA's three dimensions</h2>
+
+  <p>TASA structures its student model around three complementary layers. Each captures something the others cannot.</p>
+
+  <h3>Dimension 1 — Persona (proficiency profile)</h3>
+
+  <p>The persona is a structured map of the student's domain competencies: which concepts they have demonstrated, and at what level. Think of it as a per-concept mastery record, not a single aggregate score. The persona is updated after each interaction as the system observes new evidence of understanding or confusion.</p>
+
+  <p>The persona answers the question <em>what does this student know?</em> It is the foundation for targeting questions at the right difficulty and for tracking growth across sessions.</p>
+
+  <h3>Dimension 2 — Memory (interaction log)</h3>
+
+  <p>The memory dimension is a log of recent exchanges: what questions were asked, how the student answered, what explanations were given. It gives the AI short-term context — enough to avoid repeating an explanation already delivered and to build coherently on what was just discussed.</p>
+
+  <p>Without memory, a tutoring session has no continuity. Each exchange is effectively a cold start. With memory, the AI can reference what the student said two turns ago and adapt accordingly.</p>
+
+  <h3>Dimension 3 — Forgetting curve (knowledge tracing with decay)</h3>
+
+  <p>The forgetting curve dimension combines two mechanisms: a <strong>forgetting model</strong> that estimates how much a concept decays over time without reinforcement, and <strong>knowledge tracing</strong> that updates the mastery probability after each response. The result is a real-time prediction of how much of each concept remains available to the student <em>right now</em> — not when they last practiced it, but today.</p>
+
+  <p>This is the dimension that makes scheduling principled. A concept the student answered correctly two months ago may be nearly gone. A concept practiced yesterday is fresh. The forgetting curve tracks the difference.</p>
+
+  <!-- ─── Comparison table ─────────────────────────────────────────── -->
+
+  <h2>The three dimensions at a glance</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>What it stores</th>
+        <th>When it updates</th>
+        <th>What it enables</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Persona</strong></td>
+        <td>Per-concept mastery map — which concepts the student has demonstrated and at what level</td>
+        <td>After each interaction</td>
+        <td>Targeting questions at the right difficulty; tracking growth across sessions</td>
+      </tr>
+      <tr>
+        <td><strong>Memory</strong></td>
+        <td>Log of recent exchanges — questions asked, student answers, explanations given</td>
+        <td>After each exchange</td>
+        <td>Avoiding repetition; building coherently on recent context within a session</td>
+      </tr>
+      <tr>
+        <td><strong>Forgetting curve</strong></td>
+        <td>Predicted current availability of each concept — mastery probability decayed by elapsed time</td>
+        <td>After each response and continuously as time elapses between sessions</td>
+        <td>Scheduling the right concept at the right moment; detecting silent decay</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Section 3: How TASA integrates all three at inference ────── -->
+
+  <h2>How TASA integrates all three at inference time</h2>
+
+  <p>Before generating any question or explanation, TASA reads all three dimensions simultaneously. The persona tells the system what the student knows in principle. The memory tells it what was just discussed. The forgetting curve tells it what has likely decayed since the last session.</p>
+
+  <p>The intersection of all three determines the optimal next move. A concept flagged as weak in the persona, absent from recent memory, and predicted to have decayed significantly by the forgetting curve becomes the highest-priority target. A concept the student demonstrated strongly last session and practiced yesterday needs no immediate attention.</p>
+
+  <p>This three-way read happens at every turn. The system is never operating on a single signal; it is always triangulating.</p>
+
+  <!-- ─── Section 4: Evaluation ──────────────────────────────────────── -->
+
+  <h2>Evaluation results in math tutoring</h2>
+
+  <p>TASA was evaluated against representative baselines in a mathematics tutoring setting. It outperformed the baselines on both learning outcomes and behavioral adaptivity — the degree to which the system's behavior actually varied in response to individual student differences.</p>
+
+  <div class="callout key">
+    <div class="callout-title">Key finding</div>
+    <p style="margin:0">Among the three dimensions, the <strong>forgetting curve contributed the most improvement</strong> over baselines. Knowing what a student has likely forgotten since the last session turns out to matter more than a richer profile or a longer interaction log alone. Silent decay is the gap that flat correctness tracking leaves entirely unaddressed.</p>
+  </div>
+
+  <!-- ─── Section 5: Practical build ────────────────────────────────── -->
+
+  <h2>Minimum viable student model</h2>
+
+  <p>Building all three dimensions from scratch requires meaningful infrastructure. For a practical first build, TASA's results suggest a clear priority order.</p>
+
+  <p>Start with <strong>persona + forgetting curve</strong>. These two dimensions together capture both the static mastery map and its dynamic decay — the combination that produced the largest gains in the TASA evaluation. A system that knows what a student has learned and how much of it has likely faded can already schedule reviews far more intelligently than one relying on raw scores.</p>
+
+  <p>Add the <strong>memory log</strong> once the foundation is stable. The interaction log adds real value — session continuity, avoidance of repetition — but it also requires storing and retrieving conversation history efficiently. It is an enhancement, not a prerequisite.</p>
+
+  <!-- ─── Quiz ──────────────────────────────────────────────────────── -->
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" id="quiz-7">
+    <div class="quiz-title">Quick check — 1 question</div>
+    <p class="quiz-question">TASA's forgetting curve dimension does something none of the other two dimensions can do, which is:</p>
+    <ul class="quiz-options">
+      <li><button>A. Track which specific concepts the student has encountered so far and estimate their current mastery level</button></li>
+      <li><button>B. Predict how much of a concept the student has likely forgotten since they last practiced it</button></li>
+      <li><button>C. Log the recent interactions so the AI can avoid repeating explanations already given to the student</button></li>
+    </ul>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <!-- ─── Skill Exercise ────────────────────────────────────────────── -->
+
+  <h2>Skill exercise</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Apply it — schema design</div>
+    <p><strong>Design a minimal student model schema for a tutoring system on SQL.</strong> List: (1) 3–5 fields for the Persona dimension, (2) 2–3 fields for the Memory dimension, (3) 2 fields for the Forgetting dimension. Use pseudo-JSON or plain text.</p>
+    <p style="font-size:0.88rem; color: var(--muted); margin-bottom:0.25rem;">There is no auto-grade. The goal is to make the schema concrete enough to implement.</p>
+    <textarea placeholder="e.g.&#10;Persona: { concept: &quot;JOINs&quot;, mastery_level: 0.72, attempts: 8 }&#10;Memory: { last_question: &quot;Write a LEFT JOIN…&quot;, last_response: &quot;…&quot; }&#10;Forgetting: { last_practiced_at: &quot;2026-07-10&quot;, decay_rate: 0.15 }" aria-label="Skill exercise response"></textarea>
+  </div>
+
+  <!-- ─── Nav ───────────────────────────────────────────────────────── -->
+
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <a href="0006-multi-agent-learning-path.html">&larr; Previous: Multi-Agent Learning Path</a>
+    <a href="0008-diagnose-recommend-reassess.html" class="primary">Next: Diagnose, Recommend, Reassess &rarr;</a>
+  </nav>
+
+  <!-- ─── Tutor prompt ─────────────────────────────────────────────── -->
+
+  <div class="tutor-prompt">
+    Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.
+  </div>
+
+</div>
+
+<script src="../assets/quiz.js"></script>
+<script>
+  initQuiz(
+    'quiz-7',
+    1,
+    'The forgetting curve models knowledge decay over time — it predicts the current availability of a concept, not just whether it was ever learned. This is what the Persona (mastery map) and Memory (interaction log) cannot capture alone.'
+  );
+</script>
+</body>
+</html>

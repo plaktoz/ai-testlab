@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 10 — Taxonomy of Agentic Loop Failures</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header class="lesson-header">
+      <p class="breadcrumb">
+        <a href="../lessons.md">Loop Engineering</a> › Module 4 — Failure Modes and Robust Design › Lesson 10 of 12
+      </p>
+      <h1>Taxonomy of Agentic Loop Failures</h1>
+      <div class="lesson-meta">
+        <span>~25 min</span>
+        <span>Module 4 — Failure Modes and Robust Design</span>
+      </div>
+    </header>
+
+    <div class="source-card">
+      <div class="source-card-label">Primary Source</div>
+      <p><a href="https://huyenchip.com/2025/01/07/agents.html">Chip Huyen — Agents (2025): Failure Taxonomy</a></p>
+      <p>Huyen identifies three failure categories — planning, tool, and efficiency — that together cover every way an agentic loop can break down; the taxonomy is the most complete available and is essential for designing robust loops because you can only guard against failures you have named.</p>
+    </div>
+
+    <h2>Why a Failure Taxonomy Matters</h2>
+    <p>Agentic loops fail in structured, repeating ways. Without a shared vocabulary for those failures, engineers patch symptoms rather than causes: they add retries where they need validation, or add parallelism where they need tool grounding. Chip Huyen's taxonomy from her 2025 "Agents" analysis organises every identified failure into three categories — planning, tool, and efficiency — each demanding a different class of mitigation. Validation at the plan stage addresses planning failures; grounding and schema enforcement address tool failures; flow analysis and step-count auditing address efficiency failures.</p>
+    <p>The taxonomy also makes evaluation concrete. Huyen recommends evaluating agents against a dataset of (task, tool inventory) tuples and tracking metrics such as valid plan ratio, plans-per-valid-plan, and invalid tool call frequency. Each metric maps directly onto one of the three failure categories, turning a qualitative failure observation into a number you can trend over time.</p>
+
+    <h2>Planning Failures</h2>
+    <p>Planning failures occur before any tool is executed — they live in the step where the agent decides what to do and how to do it. Huyen identifies four subtypes:</p>
+    <ul>
+      <li><strong>Invalid tool calls:</strong> The agent calls a function name that does not exist in its tool registry — a hallucination of the planning component. The tool invocation fails immediately, but the damage is already done: a loop cycle has been consumed on a non-executable step.</li>
+      <li><strong>Correct tool, wrong parameters:</strong> The agent identifies the right tool but passes arguments that violate the tool's contract — wrong types, out-of-range values, or missing required fields. The tool exists, but the call is still invalid.</li>
+      <li><strong>Goal failures:</strong> The agent solves the wrong task. It produces output that is internally consistent and uses real tools correctly, but the result does not satisfy the user's actual intent. Goal failures are the hardest to detect automatically because no exception is raised.</li>
+      <li><strong>Reflection errors:</strong> The agent evaluates its own output and incorrectly concludes the task is complete when it is not. The loop terminates early — not because a stopping condition was met, but because the agent's self-assessment was wrong.</li>
+    </ul>
+    <p>The mitigation for planning failures is validation at the plan stage — checking tool names against the registry, validating parameter schemas before execution, and separating the generate step from the execute step so that invalid plans are rejected before they consume execution budget.</p>
+
+    <h2>Tool Failures</h2>
+    <p>Tool failures occur at the interface between the agent's natural-language reasoning and the executable environment. Even when the plan is valid, the interaction with a tool can break in three ways:</p>
+    <ul>
+      <li><strong>Incorrect output:</strong> The tool executes successfully but returns a result that is wrong, stale, or misleading. The agent treats the output as ground truth and builds subsequent steps on a faulty foundation.</li>
+      <li><strong>Translation errors:</strong> The agent cannot reliably convert between natural language instructions and the precise command format a tool requires. Formatting errors, encoding mismatches, and non-compliance with the tool's input schema all fall here. Huyen notes these require significant output-parsing code to handle robustly.</li>
+      <li><strong>Missing tools:</strong> The agent is given a task that requires a capability that simply does not exist in its tool inventory. No amount of replanning can succeed — the system lacks the instrument the task demands.</li>
+    </ul>
+    <p>The mitigation for tool failures is grounding — using structured output formats, schema validation on tool inputs, and tool documentation that is treated like production code. Huyen's framing from the oversight section applies here too: agent reliability is bounded by tool reliability.</p>
+
+    <h2>Efficiency Failures</h2>
+    <p>Efficiency failures do not prevent the agent from completing a task — they cause it to complete the task using far more resources than necessary. Two subtypes dominate:</p>
+    <ul>
+      <li><strong>Excessive steps:</strong> The agent takes more loop iterations than the task requires. Each unnecessary step consumes tokens, latency, and API budget. In long-running loops, excess steps also increase the chance that an early error compounds into a later planning failure.</li>
+      <li><strong>Missed parallelism:</strong> The agent executes steps sequentially when those steps were independent and could have been dispatched in parallel. Huyen identifies this as a flow analysis problem — the agent's control flow does not reflect the true dependency structure of the task.</li>
+    </ul>
+    <p>The mitigation for efficiency failures is flow analysis: auditing which steps depend on prior outputs and which are genuinely independent, then restructuring the plan to use parallel execution where the dependency graph permits. Tracking the invalid tool call frequency and plans-per-valid-plan metrics surfaces efficiency regressions before they become cost problems.</p>
+
+    <div class="callout key">
+      <div class="callout-label">Key Insight</div>
+      Each of the three failure categories — planning, tool, and efficiency — requires a different class of mitigation applied at a different point in the loop: planning failures need validation before execution starts, tool failures need grounding and schema enforcement at the tool interface, and efficiency failures need flow analysis of the dependency structure. Applying the wrong mitigation to a failure type wastes engineering effort without reducing the failure rate.
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">Watch Out</div>
+      Reflection errors are the most subtle planning failure because they produce no exception and no visible anomaly — the agent simply concludes it is done when it is not. A loop that terminates early due to a mistaken self-assessment looks identical at the surface to a loop that terminated because the task was genuinely complete. Detecting reflection errors requires evaluating final outputs against the original task intent, not just checking whether the loop exited cleanly.
+    </div>
+
+    <h2>LangGraph Implementation</h2>
+    <p>The following pattern wraps every tool execution in a structured error-capture block that records each failure with its category, subtype, and a mitigation hint; the routing function also inspects the accumulated <code>error_count</code> to detect runaway error loops — an efficiency failure — and hard-stops before further tokens are consumed.</p>
+
+<pre><code class="language-python">from langgraph.graph import StateGraph, END
+from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import HumanMessage, BaseMessage
+from langchain_core.tools import tool
+from langgraph.prebuilt import ToolNode
+from typing import TypedDict, Annotated, Literal
+import operator
+
+llm = ChatAnthropic(model="claude-sonnet-5")
+
+@tool
+def unreliable_search(query: str) -> str:
+    """Search for information — may raise on bad queries."""
+    if not query or len(query) < 3:
+        raise ValueError(f"Query too short: {query!r}")
+    return f"[results for '{query}']"
+
+tools = [unreliable_search]
+
+class DebugState(TypedDict):
+    messages: Annotated[list[BaseMessage], operator.add]
+    failures: list[dict]
+    error_count: int
+
+def agent(state: DebugState) -> dict:
+    return {"messages": [llm.bind_tools(tools).invoke(state["messages"])]}
+
+def safe_tools(state: DebugState) -> dict:
+    last = state["messages"][-1]
+    results, failures, error_count = [], list(state["failures"]), state["error_count"]
+    for tc in getattr(last, "tool_calls", []):
+        try:
+            output = unreliable_search.invoke(tc["args"])
+            results.append({"role": "tool", "content": output, "tool_call_id": tc["id"]})
+        except Exception as exc:
+            error_count += 1
+            failures.append({
+                "type": "tool_failure",
+                "subtype": "incorrect_output",
+                "tool": tc["name"],
+                "args": tc["args"],
+                "error": str(exc),
+                "mitigation": "sanitise input before passing to tool",
+            })
+            results.append({"role": "tool", "content": f"ERROR: {exc}", "tool_call_id": tc["id"]})
+    return {"messages": results, "failures": failures, "error_count": error_count}
+
+def route(state: DebugState) -> Literal["safe_tools", "__end__"]:
+    if state["error_count"] >= 3:    # efficiency failure: runaway error loop
+        return END
+    last = state["messages"][-1]
+    return "safe_tools" if getattr(last, "tool_calls", None) else END
+
+builder = StateGraph(DebugState)
+builder.add_node("agent", agent)
+builder.add_node("safe_tools", safe_tools)
+builder.set_entry_point("agent")
+builder.add_conditional_edges("agent", route)
+builder.add_edge("safe_tools", "agent")
+
+app = builder.compile()
+result = app.invoke({"messages": [HumanMessage("Search for AI news")], "failures": [], "error_count": 0})
+print(f"Failures logged: {result['failures']}")</code></pre>
+
+    <div class="quiz" id="quiz-10">
+      <h3>Check Your Understanding</h3>
+      <p class="quiz-question">An agent calls a function name that does not exist in its tool registry. Which failure category applies?</p>
+      <div class="quiz-options">
+        <button>Planning failure — invalid tool call</button>
+        <button>Tool failure — incorrect tool output</button>
+        <button>Efficiency failure — too many steps</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <div class="exercise">
+      <h3>Skill Exercise</h3>
+      <p>Below is a short agent transcript. Read each step and annotate it with its failure category from the taxonomy (planning, tool, or efficiency); then propose one concrete mitigation for the most severe failure you identified.</p>
+      <p><em>Transcript:</em><br />
+        Step 1: Agent calls <code>fetch_page(url="https://example.com")</code> — returns HTML correctly.<br />
+        Step 2: Agent calls <code>summarise_html(content=...)</code> — tool does not exist in registry.<br />
+        Step 3: Agent calls <code>fetch_page(url="https://example.com")</code> again — same result.<br />
+        Step 4: Agent calls <code>fetch_page(url="https://example.com")</code> a third time — same result.<br />
+        Step 5: Agent concludes "task complete" without ever producing a summary.
+      </p>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
+
+    <p class="tutor-prompt">Questions about this lesson? Ask your tutor — copy any sentence you want to explore deeper.</p>
+
+    <nav class="lesson-nav">
+      <a href="0009-state-management.html">← Previous</a>
+      <a href="0011-hard-problems.html" class="primary">Next →</a>
+    </nav>
+
+    <script src="../assets/quiz.js"></script>
+    <script>initQuiz('quiz-10', 0, 'Correct. Calling a hallucinated function name that does not exist in the tool registry is a planning failure — specifically an invalid tool call. The plan was constructed incorrectly before any execution was attempted.');</script>
+
+  </div>
+</body>
+</html>
