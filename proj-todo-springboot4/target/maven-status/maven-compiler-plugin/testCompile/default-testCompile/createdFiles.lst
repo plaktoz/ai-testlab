@@ -1,0 +1,4 @@
+com/kanban/controller/CardControllerTest.class
+com/kanban/service/CardServiceTest.class
+com/kanban/controller/ColumnControllerTest.class
+com/kanban/service/ColumnServiceTest.class
