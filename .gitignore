@@ -13,3 +13,4 @@ mvnw*
 *.class
 .vscode/
 .pytest_cache/
+.worktrees/
