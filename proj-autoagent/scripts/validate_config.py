@@ -3,7 +3,7 @@ import yaml
 import sys
 from pathlib import Path
 
-REQUIRED_API = ['api_key', 'api_url']
+REQUIRED_PROVIDER_KEYS = ['api_key', 'api_url']
 REQUIRED_PIPELINE = ['parallel_execution', 'max_tester_retries']
 REQUIRED_ROLES = ['orchestrator', 'analyst', 'designer', 'architect', 'coder', 'tester', 'deployer']
 REQUIRED_ROLE_KEYS = ['model', 'tools', 'skills']
@@ -25,11 +25,24 @@ def validate(config_path: str) -> list[str]:
     if not isinstance(config, dict):
         return ["agent-config.yml must be a YAML mapping at the top level"]
 
-    # api section
-    api = config.get('api', {})
-    for key in REQUIRED_API:
-        if key not in api:
-            errors.append(f"Missing: api.{key}")
+    # providers section
+    providers = config.get('providers', {})
+    if not providers:
+        errors.append("Missing: providers (must define at least one provider)")
+    else:
+        for name, provider in providers.items():
+            if not isinstance(provider, dict):
+                errors.append(f"providers.{name} must be a mapping")
+                continue
+            for key in REQUIRED_PROVIDER_KEYS:
+                if key not in provider:
+                    errors.append(f"Missing: providers.{name}.{key}")
+
+    default_provider = config.get('default_provider')
+    if not default_provider:
+        errors.append("Missing: default_provider")
+    elif providers and default_provider not in providers:
+        errors.append(f"default_provider '{default_provider}' is not defined in providers")
 
     # pipeline section
     pipeline = config.get('pipeline', {})
@@ -53,6 +66,8 @@ def validate(config_path: str) -> list[str]:
         for key in REQUIRED_ROLE_KEYS:
             if key not in role_cfg:
                 errors.append(f"Missing: roles.{role}.{key}")
+        if 'provider' in role_cfg and providers and role_cfg['provider'] not in providers:
+            errors.append(f"roles.{role}.provider '{role_cfg['provider']}' is not defined in providers")
         if 'tools' in role_cfg and not isinstance(role_cfg['tools'], list):
             errors.append(f"roles.{role}.tools must be a list")
         if 'skills' in role_cfg and not isinstance(role_cfg['skills'], list):
