@@ -36,8 +36,10 @@ export default function ProfilePage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
+            <label htmlFor="profile-name" className="block text-sm font-medium text-gray-600 mb-1">Name</label>
             <input
+              id="profile-name"
+              data-testid="profile-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -46,8 +48,10 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
+            <label htmlFor="profile-email" className="block text-sm font-medium text-gray-600 mb-1">Email</label>
             <input
+              id="profile-email"
+              data-testid="profile-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -56,6 +60,7 @@ export default function ProfilePage() {
             />
           </div>
           <button
+            data-testid="profile-submit"
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg py-2 text-sm transition-colors"
           >

@@ -7,18 +7,19 @@ export default function TasksPage() {
   return (
     <div className="max-w-md mx-auto mt-10 px-4">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 data-testid="task-page-heading" className="text-xl font-semibold text-gray-800">
           {profile.name}&apos;s tasks
         </h2>
-        <span className="text-sm text-gray-400">
+        <span data-testid="task-progress" className="text-sm text-gray-400">
           {done} / {userTasks.length} done
         </span>
       </div>
 
-      <ul className="space-y-2">
+      <ul data-testid="task-list" className="space-y-2">
         {userTasks.map((task) => (
           <li
             key={task.id}
+            data-testid={`task-item-${task.id}`}
             onClick={() => toggleTask(task.id)}
             className="flex items-center gap-3 bg-white rounded-xl shadow-sm px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
           >
@@ -35,7 +36,7 @@ export default function TasksPage() {
                 </svg>
               )}
             </span>
-            <span className={`text-sm ${task.done ? "line-through text-gray-400" : "text-gray-700"}`}>
+            <span data-testid={`task-title-${task.id}`} className={`text-sm ${task.done ? "line-through text-gray-400" : "text-gray-700"}`}>
               {task.title}
             </span>
           </li>
