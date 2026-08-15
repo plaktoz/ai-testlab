@@ -46,12 +46,15 @@ Run the project's standard build/start commands:
    - `docker tag <project-name>:<git-short-sha> <registry>/<project-name>:<git-short-sha>`
    - `docker push <registry>/<project-name>:<git-short-sha>`
 3. If `build_tool: compose`: run `docker compose up -d --build` instead of steps 1-2
-4. Run: `docker run -d --name <project-name> <project-name>:<git-short-sha>`
+4. If `build_tool` is NOT `compose`: run the container
+   `docker run -d --name <project-name> <project-name>:<git-short-sha>`
+   If `build_tool: compose`: skip this step — `compose up` already started containers.
 
 ### container_runtime: podman
 
 Same steps as docker, replacing `docker` with `podman` in every command.
 `docker compose` becomes `podman compose`.
+Step 4 conditional applies identically: only run `podman run` when `build_tool` is NOT `compose`.
 
 ## Step 4: Write to pipeline-state.md
 
