@@ -161,11 +161,11 @@ Read the `## Feature & Task Breakdown` table in `pipeline-state.md`:
 
 ## Blackboard Protocol
 
-`pipeline-state.md` is append-only. Rules:
+`pipeline-state.md` is append-only with one exception. Rules:
 - Read the file before activating any role — always pass the relevant sections in the context brief
 - After a role completes, copy its output into the correct section of `pipeline-state.md`
 - Never overwrite or delete prior sections
-- Update status fields (Gate 0/1/2/3 status, task table status) in place — these are the only fields that change
+- Update status fields (Gate 0/1/2/3 status, task table status) in place — these are the only in-place edits allowed; all other content is append-only
 
 ---
 
