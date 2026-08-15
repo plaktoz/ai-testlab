@@ -3,9 +3,24 @@
 # Edit this file to change models, skills, and runtime behaviour.
 # Run `python scripts/validate_config.py` after editing.
 
-api:
-  api_key: ${ANTHROPIC_API_KEY}        # export ANTHROPIC_API_KEY=sk-ant-...
-  api_url: https://api.anthropic.com   # Override for proxy or custom endpoint
+# --- Providers ---
+# Add any provider here. Each role picks one via its `provider:` field.
+# Supported providers: anthropic | openai | google | mistral
+providers:
+  anthropic:
+    api_key: ${ANTHROPIC_API_KEY}      # export ANTHROPIC_API_KEY=sk-ant-...
+    api_url: https://api.anthropic.com
+  openai:
+    api_key: ${OPENAI_API_KEY}         # export OPENAI_API_KEY=sk-...
+    api_url: https://api.openai.com/v1
+  # google:
+  #   api_key: ${GOOGLE_API_KEY}
+  #   api_url: https://generativelanguage.googleapis.com/v1beta
+  # mistral:
+  #   api_key: ${MISTRAL_API_KEY}
+  #   api_url: https://api.mistral.ai/v1
+
+default_provider: anthropic            # Used when a role omits `provider:`
 
 pipeline:
   parallel_execution: true      # Run independent tasks concurrently
@@ -13,6 +28,7 @@ pipeline:
 
 roles:
   orchestrator:
+    provider: anthropic
     model: claude-opus-4-8
     tools:
       - read_files
@@ -21,6 +37,7 @@ roles:
       - ask-matt                # Routes orchestrator to the right skill per situation
 
   analyst:
+    provider: anthropic
     model: claude-sonnet-5
     tools:
       - read_files
@@ -31,6 +48,7 @@ roles:
       - research                # Investigates questions against primary sources
 
   designer:
+    provider: anthropic
     model: claude-sonnet-5
     optional: true              # Only activated when task has a UI/UX component
     tools:
@@ -41,6 +59,7 @@ roles:
       - frontend-design         # Full design system work
 
   architect:
+    provider: anthropic
     model: claude-opus-4-8
     tools:
       - read_files
@@ -50,6 +69,7 @@ roles:
       - codebase-design         # Enforces small interfaces and clean seams
 
   coder:
+    provider: anthropic
     model: claude-sonnet-5
     tools:
       - read_files
@@ -60,6 +80,7 @@ roles:
       - diagnosing-bugs         # Disciplined red→minimise→fix→regression loop
 
   tester:
+    provider: anthropic
     model: claude-haiku-4-5-20251001
     tools:
       - read_files
@@ -69,6 +90,7 @@ roles:
       - code-review             # Parallel sub-agent review across coding standards + spec
 
   deployer:
+    provider: anthropic
     model: claude-haiku-4-5-20251001
     tools:
       - terminal
