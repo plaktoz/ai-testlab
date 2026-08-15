@@ -102,7 +102,7 @@
 
 **Gate 3 Status:** `pending` <!-- orchestrator updates to: approved | rejected -->
 
-**Retry Count:** 0 / 3 <!-- max_tester_retries from agent-config.yml -->
+**Retry Count:** 0 / <!-- max_tester_retries from agent-config.yml -->
 
 **Unit Tests:** <!-- X/Y passed -->
 
