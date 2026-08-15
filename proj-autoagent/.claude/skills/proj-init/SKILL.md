@@ -115,4 +115,4 @@ deploy:
 [show the deploy section]
 ```
 
-Run `/deploy` when you're ready to ship."
+Run `/proj-deploy` when you're ready to ship."

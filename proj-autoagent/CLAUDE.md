@@ -215,4 +215,4 @@ Always include: what happened, what was tried, what the user needs to decide.
 
 ## Project Init
 
-If this is a new project (no `pipeline-state.md` and no prior log entries), run `/project-init` before taking any task. This configures the deploy section of `agent-config.yml` for this specific project.
+If this is a new project (no `pipeline-state.md` and no prior log entries), run `/proj-init` before taking any task. This configures the deploy section of `agent-config.yml` for this specific project.

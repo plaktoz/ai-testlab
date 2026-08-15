@@ -3,6 +3,10 @@
 # Edit this file to change models, skills, and runtime behaviour.
 # Run `python scripts/validate_config.py` after editing.
 
+api:
+  api_key: ${ANTHROPIC_API_KEY}        # export ANTHROPIC_API_KEY=sk-ant-...
+  api_url: https://api.anthropic.com   # Override for proxy or custom endpoint
+
 pipeline:
   parallel_execution: true      # Run independent tasks concurrently
   max_tester_retries: 3         # Tester→Coder loop limit before human escalation
@@ -70,7 +74,7 @@ roles:
       - terminal
       - git
     skills:
-      - deploy                  # Custom skill: reads deploy section below
+      - proj-deploy             # Custom skill: reads deploy section below
 
 deploy:
   container_runtime: none       # docker | podman | none

@@ -3,6 +3,7 @@ import yaml
 import sys
 from pathlib import Path
 
+REQUIRED_API = ['api_key', 'api_url']
 REQUIRED_PIPELINE = ['parallel_execution', 'max_tester_retries']
 REQUIRED_ROLES = ['orchestrator', 'analyst', 'designer', 'architect', 'coder', 'tester', 'deployer']
 REQUIRED_ROLE_KEYS = ['model', 'tools', 'skills']
@@ -23,6 +24,12 @@ def validate(config_path: str) -> list[str]:
 
     if not isinstance(config, dict):
         return ["agent-config.yml must be a YAML mapping at the top level"]
+
+    # api section
+    api = config.get('api', {})
+    for key in REQUIRED_API:
+        if key not in api:
+            errors.append(f"Missing: api.{key}")
 
     # pipeline section
     pipeline = config.get('pipeline', {})
