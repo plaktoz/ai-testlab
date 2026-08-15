@@ -50,7 +50,7 @@ def validate(config_path: str) -> list[str]:
             errors.append(f"roles.{role}.tools must be a list")
         if 'skills' in role_cfg and not isinstance(role_cfg['skills'], list):
             errors.append(f"roles.{role}.skills must be a list")
-        if role == 'designer' and 'optional' not in role_cfg:
+        if role == 'designer' and role_cfg.get('optional') is not True:
             errors.append("roles.designer must have an 'optional' field set to true")
 
     # deploy section
