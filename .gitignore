@@ -14,3 +14,4 @@ mvnw*
 .vscode/
 .pytest_cache/
 .worktrees/
+**/node_modules/*
