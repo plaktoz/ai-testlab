@@ -25,8 +25,10 @@ export default function LoginPage() {
         <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Sign in</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Username</label>
+            <label htmlFor="login-username" className="block text-sm font-medium text-gray-600 mb-1">Username</label>
             <input
+              id="login-username"
+              data-testid="login-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -36,8 +38,10 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Password</label>
+            <label htmlFor="login-password" className="block text-sm font-medium text-gray-600 mb-1">Password</label>
             <input
+              id="login-password"
+              data-testid="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -46,8 +50,9 @@ export default function LoginPage() {
               required
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p data-testid="login-error" className="text-red-500 text-sm">{error}</p>}
           <button
+            data-testid="login-submit"
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg py-2 text-sm transition-colors"
           >
