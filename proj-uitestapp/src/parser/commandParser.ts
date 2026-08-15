@@ -37,6 +37,9 @@ export function parseCommand(raw: unknown): Command {
     case 'assertNotVisible':
       return { type: 'assertNotVisible', selector: parseSelector(value) };
 
+    case 'assertUrl':
+      return { type: 'assertUrl', path: value as string };
+
     case 'wait': {
       if (typeof value !== 'number' || !Number.isInteger(value)) {
         throw new Error(`Type error: wait value must be an integer, got ${String(value)}`);

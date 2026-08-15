@@ -9,6 +9,7 @@ import {
   executeInputTextTargeted,
   executeAssertVisible,
   executeAssertNotVisible,
+  executeAssertUrl,
   executeWait,
   executeScroll,
 } from '../driver/commands.js';
@@ -121,6 +122,9 @@ export async function dispatch(
       case 'assertNotVisible':
         await executeAssertNotVisible(page, cmd.selector);
         break;
+      case 'assertUrl':
+        await executeAssertUrl(page, cmd.path);
+        break;
       case 'wait':
         await executeWait(cmd.ms);
         break;
@@ -147,7 +151,7 @@ export async function dispatch(
     let screenshotPath: string | undefined;
     try {
       _screenshotCounter++;
-      screenshotPath = await captureScreenshot(page, flowStem, _screenshotCounter);
+      screenshotPath = await captureScreenshot(page, flowStem, _screenshotCounter, ctx.runDir);
     } catch {
       // screenshot failure is non-fatal
     }

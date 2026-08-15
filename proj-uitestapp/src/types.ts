@@ -14,6 +14,7 @@ export type Command =
   | { type: 'assertVisible';      selector: Selector }
   | { type: 'assertNotVisible';   selector: Selector }
   | { type: 'wait';               ms: number }
+  | { type: 'assertUrl';          path: string }
   | { type: 'runFlow';            path: string }
   | { type: 'scroll';             direction: 'up' | 'down' | 'left' | 'right' };
 
@@ -27,6 +28,7 @@ export interface RunOptions {
   headed: boolean;
   slowMo: number;
   reporter: 'html' | 'md' | null;
+  runDir: string;
 }
 
 export interface CommandResult {
@@ -61,4 +63,5 @@ export interface RunContext {
   lastTappedLocator: import('playwright').Locator | null;
   callStack: Set<string>;
   indentLevel: number;
+  runDir: string;
 }

@@ -19,7 +19,7 @@ export async function runAll(
     for (const target of targets) {
       const absTarget = path.resolve(target);
       const file = loadAndParse(absTarget);
-      const ctx = createContext();
+      const ctx = createContext(options.runDir);
       reporter.startFlow(file.filePath, ctx.indentLevel);
       const result = await runFlow(file, page, ctx);
       flowResults.push(result);

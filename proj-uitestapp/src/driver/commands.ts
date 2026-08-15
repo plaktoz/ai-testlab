@@ -59,6 +59,14 @@ export async function executeWait(ms: number): Promise<void> {
   await new Promise<void>((r) => setTimeout(r, ms));
 }
 
+export async function executeAssertUrl(page: Page, expectedPath: string): Promise<void> {
+  const url = new URL(page.url());
+  const actual = url.pathname + url.search + url.hash;
+  if (actual !== expectedPath) {
+    throw new Error(`Expected: ${expectedPath}\nGot: ${actual}`);
+  }
+}
+
 export async function executeScroll(page: Page, direction: 'up' | 'down' | 'left' | 'right'): Promise<void> {
   await page.evaluate((dir) => {
     const w = window.innerWidth;

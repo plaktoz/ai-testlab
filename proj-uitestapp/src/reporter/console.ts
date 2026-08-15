@@ -64,6 +64,7 @@ export class ConsoleReporter {
       case 'inputTextTargeted': return `inputTextTargeted: ${JSON.stringify(cmd.element)}`;
       case 'assertVisible': return `assertVisible: ${JSON.stringify(cmd.selector)}`;
       case 'assertNotVisible': return `assertNotVisible: ${JSON.stringify(cmd.selector)}`;
+      case 'assertUrl': return `assertUrl: ${cmd.path}`;
       case 'wait': return `wait: ${cmd.ms}ms`;
       case 'runFlow': return `runFlow: ${cmd.path}`;
       case 'scroll': return `scroll: ${cmd.direction}`;
