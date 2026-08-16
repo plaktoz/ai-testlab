@@ -56,9 +56,9 @@ Same steps as docker, replacing `docker` with `podman` in every command.
 `docker compose` becomes `podman compose`.
 Step 4 conditional applies identically: only run `podman run` when `build_tool` is NOT `compose`.
 
-## Step 4: Write to pipeline-state.md
+## Step 4: Write to pipeline/[run-name]/state.md
 
-Append to the `## Deployment` section:
+The run name is passed by the Orchestrator. Append to the `## Deployment` section of `pipeline/[run-name]/state.md`:
 
 ```markdown
 **Status:** complete
@@ -69,16 +69,18 @@ Append to the `## Deployment` section:
 ```
 ```
 
-## Step 5: Write to pipeline-log.md
+Also update the top-level `**Status:**` field in `state.md` to `complete`.
+
+## Step 5: Write to pipeline/[run-name]/log.md
 
 Append one row:
 ```
-| [timestamp] | Deployer | Deployed [container_runtime] to [target_environment] | pipeline-state.md#deployment | complete |
+| [timestamp] | Deployer | Deployed [container_runtime] to [target_environment] | pipeline/[run-name]/state.md#deployment | complete |
 ```
 
 ## On Any Error
 
 If any command fails:
 1. Paste the full error output
-2. Write `**Status:** failed` to `pipeline-state.md#deployment`
+2. Write `**Status:** failed` to `pipeline/[run-name]/state.md#deployment`
 3. Do NOT attempt to retry automatically — report the error to the user and wait
