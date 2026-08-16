@@ -1,12 +1,12 @@
 # Autonomous Multi-Agent Development Pipeline
 
-A Claude Code project that turns a single AI session into a structured, multi-role development pipeline — with human approval gates at every critical step.
+A Claude Code project template that turns a single AI session into a structured, multi-role development pipeline — with human approval gates at every critical step.
 
 ---
 
 ## What It Does
 
-You describe a task. The **Orchestrator** (Claude Code, guided by `CLAUDE.md`) breaks it into a structured plan and routes it through specialized roles:
+You describe a task. The **Orchestrator** (Claude Code, guided by `CLAUDE.md`) routes it through specialized roles:
 
 ```
 User Task → Orchestrator → Analyst → Designer* → Architect → Tester → Coder → Tester → Deployer
@@ -55,42 +55,37 @@ claude
 
 ---
 
-## First-Time Setup (New Project)
+## First-Time Setup
 
-If no `pipeline-state.md` exists with prior work, run the project init wizard before giving any task:
+Run the setup wizard to configure deployment settings:
 
 ```
-/proj-init
+/proj-start
 ```
 
-This configures the `deploy` section of `agent-config.yml` for your specific project (container runtime, registry, target environment, etc.).
+This configures the `deploy` section of `agent-config.yml` for your project (container runtime, registry, target environment, etc.).
 
 ---
 
-## Running the Pipeline
+## Commands
 
-### Give a task
+| Command | When to use |
+|---|---|
+| `/proj-start` | First-time project setup |
+| `/proj-new-feature [description]` | Add a feature or implement a change request |
+| `/proj-fix-bug [description]` | Fix a bug |
+| `/proj-refactor [description]` | Refactor existing code |
+| `/proj-resume [run-name]` | Resume an in-progress pipeline run |
+| `/proj-deploy` | Deploy the project |
+| `/proj-cleanup` | Remove completed or abandoned pipeline runs |
+| `/proj-config` | Reconfigure deployment settings |
 
-Just describe what you want built. Examples:
+---
 
-```
-Add a user authentication flow with login and registration pages.
-```
-
-```
-Fix the bug where the search results page crashes on empty queries.
-```
-
-```
-Refactor the payment module to use the new Stripe SDK.
-```
-
-### Follow the gates
-
-The Orchestrator will stop at each gate and ask for your explicit approval before continuing:
+## The Pipeline Gates
 
 | Gate | What you review | Prompt |
-|------|----------------|--------|
+|---|---|---|
 | **Gate 0** | Execution plan — roles, sequence, parallel tasks | `yes` to proceed |
 | **Gate 1** | Spec and acceptance criteria from the Analyst | `yes` to proceed |
 | **Gate 2** | UI mockup in `design-preview.html` *(UI tasks only)* | `yes` to proceed |
@@ -100,15 +95,31 @@ Type `yes` to advance, or describe what to change and the relevant role will rev
 
 ---
 
+## Pipeline State
+
+Each run stores its state in its own folder, tracked in git:
+
+```
+pipeline/
+  feat-dark-mode/
+    state.md          ← shared blackboard for all agent outputs
+    log.md            ← append-only log of every agent action
+    design-preview.html  ← generated UI mockup (UI tasks only)
+  fix-auth-bug/
+    state.md
+    log.md
+```
+
+State is committed to git so pipelines survive across sessions and machines.
+
+---
+
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+|---|---|
 | `agent-config.yml` | Central config — models, roles, tools, skills, deploy settings |
-| `CLAUDE.md` | Orchestrator instructions (read by Claude Code on every session start) |
-| `pipeline-state.md` | Shared blackboard — all agent outputs live here |
-| `pipeline-log.md` | Append-only log of every agent action |
-| `design-preview.html` | Generated UI mockup *(created when Designer is activated)* |
+| `CLAUDE.md` | Orchestrator identity and command reference |
 | `scripts/validate_config.py` | Validates `agent-config.yml` structure |
 
 ---
@@ -120,37 +131,37 @@ Type `yes` to advance, or describe what to change and the relevant role will rev
 ```yaml
 roles:
   coder:
-    model: claude-opus-4-8   # upgrade to a more capable model
+    model: claude-opus-4-8
 ```
 
 ### Enable/disable parallel task execution
 
 ```yaml
 pipeline:
-  parallel_execution: true   # independent tasks run concurrently
+  parallel_execution: true
 ```
 
 ### Set the TDD retry limit
 
 ```yaml
 pipeline:
-  max_tester_retries: 3   # Orchestrator escalates to you after 3 Coder failures
+  max_tester_retries: 3
 ```
 
 ### Configure deployment
 
 ```yaml
 deploy:
-  container_runtime: docker       # docker | podman | none
-  registry: ghcr.io               # docker.io | ghcr.io | local | none
-  target_environment: staging     # local | staging | production
-  build_tool: dockerfile          # dockerfile | compose | none
+  container_runtime: docker
+  registry: ghcr.io
+  target_environment: staging
+  build_tool: dockerfile
   pre_deploy_checks:
     - tests
     - lint
 ```
 
-After editing, always re-run:
+After editing, re-run:
 
 ```bash
 python scripts/validate_config.py
@@ -160,7 +171,7 @@ python scripts/validate_config.py
 
 ## How the TDD Loop Works
 
-Tests are written **before** any code is written:
+Tests are written **before** any code:
 
 1. **Tester Phase 1** reads the spec and writes unit + integration tests
 2. **Coder** reads the tests and writes code to make them pass
@@ -170,28 +181,22 @@ Tests are written **before** any code is written:
 
 ---
 
-## Resuming an Interrupted Session
-
-If you close Claude Code mid-pipeline, reopen it in the same directory:
+## Resuming Across Sessions or Machines
 
 ```bash
+git pull
 claude
+/proj-resume
 ```
 
-The Orchestrator reads `pipeline-state.md` on startup and announces:
-
-```
-Resuming pipeline from: [last completed step]
-```
-
-It will offer to continue from where it left off.
+`proj-resume` lists all in-progress runs and picks up from the last completed step.
 
 ---
 
 ## Roles Reference
 
 | Role | Model (default) | Activated for |
-|------|----------------|---------------|
+|---|---|---|
 | Orchestrator | claude-opus-4-8 | Every task |
 | Analyst | claude-sonnet-5 | Every task |
 | Designer | claude-sonnet-5 | UI/UX tasks only |
