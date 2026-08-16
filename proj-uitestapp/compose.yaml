@@ -1,5 +1,0 @@
-services:
-  webt:
-    build:
-      context: .
-      dockerfile: Dockerfile
